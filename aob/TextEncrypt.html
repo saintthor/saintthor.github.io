@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="vue.min_2_5_16.js" type="text/javascript"></script>
+    <!--script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script-->
+    <style>
+        .note { color: #444; font-size: 0.9em; }
+        .alert { color: red; font-size: 0.9em; }
+        .key { color: green; font-size: 0.9em; }
+        .closebtn { background-color: #fef; font-size: 0.9em; cursor: pointer; margin-left: 10px; }
+        .toggle { display: inline-block; }
+        .tggtitle { cursor: pointer; display: inline; }
+        span.trigger { font-size: 0.7em; color: #b49; margin-right: 3px; cursor: pointer; }
+        div.toggleon { border-left: solid 1px #d7b; padding: 4px; border-top: solid 1px #eee; border-bottom: solid 1px #eee; }
+        .tggfade-enter-active, .tggfade-leave-active { transition: opacity .6s; }
+        .tggfade-enter, .tggfade-leave-to { opacity: 0; }
+        .whyface { color: green; font-size: 12px; cursor: pointer; padding-left: 2px; }
+        div.why{ position: absolute; padding: 4px; font-size: 13px; border: solid 1px #3a3; color: #161;
+            background-color: #f7fff7; z-index: 99; width: 260px; }
+    </style>
+  <title>加密神器</title>
+</head>
+
+<body>
+    <div style="float:right">
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+      <ins class="adsbygoogle"
+           style="display:inline-block;width:160px;height:600px"
+           data-ad-client="ca-pub-1144733694164093"
+           data-ad-slot="5588766556"></ins>
+      <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+
+    <div id="body" style="font-size:14px;margin:10px">
+        <div style="background-color:#eee;padding:8px;">张无忌想和周芷若通信，但周芷若的往来信件都会被灭绝师太查看。有了本神器，他们就能通过 QQ，微信或者墙内邮箱安全地说点悄悄话了。
+            <br>本加密神器适用于通信双方确保信息可达，只需防范第三方监视的情况。不能应对中间人攻击。
+            <br>输入主密码打开账户，可从中读取先前保存的联系人列表、密钥和历史消息记录。不同的主密码对应不同的账户，输入未记录的主密码会创建新账户。
+            <br>本网页不向任何服务器上传任何数据。数据加密后保存在当前浏览器的 localStorage 里，若要从其它电脑或其它浏览器访问，须导出数据，再导入到另外的浏览器里。
+            <br>本神器完全基于 web 前端技术实现。可以将本网页（只有一个 html 文件）下载到本地使用。
+        </div><br>
+        <div>
+            <a href="https://www.guideep.com/read?guide=5727517264576512" target="_blank">详细文档</a>
+            <a href="PasswordManager.html" target="_blank" style="margin-left:20px;">密码管理神器</a>
+        </div>
+        <hr><br>
+        <div v-if="MainCBCKey">
+            <div>
+                <span class="note">当前主密码特征值：{{ Suffix }}</span>
+                <span @click="MainCBCKey=''" style="cursor:pointer;color:#04f;margin-left:20px">更换主密码</span>
+            </div>
+            <br><br>
+            <div>
+                <button @click="SetDownload">导出数据</button>&emsp;
+                <button @click="LoadMode=!LoadMode">导入数据</button>
+                <div class="note">数据保存在本地，可导出备份。</div>
+            </div>
+            <div v-if="DownloadStr">
+                <a download="Account.sec" :href="DownloadStr">点此下载 Account.sec</a>
+                <span class="closebtn" @click="DownloadStr=''" title="删除">ㄨ</span>
+            </div>
+            <div v-show="LoadMode" style="background-color:#eee;padding:10px;">
+                <input type="file" v-on:change="LoadItemFromFile"/>
+                <button v-show="MaySave" @click="SaveImport">保存</button>
+                <div class="alert">{{ ImportMsg }}</div>
+            </div>
+            <br><br>
+            <div v-if="Friends">
+                <div v-for="Friend in Friends" style="margin-top:20px;">
+                    <pm-toggle :trigger=false>
+                        <span slot="title">{{ Friend.Name }}
+                            <span class="closebtn" @click="DelFriend(Friend.Name)" title="删除">ㄨ</span>
+                        </span>
+                        <div slot="content">
+                            <div v-if="Friend.Status >= 10">
+                                <div>
+                                    <br><b>通信密钥</b>已就位，特征值为&ensp;{{ Friend.PswdSuffix }}。
+                                    <span v-if="Friend.NewCBCKey" class="note">对方按同样步骤操作，也能得到同一个通信密钥，而监控方无法获得这个密钥。</span>
+                                    <span @click="Friend.Status=0" style="cursor:pointer;color:#04f;font-size:0.9em;margin-left:20px">更换通信密钥</span>
+                                </div>
+                                <h4>现在可以与〖{{ Friend.Name }}〗加密通信</h4>
+                                <div class="note">将你要发送的消息明文放在左边输入框里，点加密，密文会出现在右边输入框里。将密文通过 Email 或 IM 发送给〖{{ Friend.Name }}〗，〖{{ Friend.Name }}〗可以用<b>通信密钥</b>解密。
+                                <br>将〖{{ Friend.Name }}〗发回的密文放在右侧输入框里，点解密，解得的明文会再现在左侧输入框里。</div>
+                                <div style="display:flex;">
+                                    <textarea placeholder="明文" v-model="Friend.RawText" cols="40" rows="20"></textarea>
+                                    <span style="margin-top:100px">
+                                        <div><button @click="Encrypt(Friend)">→&ensp;加密&ensp;→</button></div>
+                                        <div><button @click="Decrypt(Friend)">←&ensp;解密&ensp;←</button></div>
+                                        <div class="alert">{{ Friend.CryptMsg }}</div>
+                                        <div>
+                                            <input v-model="Friend.Log" type="checkbox"/>
+                                            <span @click="Friend.Log=!Friend.Log" style="cursor:pointer;font-size:0.9em">记录</span>
+                                            <pf-help><div slot="note">选中此项，会将处理过的消息保存在历史记录里。</div></pf-help>
+                                        </div>
+                                    </span>
+                                    <textarea placeholder="密文" v-model="Friend.EncryptedText" cols="40" rows="20"></textarea>
+                                </div><br>
+                                <pm-toggle :trigger=false>
+                                    <span slot="title">历史记录</span>
+                                    <div slot="content" style="max-height:360px;overflow-y:auto;">
+                                        <div v-for="Msg,i in Friend.Messages">
+                                            <div class="note">
+                                                〖我〗{{ '←→'[Msg[0]] }}&ensp;{{ Msg[1] }}&ensp;{{ '←→'[Msg[0]] }}〖{{ Friend.Name }}〗
+                                                <span class="closebtn" @click="DelMsg(Friend,i)" title="删除">ㄨ</span>
+                                            </div>
+                                            <div style="border-bottom:solid 1px #555;padding:6px;">{{ Msg[2] }}</div>
+                                        </div>
+                                    </div>
+                                </pm-toggle>
+                            </div>
+                            <div v-else>
+                                <h4>先创建与〖{{ Friend.Name }}〗通信用的密钥</h4>
+                                <div class="note">
+                                    要实现加密通信，须将明文信息通过一个密钥加密成密文，发给〖{{ Friend.Name }}〗，〖{{ Friend.Name }}〗收到后用同一密钥解密成明文。
+                                    <br>显然，通信双方需要共享通信密钥，又要防止监控方获知此密钥。我们可以通过
+                                    <pm-toggle :trigger=false>
+                                        <span slot="title"><b>ECDH 算法</b></span>
+                                        <div slot="content">
+                                            ECDH 算法原理：<br>1、通信双方各自生成一对 ECDH 公钥 + 私钥，并将自己的公钥发给对方。
+                                            <br>2、双方将对方发来的公钥与自己的私钥共同运算，得到<b>通信密钥</b>。
+                                            <br>监控者能看到双方的公钥，看不到私钥，无法计算出通信密钥。
+                                        </div>
+                                    </pm-toggle>
+                                    实现这个功能。
+                                    </div><br>
+                                <div>现有的 <b>ECDH 公钥</b>为：<span class="key">{{ ECDHPubK64 }}</span></div><br>
+                                <div>
+                                    将此公钥通过 EMAIL 或 IM 发给〖{{ Friend.Name }}〗，将〖{{ Friend.Name }}〗发来的 ECDH 公钥填在下面，即可生成<b>通信密钥</b>。
+                                    <span class="note">通过 ECDH，双方可以在监视之下安全地交换密钥。</span>
+                                </div>
+                                <div><textarea v-model="Friend.RemoteECDHPubK" placeholder="对方的 ECDH 公钥" cols="50"></textarea>
+                                <br><button @click="GenCBCKey(Friend)">生成通信密钥</button></div>
+                            </div>
+                        </div>
+                    </pm-toggle>
+                </div>
+            </div>
+            <div v-else class="note">无联系人，可在下面添加。如果此前在同一电脑上用同一浏览器保存过联系人，可能因主密码不同而无法读取。</div>
+            <br><hr><br>
+            <input type="edit" v-model="NewFriendName" style="width:360px;" placeholder="在此输入新联系人名"/>
+            <button @click="AddFriend">添加联系人</button>
+            <div>{{ NewFriendMsg }}</div>
+        </div>
+        <div v-else>
+            <input type="password" v-model="InputMainPswd" style="width:360px;" placeholder="在此输入主密码"/>
+            <button @click="SetMain">输入</button>
+            <div class="note">每个主密码对应一个账户，账户里是多个联系人。如果输入一个未记录的主密码，将创建一个新的账户。
+                <br>每个账户对应的主密码不可改变。如果忘记主密码，将失去账户里的数据。推荐使用<a href="PasswordManager.html" target="_blank">密码管理神器</a>记录密码。
+            </div>
+        </div><br><br><br><br><br><br><br><br><br><br><br><br><hr>
+        <div class="note">当前版本：{{ Ver }}</div>
+    </div>
+<script>
+
+for( let [k, v] of [['localStorage', window.localStorage], ['SubtleCrypto', window.crypto.subtle]] )
+{
+    if( !v )
+    {
+        alert( '当前浏览器不支持 ' + k + '。请换用 firefox 或 chrome 的最新版本。' );
+        throw 'feature not supported.';
+    }
+}
+
+function Hash( raw, hashName )
+{
+    let ua = typeof raw === 'string' ? ( new TextEncoder( 'utf8' ).encode( raw )) : raw;
+    return crypto.subtle.digest( { name: hashName }, ua );
+}
+
+function Base642ABuff( b64 )
+{
+    let s = atob( b64 );
+    let ua8 = new Uint8Array( s.length );
+    for( let l = s.length; l-- > 0; )
+    {
+        ua8[l] = s.charCodeAt( l );
+    }
+    return ua8;
+}
+
+function ABuff2Base64( ab )
+{
+    return btoa( String.fromCharCode( ...new Uint8Array( ab )));
+}
+
+function Xor( ab0, ab1 )
+{
+    let ua0 = new Uint8Array( ab0 );
+    let ua1 = new Uint8Array( ab1 );
+    for( let i = 0; i < ab0.byteLength; i++ )
+    {
+        ua0[i] ^= ua1[i];
+    }
+    return ua0;
+}
+
+function Utf8ArrayToStr( array )
+{
+    let out, i, len, c;
+    let char2, char3;
+
+    out = "";
+    len = array.length;
+    i = 0;
+    while( i < len )
+    {
+        c = array[i++];
+        switch( c >> 4 )
+        {
+          case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+            // 0xxxxxxx
+            out += String.fromCharCode( c );
+            break;
+          case 12: case 13:
+            // 110x xxxx   10xx xxxx
+            char2 = array[i++];
+            out += String.fromCharCode((( c & 0x1F) << 6 ) | ( char2 & 0x3F ));
+            break;
+          case 14:
+            // 1110 xxxx  10xx xxxx  10xx xxxx
+            char2 = array[i++];
+            char3 = array[i++];
+            out += String.fromCharCode((( c & 0x0F) << 12 ) |
+                           (( char2 & 0x3F) << 6 ) |
+                           (( char3 & 0x3F) << 0 ));
+            break;
+        }
+    }
+    return out;
+}
+
+Vue.component( 'pm-toggle', {
+    props: ['trigger'],
+    template: '<div class="toggle" :class="{\'toggleon\':open}">\
+            <div class="tggtitle" :style="{\'display\':open?\'inline\':\'block\'}" @click="open=!open" :title="open?\'降维\':\'升维\'">\
+            <span class="trigger" v-if="open">◤</span><span class="trigger" v-else>◣</span><slot name="title"/></div>\
+            <transition name="tggfade" mode="out-in"><div v-show="open"><slot name="content"/></div></transition></div>',
+    data: function() { return { open: this.trigger }; },
+} );
+
+Vue.component( 'pf-help', {
+    props: ['face'],
+    template: '<span><span class="whyface" @mouseover="Start" @mouseleave="Time=0" @click="Show">{{ Face }}</span>\
+            <div class="why" :style="{display:Open?\'block\':\'none\',top:Top,left:Left}" @mouseleave="Open=false">\
+            <transition name="tggfade" mode="out-in"><div v-show="Open"><slot name="note"/></div></transition></div></span>',
+    data: () => ( { Face: '？', Open: false, Time: 0, Top: '200px', Left: '300px' } ),
+    methods: {
+        Start: function( event )
+        {
+            if( !this.Open )
+            {
+                let Help = this;
+                this.Time = ( new Date()).getTime();
+                setTimeout( function()
+                {
+                    Help.Left = event.layerX + 'px';
+                    Help.Top = event.layerY + 'px';
+                    Help.Open = Help.Time > 1;
+                }, 500 );
+            }
+        },
+
+        Show: function( event )
+        {
+            this.Left = event.layerX + 'px';
+            this.Top = event.layerY + 'px';
+            this.Open = true;
+        }
+    }
+} );
+
+new Vue( {
+    el: '#body',
+    data: { MainCBCKey: '', ECDHPubK64: '', InputMainPswd: '', NewFriendName: '', Friends: [], NewFriendMsg: '', DownloadStr: '',
+            LoadMode: false, MaySave: false, ImportMsg: '导入会覆盖现有记录。若须保存，先导出。', Ver: '0.1', },
+    methods: {
+        SetMain: function()
+        {
+            let v = this;
+            this.GenECDH();
+            Hash( this.InputMainPswd, 'SHA-512' ).then( hash512 =>
+            {
+                v.Salt = hash512.slice( 0, 16 );
+                v.CBCiv = hash512.slice( 32, 48 );
+
+                Hash( this.InputMainPswd, 'SHA-256' ).then( hash256 =>
+                {
+                    v.InputMainPswd = '';
+                    crypto.subtle.importKey( 'raw', hash256, { name: 'PBKDF2' }, false, ['deriveBits', 'deriveKey'] )
+                    .then( k => crypto.subtle.deriveKey( { "name": 'PBKDF2', "salt": v.Salt,
+                                        "iterations": 60000, "hash": 'SHA-256' }, k,
+                                        { "name": 'AES-CBC', "length": 256 }, true, ["encrypt", "decrypt"] ))
+                    .then( webKey => crypto.subtle.exportKey( "raw", webKey )).then( mp =>
+                    {
+                        //v.Main = mp;
+                        v.Mask = Xor( hash512.slice( 0, 32 ), mp );
+                        v.Suffix = ABuff2Base64( Xor( hash512.slice( 48, 64 ), mp.slice( 4, 20 ))).replace( /[\+\=\/]/g, '' ).slice( 0, 12 );
+
+                        let Exist = localStorage['Account_' + v.Suffix];
+                        if( Exist )
+                        {
+                            //console.log( Exist );
+                            v.Read( JSON.parse( Exist ));
+                        }
+                        else
+                        {
+                            crypto.subtle.generateKey( { name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"] )
+                            .then( key => crypto.subtle.exportKey( "raw", key ))
+                            .then( cbck => v.MainCBCKey = cbck );
+                        }
+                    } );
+                } );
+            } );
+        },
+
+        Read: function( record )
+        {
+            let v = this;
+            this.MainCBCKey = Xor( Base642ABuff( record.MainCBCKey ), this.Mask );
+            crypto.subtle.importKey( 'raw', this.MainCBCKey, { name: 'AES-CBC' }, true, ["encrypt", "decrypt"] )
+            .then( key =>
+            {
+                crypto.subtle.decrypt( { name: 'AES-CBC', iv: v.CBCiv }, key, Base642ABuff( record.Friends ))
+                .then( friends =>
+                {
+                    v.Friends = JSON.parse( Utf8ArrayToStr( new Uint8Array( friends )));
+                    ( v.Friends || [] ).forEach( f =>
+                    {
+                        f.RawText = f.EncryptedText = f.TransCBCKey = f.RemoteECDHPubK = '';
+                        f.RawTransCBCKey && crypto.subtle.importKey( 'raw', Base642ABuff( f.RawTransCBCKey ), { name: 'AES-CBC' },
+                                            true, ["encrypt", "decrypt"] ).then( transK => f.TransCBCKey = transK );
+                    } );
+                    //v.Friends.map( f => f.Status = 10 );
+                } );
+            } );
+        },
+
+        GenECDH: function()
+        {
+            let v = this;
+            crypto.subtle.generateKey( { name: "ECDH", namedCurve: "P-256", }, true, ["deriveKey", "deriveBits"] ).then( k =>
+            {
+                v.ECDHPriKey = k.privateKey;
+                crypto.subtle.exportKey( "raw", k.publicKey ).then( rk =>
+                {
+                    v.ECDHPubK64 = ABuff2Base64( rk );
+                    console.log( 'ECDH ok.', v.ECDHPubK64 );
+                } );
+            } );
+        },
+
+        GenCBCKey: function( friend )
+        {
+            let v = this;
+            crypto.subtle.importKey( "raw", Base642ABuff( friend.RemoteECDHPubK ), { name: "ECDH", namedCurve: "P-256" }, true, [] ).then( pubK =>
+            crypto.subtle.deriveKey( { name: "ECDH", namedCurve: "P-256", public: pubK }, v.ECDHPriKey,
+                                { name: "AES-CBC", length: 256 }, true, ["encrypt", "decrypt"] ).then( cbcK =>
+            {
+                friend.TransCBCKey = cbcK;
+                //console.log( friend.TransCBCKey );
+                Hash( [v.ECDHPubK64, friend.RemoteECDHPubK].sort().join( ',' ), 'SHA-256' ).then( hash256 =>
+                {
+                    friend.PswdSuffix = ABuff2Base64( hash256 ).replace( /[\+\=\/]/g, '' ).slice( 0, 8 );
+                    friend.Status = 10;
+                    friend.NewCBCKey = true;
+                    console.log( 'cbck ok.', friend.PswdSuffix );
+                } );
+                crypto.subtle.exportKey( "raw", cbcK ).then( rawK =>
+                {
+                    friend.RawTransCBCKey = ABuff2Base64( rawK );
+                    v.Save();
+                } );
+            } ));
+        },
+
+        Encrypt: function( friend )
+        {
+            let v = this;
+            let iv = new Uint8Array( [0x80, 0xb2, 0x59, 0x01, 0xb2, 0x59, 0x01, 0x80, 0x59, 0x01, 0x80, 0xb2, 0x01, 0x80, 0xb2, 0x59] );
+            let buff = new TextEncoder( 'utf8' ).encode( friend.RawText );
+            friend.EncryptedText = friend.CryptMsg = '';
+            crypto.subtle.encrypt( { name: 'AES-CBC', iv: iv }, friend.TransCBCKey, buff ).then( encypted =>
+            {
+                friend.EncryptedText = ABuff2Base64( encypted );
+                v.$forceUpdate();
+                friend.Log && v.AddMsg( friend, 1 );
+                //console.log( 'encrypted.', friend.RawText );
+            } ).catch( err => { console.error( err ); friend.CryptMsg = '加密失败。'; } );
+        },
+
+        Decrypt: function( friend )
+        {
+            let v = this;
+            let iv = new Uint8Array( [0x80, 0xb2, 0x59, 0x01, 0xb2, 0x59, 0x01, 0x80, 0x59, 0x01, 0x80, 0xb2, 0x01, 0x80, 0xb2, 0x59] );
+            friend.RawText = friend.CryptMsg = '';
+            crypto.subtle.decrypt( { name: 'AES-CBC', iv: iv }, friend.TransCBCKey, Base642ABuff( friend.EncryptedText ))
+            .then( raw =>
+            {
+                friend.RawText = Utf8ArrayToStr( new Uint8Array( raw ));
+                v.$forceUpdate();
+                friend.Log && v.AddMsg( friend, 0 );
+                //console.log( 'decrypted.', raw, friend.RawText );
+            } ).catch( err => { friend.CryptMsg = '解密失败。'; } );
+        },
+
+        AddMsg: function( friend, direct )
+        {
+            friend.Messages.push( [direct, new Date().toLocaleString(), friend.RawText] );
+            this.Save();
+        },
+
+        DelMsg: function( friend, i )
+        {
+            friend.Messages.splice( i, 1 );
+            this.Save();
+        },
+
+        AddFriend: function()
+        {
+            this.NewFriendMsg = '';
+            if( !this.NewFriendName )
+            {
+                this.NewFriendMsg = '联系人名不能为空。';
+                return;
+            }
+            if( this.Friends.some( s => s.Name === this.NewFriendName ))
+            {
+                this.NewFriendMsg = '此人已存在，请换用另一个名。';
+                return;
+            }
+            this.Friends.push( { Name: this.NewFriendName, TransCBCKey: '', Messages: [], Status: 0, CryptMsg: '' } )
+            this.NewFriendName = '';
+            this.Save();
+        },
+
+        DelFriend: function( name )
+        {
+            if( confirm( '确认删除此联系人及其通信密码？' ))
+            {
+                this.Friends = this.Friends.filter( f => f.Name !== name );
+                this.Save();
+            }
+        },
+
+        Save: function()
+        {
+            let v = this;
+            let Friends = ( v.Friends || [] ).map( f => ( { Name: f.Name, Log: f.Log, Messages: f.Messages, PswdSuffix: f.PswdSuffix,
+                                                        Status: f.Status, RawTransCBCKey: f.RawTransCBCKey } ));
+            //console.log( 'Save', Friends );
+            let buff = new TextEncoder( 'utf8' ).encode( JSON.stringify( Friends ));
+            crypto.subtle.importKey( 'raw', v.MainCBCKey, { name: 'AES-CBC' }, true, ["encrypt", "decrypt"] )
+            .then( key =>
+            {
+                crypto.subtle.encrypt( { name: 'AES-CBC', iv: v.CBCiv }, key, buff ).then( encypted =>
+                {
+                    try
+                    {
+                        localStorage['Account_' + v.Suffix] = JSON.stringify( { MainCBCKey: ABuff2Base64( Xor( v.MainCBCKey, v.Mask )),
+                                                                        Friends: ABuff2Base64( encypted ) } );
+                    }
+                    catch( e )
+                    {
+                        alert( '保存失败。\n如果以前成功保存过，可能是由于数据太长，可删除一些历史记录再试。' );
+                    }
+                } );
+            } );
+        },
+
+        SetDownload: function()
+        {
+            let blob = new Blob( [JSON.stringify( { Suffix: this.Suffix, Record: localStorage['Account_' + this.Suffix], Version: this.Ver } )] );
+            this.DownloadStr = URL.createObjectURL( blob );
+            //console.log( this.DownloadStr );
+            this.$forceUpdate();
+        },
+
+        LoadItemFromFile: function( e )
+        {
+            let v = this;
+            this.ImportMsg = '';
+            let Files = e.target.files || e.dataTransfer.files;
+            for( let f of Files )
+            {
+                let reader = new FileReader();
+                reader.onload = function( e )
+                {
+                    v.Import = JSON.parse( this.result );
+                    if( v.Import.Suffix !== v.Suffix )
+                    {
+                        v.ImportMsg = '导入失败：当前的主密码特征值与导入文件不符。';
+                        return;
+                    }
+                    v.MaySave = true;
+                }
+                reader.readAsText( f );
+                break;
+            }
+        },
+
+        SaveImport: function()
+        {
+            localStorage['Account_' + this.Import.Suffix] = this.Import.Record;
+            this.Read( JSON.parse( this.Import.Record ));
+            this.Import = null;
+            this.LoadMode = false;
+        },
+    },
+} );
+
+</script>
+
+</body>
+</html>

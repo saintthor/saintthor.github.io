@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打飞机游戏</title>
+    <link rel="stylesheet" href="style.css">
+    <style type="text/css">
+    body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+#game-container {
+    display: flex;
+    gap: 20px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 1px;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.hit {
+    background-color: red;
+}
+
+.miss {
+    background-color: gray;
+}
+
+button {
+    margin-bottom: 10px;
+}
+
+#message {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 18px;
+}
+    </style>
+</head>
+<body>
+    <div style="display: flex; flex-direction: column;">
+    <p>玩家在左侧棋盘中摆放三架“士”字形的飞机，游戏开始。电脑也在右侧棋盘中摆三架。</p>
+    <p>玩家点击右侧棋盘中的方格，会显示是否打中了电脑的飞机。电脑也打玩家的棋盘。先打中对方三架飞机的机头者胜。</p>
+    <p>摆放飞机前先点按钮选定方向，再点自己棋盘上的方格，若能摆得下，飞机就会出现。</p>
+    <p>本页代码主要用 Claude 生成，主要人工优化了电脑的战术。我也有输的时候。</p>
+    <p></p>
+    <div>
+        <button></button>
+        <div id="game-container">
+            <div id="player-board" class="board"></div>
+            <div id="computer-board" class="board"></div>
+        </div>
+        <div id="message">uuuuuuuuuu</div>
+    </div>
+    </div>
+    <script>
+const BOARD_SIZE = 10;
+const PLANE_SIZE = 10;
+
+class Game {
+    constructor() {
+        this.playerBoard = this.createEmptyBoard();
+        this.computerBoard = this.createEmptyBoard();
+        this.GuessBoard = this.createEmptyBoard();
+        this.placeRandomPlanes(this.computerBoard);
+        this.Round = 1;
+        this.playerHits = 0;
+        this.computerHits = 0;
+        this.playerHeadshots = 0;
+        this.computerHeadshots = 0;
+        this.gameOver = false;
+        this.playerPlanes = [];
+        this.currentDirection = 'horizontal';
+        this.selectedPlane = null;
+        this.computerLastHit = null;
+        this.LastHits = [];
+        this.Dead = [];
+        this.Possible = [];
+
+        this.initBoards();
+        this.addRotateButton();
+        this.startPlayerPlacement();
+    }
+
+    createEmptyBoard() {
+        return Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
+    }
+
+    addRotateButton() {
+        const button = document.querySelector('button');
+        button.innerHTML = '旋转飞机<br>当前' + this.getDirectionName();
+        button.addEventListener('click', () => {
+            this.rotateDirection();
+            this.showMessage(`飞机方向已更改为${this.getDirectionName()}。`);
+            button.innerHTML = '旋转飞机<br>当前' + this.getDirectionName();
+            if (this.selectedPlane) {
+                this.rotatePlane(this.selectedPlane);
+            }
+        });
+        //document.body.insertBefore(button, document.getElementById('game-container'));
+    }
+
+    startPlayerPlacement() {
+        this.showMessage("请在左侧棋盘放置您的飞机。先选定方向，再点击格子放置飞机。");
+        const playerBoardElement = document.getElementById('player-board');
+        playerBoardElement.addEventListener('click', this.handlePlayerAction.bind(this));
+    }
+
+    handlePlayerAction(event) {
+        if (this.playerPlanes.length >= 3 && !this.selectedPlane) return;
+
+        const cell = event.target;
+        const x = parseInt(cell.dataset.x);
+        const y = parseInt(cell.dataset.y);
+
+        if (this.selectedPlane) {
+            this.movePlane(this.selectedPlane, x, y);
+        } else {
+            this.placePlane(x, y);
+        }
+    }
+
+    placePlane(x, y) {
+        if (this.canPlacePlane(this.playerBoard, x, y, this.currentDirection)) {
+            const plane = { x, y, direction: this.currentDirection };
+            this.playerPlanes.push(plane);
+            this.updatePlayerBoard();
+            if (this.playerPlanes.length === 3) {
+                this.showMessage("所有飞机已放置。游戏开始！玩家先点右侧棋盘。");
+            } else {
+                this.showMessage(`已放置 ${this.playerPlanes.length} 架飞机。请继续放置。`);
+            }
+        } else {
+            this.showMessage("无法在此处放置飞机。请选择其他位置或方向。");
+        }
+    }
+
+    movePlane(plane, newX, newY) {
+        if (this.canPlacePlane(this.playerBoard, newX, newY, plane.direction)) {
+            plane.x = newX;
+            plane.y = newY;
+            this.selectedPlane = null;
+            this.updatePlayerBoard();
+            this.showMessage("飞机已移动。");
+        } else {
+            this.showMessage("无法移动到此位置。请选择其他位置。");
+        }
+    }
+
+    rotatePlane(plane) {
+        const newDirection = this.getNextDirection(plane.direction);
+        if (this.canPlacePlane(this.playerBoard, plane.x, plane.y, newDirection)) {
+            plane.direction = newDirection;
+            this.updatePlayerBoard();
+            this.showMessage("飞机已旋转。");
+        } else {
+            this.showMessage("无法在此位置旋转飞机。请先移动飞机。");
+        }
+    }
+
+    getNextDirection(direction) {
+        const directions = ['horizontal', 'vertical', 'horizontal-reverse', 'vertical-reverse'];
+        const currentIndex = directions.indexOf(direction);
+        return directions[(currentIndex + 1) % 4];
+    }
+
+    rotateDirection() {
+        this.currentDirection = this.getNextDirection(this.currentDirection);
+    }
+
+    getDirectionName() {
+        const names = {
+            'horizontal': '向上',
+            'vertical': '向左',
+            'horizontal-reverse': '向下',
+            'vertical-reverse': '向右'
+        };
+        return names[this.currentDirection];
+    }
+
+    placeRandomPlanes(board) {
+        for (let i = 0; i < 3; i++) {
+            let placed = false;
+            while (!placed) {
+                const x = Math.floor(Math.random() * BOARD_SIZE);
+                const y = Math.floor(Math.random() * BOARD_SIZE);
+                const direction = ['horizontal', 'vertical', 'horizontal-reverse', 'vertical-reverse'][Math.floor(Math.random() * 4)];
+                if (this.canPlacePlane(board, x, y, direction)) {
+                    this.placePlaneOnBoard(board, x, y, direction);
+                    placed = true;
+                }
+            }
+        }
+    }
+
+    canPlacePlane(board, x, y, direction) {
+        const offsets = this.getPlaneOffsets(direction);
+        for (let [dx, dy] of offsets) {
+            const newX = x + dx;
+            const newY = y + dy;
+            if (newX < 0 || newX >= BOARD_SIZE || newY < 0 || newY >= BOARD_SIZE || board[newX][newY] !== 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    getPlaneOffsets(direction) {
+        const baseOffsets = [
+            [0, 0], // head
+            [1, 0], [1, -1], [1, -2], [1, 1], [1, 2], // wings
+            [2, 0], // body
+            [3, -1], [3, 0], [3, 1] // tail
+        ];
+
+        let offsets;
+        switch (direction) {
+            case 'horizontal':
+            case 0:
+                offsets = baseOffsets;
+                break;
+            case 'vertical':
+            case 1:
+                offsets = baseOffsets.map(([x, y]) => [y, x]);
+                break;
+            case 'horizontal-reverse':
+            case 2:
+                offsets = baseOffsets.map(([x, y]) => [-x, -y]);
+                break;
+            case 'vertical-reverse':
+            case 3:
+                offsets = baseOffsets.map(([x, y]) => [-y, -x]);
+                break;
+        }
+        return offsets;
+    }
+
+    placePlaneOnBoard(board, x, y, direction) {
+        const offsets = this.getPlaneOffsets(direction);
+        for (let [dx, dy] of offsets) {
+            const newX = x + dx;
+            const newY = y + dy;
+            board[newX][newY] = (dx === 0 && dy === 0) ? 2 : 1; // 2 for head, 1 for body
+        }
+    }
+
+    initBoards() {
+        const playerBoardElement = document.getElementById('player-board');
+        const computerBoardElement = document.getElementById('computer-board');
+
+        for (let i = 0; i < BOARD_SIZE; i++) {
+            for (let j = 0; j < BOARD_SIZE; j++) {
+                const playerCell = document.createElement('div');
+                playerCell.className = 'cell';
+                playerCell.dataset.x = i;
+                playerCell.dataset.y = j;
+                playerBoardElement.appendChild(playerCell);
+
+                const computerCell = document.createElement('div');
+                computerCell.className = 'cell';
+                computerCell.dataset.x = i;
+                computerCell.dataset.y = j;
+                computerCell.addEventListener('click', () => this.playerTurn(i, j));
+                computerBoardElement.appendChild(computerCell);
+            }
+        }
+    }
+
+    updatePlayerBoard() {
+        console.log( 'updatePlayerBoard' );
+        this.playerBoard = this.createEmptyBoard();
+        for (let plane of this.playerPlanes) {
+            this.placePlaneOnBoard(this.playerBoard, plane.x, plane.y, plane.direction);
+        }
+
+        const cells = document.querySelectorAll('#player-board .cell');
+        cells.forEach((cell, index) => {
+            const x = Math.floor(index / BOARD_SIZE);
+            const y = index % BOARD_SIZE;
+            if (this.playerBoard[x][y] === 1) {
+                cell.style.backgroundColor = 'lightblue';
+            } else if (this.playerBoard[x][y] === 2) {
+                cell.style.backgroundColor = 'lightblue';
+            } else {
+                cell.style.backgroundColor = '';
+            }
+        });
+    }
+
+    playerTurn(x, y) {
+        if (this.gameOver || this.playerPlanes.length < 3) return;
+
+        const cell = document.querySelector(`#computer-board .cell[data-x="${x}"][data-y="${y}"]`);
+        if (cell.classList.contains('hit') || cell.classList.contains('miss')) return;
+
+        if (this.computerBoard[x][y] > 0) {
+            cell.classList.add('hit');
+            this.playerHits++;
+            if (this.computerBoard[x][y] === 2) {
+                cell.style.backgroundColor = 'yellow';
+                this.playerHeadshots++;
+                this.showMessage( this.Round + '：你击中了机头！' );
+            } else {
+                cell.style.backgroundColor = 'red';
+                this.showMessage( this.Round + '：击中！' );
+            }
+        } else {
+            cell.classList.add('miss');
+            this.showMessage( this.Round + '：未击中。' );
+        }
+
+        if (this.playerHeadshots === 3) {
+            this.gameOver = true;
+            this.showMessage( this.Round + '：你赢了！' );
+            this.Over();
+            return;
+        }
+
+        setTimeout(() => this.computerTurn(), 1000);
+    }
+
+    Over()
+    {
+        for( let x = 0; x < BOARD_SIZE; x++ )
+        {
+            for( let y = 0; y < BOARD_SIZE; y++ )
+            {
+                if( this.computerBoard[x][y] > 0 )
+                {
+                    const cell = document.querySelector( `#computer-board .cell[data-x="${x}"][data-y="${y}"]` );
+                    cell.style.backgroundColor = this.computerBoard[x][y] > 1 ? 'yellow': 'red';
+                }
+            }
+        }
+    }
+
+    CanPlace( direct, x, y )
+    {
+        let HitNum = 0;
+        //console.log( 'Canplace in', direct, x, y, this.GuessBoard[x][y] );
+        for( let [x2, y2] of this.getPlaneOffsets( direct ).slice( 1 ))
+        {
+            if( x + x2 < 0 || x + x2 >= BOARD_SIZE || y + y2 < 0 || y + y2 >= BOARD_SIZE )
+            {
+                //console.log( 'Canplace return', x + x2, y + y2 );
+                return -1;
+            }
+            const cell = this.GuessBoard[x + x2][y + y2];
+            //console.log( 'Canplace cell', cell, x + x2, y + y2 );
+            if( cell < 0 || cell > 1 )
+            {
+                //console.log( 'Canplace return 111', cell, x + x2, y + y2 );
+                return -1;
+            }
+            HitNum += cell;
+        }
+        //console.log( 'Canplace out', HitNum );
+        return HitNum;
+    }
+
+    CrossDead( dead )
+    {
+        console.log( 'CrossDead', dead );
+        if( dead[1][0] % 2 !== dead[1][1] % 2 )
+        {
+            let x = ( dead[1][0] - 2 ) * ( dead[1][1] - 2 ) ? 1: -1;
+            let y = ( dead[1][0] - 3 ) * ( dead[1][1] - 3 ) ? 1: -1;
+            console.log( 'Cross', dead, x, y );
+            x += dead[0][0];
+            y += dead[0][1];
+            this.GuessBoard[x][y] = 2;
+            this.LastHits = this.LastHits.filter( h => h.x !== x || h.y !== y );
+            const cell = document.querySelector( `#player-board .cell[data-x="${x}"][data-y="${y}"]` );
+            cell.style.backgroundColor = 'lightyellow';
+            this.UpdatePossible( x, y );
+        }
+    }
+
+    UpdateDead( x, y )
+    {
+        //console.log( 'UpdateDead', this.GuessBoard[x][y], x, y, this.Dead );
+
+        if( this.GuessBoard[x][y] !== 1 )
+        {
+            for( let dead of this.Dead )
+            {
+                const [x0, y0] = dead[0];
+                dead[1] = dead[1].filter( direct => 0 <= this.CanPlace( direct, x0, y0 ));
+                if( dead[1].length === 1 )
+                {
+                    //console.log( '333333333', dead );
+                    for( let [x1, y1] of this.getPlaneOffsets( dead[1][0] ).slice( 1 ))
+                    {
+                        this.GuessBoard[x0 + x1][y0 + y1] = 2;
+                        this.LastHits = this.LastHits.filter( h => h.x !== x + x1 || h.y !== y + y1 );
+                        const cell = document.querySelector( `#player-board .cell[data-x="${x0 + x1}"][data-y="${y0 + y1}"]` );
+                        cell.style.backgroundColor = 'lightyellow';
+                        this.UpdatePossible( x0 + x1, y0 + y1 );
+                    }
+                    dead[1] = [];
+                }
+                else if( dead[1].length === 2 )
+                {
+                    this.CrossDead( dead );
+                }
+            }
+        }
+
+        if( this.GuessBoard[x][y] === 2 )
+        {
+            const NewDead = [[x, y], []];
+            for( let direct = 3; direct >= 0; direct-- )
+            {
+                if( 0 <= this.CanPlace( direct, x, y ))
+                {
+                    //console.log( 'ssssssss', direct );
+                    NewDead[1].push( direct );
+                    for( let [x1, y1] of this.getPlaneOffsets( NewDead[1][0] ))
+                    {
+                        this.LastHits = this.LastHits.filter( h => h.x !== x + x1 || h.y !== y + y1 );
+                    }
+                }
+            }
+            if( NewDead[1].length === 1 )
+            {
+                for( let [x1, y1] of this.getPlaneOffsets( NewDead[1][0] ).slice( 1 ))
+                {
+                    this.GuessBoard[x + x1][y + y1] = 2;
+                    this.LastHits = this.LastHits.filter( h => h.x !== x + x1 || h.y !== y + y1 );
+                    const cell = document.querySelector( `#player-board .cell[data-x="${x + x1}"][data-y="${y + y1}"]` );
+                    cell.style.backgroundColor = 'lightyellow';
+                    this.UpdatePossible( x + x1, y + y1 );
+                }
+            }
+            else
+            {
+                if( NewDead[1].length === 2 )
+                {
+                    this.CrossDead( NewDead );
+                }
+                this.Dead.push( NewDead );
+                for( let direct of NewDead[1] )
+                {
+                    for( let [x1, y1] of this.getPlaneOffsets( direct ))
+                    {
+                        this.LastHits = this.LastHits.filter( h => h.x !== x + x1 || h.y !== y + y1 );
+                    }
+                }
+            }
+        }
+    }
+
+    UpdatePossible( x, y )
+    {
+        console.log( 'UpdatePossible', x, y );
+
+        if( x !== undefined )
+        {
+            this.Possible = this.Possible.filter( p =>
+            {
+                const [[i, j], ds] = p;
+
+                if(( x === i && y === j ) || this.GuessBoard[i][j] !== 0 )
+                {
+                    console.log( 'del possi', x, y );
+                    return false;
+                }
+                if(( x - i ) * ( x - i ) + ( y - j ) * ( y - j ) <= 17 )
+                {
+                    p[1] = ds.filter( d => 0 <= this.CanPlace( d, i, j ));
+                    if( p[1].length === 0 )
+                    {
+                    console.log( 'del possi 2222', x, y );
+                        return false;
+                    }
+                }
+                return true;
+            } );
+            return;
+        }
+
+        if( this.Possible.length === 0 )
+        {
+            for( let i = 0; i < BOARD_SIZE; i++ )
+            {
+                for( let j = 0; j < BOARD_SIZE; j++ )
+                {
+                    const Head = [[i, j], [0, 1, 2, 3].filter( d => 0 <= this.CanPlace( d, i, j ))];
+                    if( Head[1].length > 0 )
+                    {
+                        this.Possible.push( Head );
+                    }
+                }
+            }
+            console.log( 'init Possible', this.Possible.length );
+        }
+        if( this.Possible.length < 12 )
+        {
+            return this.Possible.reduce(( good, p ) => ( p[1].length - this.Distance( p[0] )) > ( good[1].length
+                                                    - this.Distance( good[0] )) ? p : good, [[0, 0], []] )[0];
+        }
+        return [undefined, undefined];
+    }
+
+    Distance( point )
+    {
+        return ( Math.abs( point[0] - 4.5 ) + Math.abs( point[1] - 4.5 )) * 0.07;
+    }
+
+    computerTurn() {
+        if (this.gameOver) return;
+
+        let x, y;
+console.log( '===============  computerTurn ===================' );
+        if( this.LastHits.length > 0 )
+        {
+            this.computerLastHit = this.LastHits[this.LastHits.length - 1];
+
+            let GuessPlanes = [];
+            let x1, y1;
+            const rd = Math.floor( Math.random() * 4 );
+            for( let d0 = rd + 4; d0-- > rd; )
+            {
+                const direct = d0 % 4;
+                //console.log( direct, this.computerLastHit, '----------' );
+                const plane = this.getPlaneOffsets( direct );
+                for( let [x1, y1] of plane.slice( 1 ))
+                {
+                    const HeadX = this.computerLastHit.x - x1;
+                    const HeadY = this.computerLastHit.y - y1;
+                    if( HeadX < 0 || HeadX >= BOARD_SIZE || HeadY < 0 || HeadY >= BOARD_SIZE || this.GuessBoard[HeadX][HeadY] !== 0 )
+                    {
+                        continue;
+                    }
+                    const HitNum = this.CanPlace( direct, HeadX, HeadY );
+                    if( HitNum > 0 )
+                    {
+                        //console.log( 'wwwwwww', HitNum, direct, HeadX, HeadY );
+                        GuessPlanes.push( [[HeadX, HeadY], HitNum] );
+                    }
+                }
+            }
+            if( GuessPlanes.length > 0 )
+            {
+                //if( this.Possible.length == 0 )
+                [x, y] = GuessPlanes.reduce(( good, current ) => ( current[1] - this.Distance( current[0] )) > ( good[1]
+                                                    - this.Distance( good[0] )) ? current : good, GuessPlanes[0] )[0];
+                console.log( x, y, GuessPlanes );
+            }
+            //else
+            //{
+        ////}
+            ////if (this.computerLastHit) {
+                //// 如果上一次击中，尝试周围的格子
+                //for( let i = 5; i--; ) {
+                    //const newX = this.computerLastHit.x + Math.floor( Math.random() * 3 ) - 1;
+                    //const newY = this.computerLastHit.y + Math.floor( Math.random() * 3 ) - 1;
+                    //if (newX >= 0 && newX < BOARD_SIZE && newY >= 0 && newY < BOARD_SIZE && this.playerBoard[newX][newY] !== -1) {
+                        //x = newX;
+                        //y = newY;
+                        //break;
+                    //}
+                //}
+            //}
+        }
+
+        // 如果没有找到合适的位置，随机选择
+        if( x === undefined || y === undefined )
+        {
+            const unknown = this.GuessBoard.reduce(( acc, row ) => acc +
+                        row.reduce(( rowAcc, val ) => rowAcc + ( val === 0 ? 1 : 0 ), 0 ), 0 );
+            console.log( 'unknown ---------', unknown );
+            if( this.Round > 6 && 90 > unknown )
+            {
+                [x, y] = this.UpdatePossible();
+                console.log( 'possible', x, y );
+            }
+        }
+        if (x === undefined || y === undefined) {
+            let found = false;
+            console.log( 'radom select', this.GuessBoard );
+            for( let i = 50; i--; )
+            {
+                x = Math.floor(Math.random() * ( BOARD_SIZE - 4 )) + 2;
+                y = Math.floor(Math.random() * ( BOARD_SIZE - 4 )) + 2;
+                if( this.GuessBoard[x][y] !== 0 || x < 2 || x > BOARD_SIZE - 3 || y < 2 || y > BOARD_SIZE - 3 )
+                {
+                    continue;
+                }
+                const d = Math.floor( i / 15 );
+                let MinD = 5;
+                for( let xi = Math.max( x - d, 0 ); xi <= Math.min( x + d, BOARD_SIZE - 1 ); xi++ )
+                {
+                    for( let yi = Math.max( y - d, 0 ); yi <= Math.min( y + d, BOARD_SIZE - 1 ); yi++ )
+                    {
+                        //console.log( 'jjjjjjjjjj', [x, y], [xi, yi], this.GuessBoard[xi][yi] )
+                        if( this.GuessBoard[xi][yi] !== 0 )
+                        {
+                            xi -= x;
+                            yi -= y;
+                            MinD = Math.min( MinD, Math.pow( xi * xi + yi * yi, 0.5 ))
+                            xi = BOARD_SIZE;
+                            //console.log( 'ttttttt', MinD, xi, yi )
+                            break
+                        }
+                    }
+                }
+                if( MinD == 5 )
+                {
+                    found = true;
+                    console.log( 'found', i, d, x, y );
+                    break;
+                }
+            }
+            if( !found )
+            {
+                do {
+                    x = Math.floor(Math.random() * ( BOARD_SIZE - 4 )) + 2;
+                    y = Math.floor(Math.random() * ( BOARD_SIZE - 4 )) + 2;
+                } while (this.playerBoard[x][y] === -1 || x < 2 || x > BOARD_SIZE - 3 || y < 2 || y > BOARD_SIZE - 3 );
+            }
+        }
+        this.GuessBoard[x][y] = this.playerBoard[x][y] > 0 ? this.playerBoard[x][y] : -1;
+console.log( x, y, 'xxxxxxx', this.GuessBoard[x][y] );
+        if( this.GuessBoard[x][y] < 0 )
+        {
+            console.log( 'xxxxxxxx value', this.GuessBoard[x][y] );
+            //this.GuessBoard[x][y] = 0;
+        }
+        this.UpdatePossible( x, y );
+
+        const cell = document.querySelector(`#player-board .cell[data-x="${x}"][data-y="${y}"]`);
+
+        if (this.playerBoard[x][y] > 0) {
+            cell.classList.add('hit');
+            this.computerHits++;
+            this.computerLastHit = { x, y };
+            if (this.playerBoard[x][y] === 2) {
+                cell.style.backgroundColor = 'green';
+                setTimeout( () => cell.style.backgroundColor = 'yellow', 300 );
+                this.computerHeadshots++;
+                this.showMessage( this.Round + '：电脑击中了你的机头！' );
+                this.computerLastHit = null; // 击中机头后重置
+                //this.LastHits = [];
+                this.UpdateDead( x, y );
+            } else {
+                this.LastHits.push( this.computerLastHit );
+                this.LastHits.push( this.computerLastHit );
+                cell.style.backgroundColor = 'green';
+                setTimeout( () => cell.style.backgroundColor = 'red', 300 );
+                this.showMessage( this.Round + '：电脑击中了你的飞机！' );
+            }
+        } else {
+            cell.classList.add('miss');
+            this.showMessage( this.Round + '：电脑未击中。' );
+            this.UpdateDead( x, y );
+            this.computerLastHit = null;
+        }
+        this.playerBoard[x][y] = -1;
+
+        if (this.computerHeadshots === 3) {
+            this.gameOver = true;
+            this.showMessage( this.Round + '：电脑赢了！' );
+            this.Over();
+        }
+        this.Round++;
+    }
+
+    showMessage(msg) {
+        document.getElementById('message').textContent = msg;
+    }
+}
+
+new Game();
+
+    </script>
+</body>
+</html>

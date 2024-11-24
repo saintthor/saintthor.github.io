@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>卡诺热机</title>
+</head>
+<body>
+<h2>卡诺热机</h2>
+<p>本人发明了世界第一种实用的卡诺热机。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
+<p>与斯特林热机相比，结构更简单，无须换热器，也无须曲轴即可输出旋转动力。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机。</p>
+<p>与常见热机相比，热功效率更高，但单位体积的输出功率不高。</p>
+<p>正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
+
+<div id="rotate" style="display:inline-block; margin-right:80px; border:solid 1px; padding:10px">
+    <canvas width="400" height="400"></canvas>
+    <div>
+        <span>旋转式热机</span>&emsp;
+        <button>Start</button>
+        <button>Stop</button>
+    </div>
+</div>
+
+<div id="rotate2" style="display:inline-block; border:solid 1px; padding:10px">
+    <canvas width="400" height="400"></canvas>
+    <div>
+        <span>旋转式热泵</span>&emsp;
+        <button>Start</button>
+        <button>Stop</button>
+    </div>
+</div>
+
+<p>左侧为<b>旋转式热机</b>：气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始等温膨胀过程。</p>
+<p>离开热源后是绝热膨胀过程。降温至最高点，进入温度与低温相等的冷源，开始等温压缩过程。</p>
+<p>离开冷源后是绝热压缩过程。</p>
+<p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺热机的定义。</p>
+<p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点。因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
+<p>右侧为<b>旋转式热泵</b>，为左侧热机的逆向运行，接受外界做功，将热量由冷源输送到热源。</p>
+<hr>
+<div id="reciprocate" style="display:inline-block; border:solid 1px; margin-top:20px; margin-bottom:20px; padding:10px">
+    <canvas width="600" height="280"></canvas>
+    <div>
+        <span>往复式热机</span>&emsp;
+        <button>Start</button>
+        <button>Stop</button>
+    </div>
+</div>
+<div>
+<p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。在每一边的工质气体压缩至最小时加上与气体温度相等的热源，同时在另一边加上与体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。撤除热/冷源后为绝热膨胀/压缩过程，至另一方向的极限位置后再反向加热/冷源。在每个周期之内每一边的工质气体都经历了卡诺循环的四个过程。</p>
+<p>通过气缸的运动对外做功。</p>
+</div>
+
+<script>
+class Carnot
+{
+    constructor( Id, isEngine )
+    {
+        let self = this;
+        this.Div = document.getElementById( Id );
+        this.Canvas = this.Div.querySelector( 'canvas' );
+        const Bttns = this.Div.querySelectorAll( 'button' );
+        Bttns[0].onclick = function() { self.Start() };
+        Bttns[1].onclick = function() { self.Stop() };
+        this.CTX = this.Canvas.getContext( '2d' );
+        this.Angle = 0;
+        this.Interval = 40;
+        this.IsEngine = isEngine;
+    }
+
+    async Start()
+    {
+        if( this.Run )
+        {
+            return;
+        }
+
+        this.Run = true;
+
+        while( this.Run )
+        {
+            this.Draw();
+            this.Angle += this.IsEngine ? 0.01 : -0.01;
+            if( this.Angle < 0 )
+            {
+                this.Angle += Math.PI * 2;
+            }
+            await new Promise( r => setTimeout( r, this.Interval ));
+        }
+    }
+
+    Stop()
+    {
+        this.Run = false;
+    }
+}
+
+class ReciEngine extends Carnot
+{
+    constructor( Id, isEngine )
+    {
+        super( Id, isEngine );
+        this.Center = [Math.floor( this.Canvas.width / 2 ), Math.floor( this.Canvas.height / 2 )];
+        this.LinderLength = 300;
+        this.LinderWidth = 40;
+        this.Interval = 24;
+        this.Angle = 0;
+        this.Base = { x: 150, y: 120 }
+        //this.Radius = 150;
+    }
+
+    Draw()
+    {
+        this.CTX.clearRect( 0, 0, this.Canvas.width, this.Canvas.height );
+
+        this.CTX.beginPath();       //中线
+        this.CTX.moveTo( this.Center[0], 50 );
+        this.CTX.lineTo( this.Center[0], 250 );
+        this.CTX.lineWidth = 2;
+        this.CTX.strokeStyle = 'lightgray';
+        this.CTX.stroke();
+
+        this.CTX.strokeStyle = 'black';    //气缸
+        this.CTX.lineWidth = 2;
+        this.CTX.fillStyle = 'white';
+        const offset = Math.sin( this.Angle ) * 40;
+        this.CTX.fillRect( this.Base.x + offset + 1, this.Base.y + 1, this.LinderLength - 2, this.LinderWidth - 2 );
+        this.CTX.strokeRect( this.Base.x + offset, this.Base.y, this.LinderLength, this.LinderWidth );
+
+        this.CTX.fillStyle = 'darkgray';
+        this.CTX.fillRect( this.Canvas.width / 2 - 20 - offset * 0.8, this.Base.y, 40, this.LinderWidth );
+
+        const Angle = this.Angle % ( Math.PI * 2 );
+        let stage = '绝热';
+        if( Angle < Math.PI && Angle > Math.PI * 0.5 )
+        {
+            stage = '等温';
+            this.CTX.fillStyle = 'red';
+            this.CTX.fillRect( 180, this.Base.y + 45, 50, 20 );
+            this.CTX.fillStyle = 'blue';
+            this.CTX.fillRect( 420, this.Base.y + 45, 50, 20 );
+        }
+        else if( Angle < Math.PI * 2 && Angle > Math.PI * 1.5 )
+        {
+            stage = '等温';
+            this.CTX.fillStyle = 'red';
+            this.CTX.fillRect( 370, this.Base.y + 45, 50, 20 );
+            this.CTX.fillStyle = 'blue';
+            this.CTX.fillRect( 130, this.Base.y + 45, 50, 20 );
+        }
+
+        const Status = Number( Angle < Math.PI * 1.5 && Angle > Math.PI * 0.5 );
+        this.CTX.fillStyle = 'black';
+        this.CTX.font = '16px Arial';
+        this.CTX.fillText( stage + ['压缩','膨胀'][Status], 180, 80 );
+        this.CTX.fillText( stage + ['膨胀','压缩'][Status], 360, 80 );
+    }
+}
+
+class RotEngine extends Carnot
+{
+    constructor( Id, isEngine )
+    {
+        super( Id, isEngine );
+        this.Center = [Math.floor( this.Canvas.width / 2 ), Math.floor( this.Canvas.height / 2 )];
+        this.LinderLength = 280;
+        this.LinderWidth = 30;
+        this.Radius = 150;
+    }
+
+    Draw()
+    {
+        this.CTX.clearRect( 0, 0, this.Canvas.width, this.Canvas.height );
+
+        this.CTX.beginPath();       //中线
+        this.CTX.moveTo( this.Center[0], 50 );
+        this.CTX.lineTo( this.Center[0], 350 );
+        this.CTX.lineWidth = 2;
+        this.CTX.strokeStyle = 'lightgray';
+        this.CTX.stroke();
+
+        this.CTX.lineWidth = 10;
+        this.CTX.beginPath();       //热源
+        this.CTX.arc( this.Center[0], this.Center[1], this.Radius, 0, Math.PI / 2, false );
+        this.CTX.strokeStyle = 'red';
+        this.CTX.stroke();
+
+        this.CTX.beginPath();       //冷源
+        this.CTX.arc( this.Center[0], this.Center[1], this.Radius, Math.PI, -Math.PI / 2, false );
+        this.CTX.strokeStyle = 'blue';
+        this.CTX.stroke();
+
+        this.CTX.save();    //绘制旋转的气缸
+        this.CTX.translate( ...this.Center );
+        this.CTX.rotate( -this.Angle ); //逆时针旋转
+        this.CTX.strokeStyle = 'black';    //绘制无填充色的矩形，仅有黑色边框
+        this.CTX.lineWidth = 2;
+        this.CTX.strokeRect( -this.LinderWidth / 2, -this.LinderLength / 2, this.LinderWidth, this.LinderLength );
+
+        let Offset, stage;    // 计算活塞位置
+        const Angle = this.Angle % ( Math.PI * 2 );
+        if( Angle % Math.PI <= Math.PI / 2 )
+        {    // 从最下方 0 ~ pi/2
+            Offset = Math.cos( Angle ) * this.LinderLength / 3 - 26 * [1, -1][Number( Angle >= Math.PI )];
+            stage = '等温';
+        }
+        else
+        {   // pi/2 ~ pi
+            Offset = Math.cos( Angle ) * ( this.LinderLength - 156 ) / 3 - 26 * [1, -1][Number( Angle >= Math.PI )];
+            stage = '绝热';
+        }
+        this.CTX.fillStyle = 'darkgray';
+        this.CTX.fillRect( -this.LinderWidth/2, Offset - 10, this.LinderWidth, 20 );
+        this.CTX.restore();
+
+        // 标记卡诺循环阶段
+        this.CTX.fillStyle = 'black';
+        this.CTX.font = '16px Arial';
+        const Index = Number( this.IsEngine );
+        this.CTX.fillText( `${ stage }压缩`, [300, 20][Index], 40 );
+        this.CTX.fillText( `${ stage }膨胀`, [20, 300][Index], 40 );
+        this.CTX.fillText( [['气缸对活塞做功', '      活塞对气缸做功'], ['活塞对气缸做功', '      气缸对活塞做功']][Index][Number( Offset * ( Angle - Math.PI ) < 0 && Angle % Math.PI <= Math.PI / 2 )], 130, 380 );
+    }
+}
+
+new RotEngine( 'rotate', 1 ).Draw();
+new RotEngine( 'rotate2', 0 ).Draw();
+new ReciEngine( 'reciprocate', 1 ).Draw();
+</script>
+</body>
+</html>
