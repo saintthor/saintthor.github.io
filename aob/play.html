@@ -472,7 +472,7 @@
     <div class="panel">
         <div class="title">操作面板</div>
 
-        <h3 style="margin-top: 0;">Players</h3>
+        <h3 style="margin-top: 0;">用户</h3>
         <div class="players-container" :class="{'three-users': Users.length === 3}">
             <div class="user" v-for="user in Users" :class="{ 'selected-sender': SelUser&&SelUser.Id===user.Id, 'selected-receiver': SelTarget&&SelTarget.Id===user.Id }">
                 <div v-show="SelUser&&SelUser.Id===user.Id" class="selchar" title="sender">发</div>
