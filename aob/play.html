@@ -2,100 +2,528 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://gcore.jsdelivr.net/npm/vue@2"></script>
     <script src="peer.js"></script>
     <script src="user.js"></script>
     <script src="blockchain.js"></script>
     <title>原子物权链演示</title>
     <style type="text/css">
-        body { background-color: #ffe; word-break: break-all; }
-        div.left { display: inline; box-sizing:border-box; float: left; width: 45%; }
-        div.right { display: inline; border: #fc0 solid 1px; padding: 6px; min-height: 500px;
-            box-sizing:border-box; width: 25%; float: right; margin-left: 8px; }
-        div.seg { display: inline; border: #fc0 solid 1px; padding: 8px; min-height: 50px;
-            width: 100%; }
-        div.title { border-bottom: #fc0 solid 1px; margin-bottom: 6px; padding-bottom: 5px; }
-        div.user { display: inline; border: #fc0 solid 1px; margin: 8px; padding: 8px; width: 60px; float: left; cursor: pointer; }
-        div.userid { color: #888; font-size: x-small; }
-        div.selchar { color: green; }
-        div.chainid { color: #888; font-size: x-small; }
-        div.chainname { color: #666; font-size: small; border-top: #fc0 solid 1px; margin-top: 6px; padding-top: 5px; }
-        div.log { color: #666; font-size: small; margin-top: 4px; }
-        div.logarea { overflow-y: auto; height: 600px; }
-        div.act { border: #fc0 solid 2px; padding: 8px; font-size: big; }
-        div.chainview { transition: opacity .6s; position: absolute; background: white; font-size: big; padding: 6px; cursor: auto; }
-        div.block { cursor: pointer; border-top: #fc0 solid 1px; width: 60px; margin-top: 6px; }
-        span.blockidx { margin-right: 8px; font-color: black; font-size: big }
-        .act>span { margin: 6px; }
-        span.closebtn { float: right; font-size: 0.9em; cursor: pointer; }
+        :root {
+            --primary: #4a6fa5;
+            --primary-light: #d9e6f7;
+            --secondary: #f8f9fa;
+            --accent: #ffa500;
+            --text: #333;
+            --text-light: #666;
+            --border: #dee2e6;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #main {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "left panel"
+                "left logs";
+            gap: 20px;
+        }
+
+        div.left {
+            grid-area: left;
+            min-width: 300px;
+        }
+
+        div.panel {
+            grid-area: panel;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        div.logs {
+            grid-area: logs;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 16px;
+            margin-bottom: 20px;
+            max-width: 500px;
+        }
+
+        div.title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary-light);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 8px;
+        }
+
+        button:hover {
+            background-color: #3a5a8c;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        input[type="number"] {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            margin-right: 8px;
+        }
+
+        div.act {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Players section */
+        div.players-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        /* This is new - makes users display in a single row when there are only 3 */
+        div.players-container.three-users {
+            flex-wrap: nowrap;
+            justify-content: space-between;
+        }
+
+        div.user {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: calc(25% - 8px);
+            min-width: 120px;
+            position: relative;
+            border-left: 3px solid transparent;
+        }
+
+        /* This is new - adjusts width for 3-user layout */
+        div.players-container.three-users div.user {
+            width: 32%;
+        }
+
+        div.user:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+            border-left-color: var(--accent);
+        }
+
+        div.user.selected-sender {
+            border-left-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+
+        div.user.selected-receiver {
+            border-left-color: #f59e0b;
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        div.username {
+            font-weight: bold;
+        }
+
+        div.userid {
+            color: var(--text-light);
+            font-size: 0.8em;
+            margin-bottom: 4px;
+        }
+
+        div.selchar {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #22c55e;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        div.selchar[title="receiver"] {
+            background-color: #f59e0b;
+        }
+
+        /* Blockchains section */
+        div.chains-section {
+            margin-top: 24px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        div.chains-section h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+
+        /* This is new - style for highlighted user's chains */
+        div.user-chains.highlighted {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        div.chains-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        div.chain-item {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: calc(50% - 6px);
+            min-width: 120px;
+            border-left: 3px solid transparent;
+            margin-bottom: 8px;
+        }
+
+        div.chain-item:hover {
+            background-color: rgba(74, 111, 165, 0.2);
+            border-left-color: var(--primary);
+        }
+
+        div.chain-item.selected {
+            border-left-color: var(--primary);
+            background-color: rgba(74, 111, 165, 0.3);
+        }
+
+        div.chainname {
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        div.chainid {
+            color: var(--text-light);
+            font-size: 0.8em;
+        }
+
+        div.log {
+            color: var(--text-light);
+            font-size: 0.85em;
+            border-bottom: 1px solid var(--primary-light);
+            padding: 6px 0;
+        }
+
+        div.logarea {
+            overflow-y: auto;
+            max-height: 400px;
+            background-color: #fdfdfd;
+            border-radius: 4px;
+            padding: 8px;
+        }
+
+        div.chainview {
+            transition: all 0.3s;
+            position: absolute;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+            cursor: auto;
+            z-index: 100;
+            border-left: 4px solid var(--accent);
+            max-width: 300px;
+        }
+
+        div.block {
+            cursor: pointer;
+            border-top: 1px solid var(--primary-light);
+            padding: 8px 0;
+            word-break: break-all;
+            transition: background-color 0.2s;
+        }
+
+        div.block:hover {
+            background-color: var(--primary-light);
+        }
+
+        span.blockidx {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-size: 0.8em;
+        }
+
+        span.closebtn {
+            float: right;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s;
+        }
+
+        span.closebtn:hover {
+            color: var(--text);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 3s;
+        }
+
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* Alert for crypto unavailable */
+        #alert_crypto {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Warning message */
+        p[style*="color:red"] {
+            background-color: #fee2e2;
+            color: #dc2626 !important;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            margin: 12px 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 992px) {
+            #main {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "left"
+                    "panel"
+                    "logs";
+            }
+
+            div.user {
+                width: calc(50% - 8px);
+            }
+
+            div.players-container.three-users div.user {
+                width: 32%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            div.user, div.chain-item {
+                width: 100%;
+            }
+
+            div.players-container.three-users {
+                flex-wrap: wrap;
+            }
+
+            div.players-container.three-users div.user {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
 <div id='alert_vue' style="font-size:xx-big; margin:30px; color:red;"><b>无法加载 Vue。<br>
 本页面基于 Vue 构建，但无法从 cdn.jsdelivr.net 加载 Vue。可能是被墙了。请尝试通过梯子访问上述网址。</b></div>
-
 <div id='alert_crypto' style="font-size:xx-big; margin:30px; color:red;"><b>crypto.subtle 无效。<br>
 当前浏览器不支持加密运算 SubtleCrypto，请用 firefox 或 chrome 的较新版本打开。<br>只在网址前缀为 https: 或 file: 时能运行 SubtleCrypto。</b></div>
 
-<div id="main" style="padding:10px">
+<div id="main">
     <div class="left">
-        <div>
-            这里是原子物权链的演示页，对原子物权链不了解者请先<a target="_blank" href="http://acc.guideep.com">阅读文档</a>。<br><br>
-            <a target="_blank" href="play_en.html" style="margin-right: 28px">English version</a>
-            <a target="_blank" href="https://github.com/saintthor/decentralization">代码</a><br><br>
-            原子物权链是高度去中心化的区块链技术，基本运行模式是令若干条私有区块链能在人群之中互相转送。设定每条链代表不同的对象，即可实现不同的业务。<br><br>
-            下面首先创建用户，数量为<input type="number" v-model="UserNum" max="6" min="3" style="width:50px;"/>个，
-            <button :disabled="Users.length!==0" @click="InitUsers">确定</button>
-        </div>
-        <div>
-            接着创建区块链，数量为<input type="number" v-model="ChainNum" max="10" min="3" style="width:50px;"/>条，
-            <button :disabled="Chains.length!==0" @click="InitChains">确定</button>
-        </div><br>
-        <div v-show="Chains.length>0">
-            <hr>
-            在操作面板中可以看到用户及每个用户拥有的链。新建的链只有根区块。<br><br>
-            <div class="act">
-                现在，令[<span :style="{color:SelUser?'#636':'#b33'}">{{ SelUser?SelUser.Name:'某个发送者' }}</span>]向
-                [<span :style="{color:SelChain?'#636':'#b33'}">{{ SelChain?SelChain.Name:'某条链' }}</span>]上的
-                [<span :style="{color:SelBlockId?'#636':'#b33'}">{{ SelBlockId?SelBlockId:'某个区块' }}</span>]之后添加区块，以将此链送给
-                [<span :style="{color:SelTarget?'#636':'#b33'}">{{ SelTarget?SelTarget.Name:'某个接收者' }}</span>]。
+        <h2>原子物权链功能演示</h2>
+        <transition name="fade">
+            <div v-show="Chains.length>0">
+                <p>在操作面板中可以看到用户及每个用户拥有的链。新建的链只有根区块。</p>
+
+                <div class="act">
+                    <h3 style="margin-top: 0;">传送设定</h3>
+                    现在，令[<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser?SelUser.Name:'某个发送者' }}</span>]向
+                    [<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain?SelChain.Name:'某条链' }}</span>]上的
+                    [<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId?SelBlockId:'某个区块' }}</span>]之后添加区块，以将此链送给
+                    [<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget?SelTarget.Name:'某个接收者' }}</span>]。
+                </div>
+
+                <div style="background-color: white; border-radius: 8px; padding: 16px; margin: 16px 0; box-shadow: var(--card-shadow);">
+                    <h3>操作方法</h3>
+                    <p>按照下面的步骤，在右侧操作面板上设定上框中所需的四个变量：</p>
+                    <ol>
+                        <li>点击用户名，以选择执行发送操作的用户。</li>
+                        <li>点击区块链，以选择执行此操作的链。选中后可见此链上的所有区块。</li>
+                        <li>点击选择上级区块，新区块将加在所选区块之后。</li>
+                        <li>再次点击一个用户名，以选择接收此链的用户。</li>
+                    </ol>
+
+                    <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 16px;">
+                        <h4 style="margin-top: 0;">传送规则</h4>
+                        <ol>
+                            <li>只能把新区块加在区块链最末的区块之后；</li>
+                            <li>发送者必须是新区块所跟随的区块记载的转移事件中的接收者。</li>
+                        </ol>
+                        <p>若违反上述原则，发送者可能会受到忽略和鄙视，<b>甚至被全网拉黑</b>。</p>
+                    </div>
+                </div>
+
+                <p v-show="Warning" style="color:red; font-size:0.9em;">警告：<br>{{ Warning }}
+                <br>如果坚持实施此项操作，再点一次传送按钮。</p>
+
+                <div style="margin: 20px 0;">
+                    <button @click="SubmitAct" :disabled="!(SelUser&&SelChain&&SelBlockId&&SelTarget)">传送区块链</button>
+                    <button @click="CancelAct" style="background-color: #888;">取消</button>
+                </div>
+                <hr>
             </div>
-            <p>按照下面的步骤，设定上框中所需的四个变量：</p>
-            <p>1、在操作面板上点击用户名，可选择执行发送操作的用户。</p>
-            <p>2、在操作面板上点击区块链，可选择执行此操作的链。选中后可见此链上的所有区块。</p>
-            <p>3、点击选择上级区块，新区块将加在所选区块之后。</p>
-            <p>4、再次在操作面板上点击用户名，可选择接收此链的用户。</p>
-            <p style="font-size:0.9em;">注意，合法的操作必须满足：<br>1、只能把新区块加在区块链最末的区块之后；
-            <br>2、发送者必须是新区块所跟随的区块记载的转移事件中的接收者。
-            <br>若违反上述原则，发送者可能会受到忽略和鄙视，<b>甚至被全网拉黑</b>。</p>
-            <p style="color:red;font-size:0.9em;" v-show="Warning">添加方式不合规：
-            <br>{{ Warning }}<br>若执意添加区块，请再点一次确定。</p>
-            <div><button @click="SubmitAct" :disabled="!(SelUser&&SelChain&&SelBlockId&&SelTarget)">确定</button>
-            <button @click="CancelAct">取消</button></div>
+        </transition>
+        <div>
+            <p>本页为原子物权链演示页。原子物权链是全球惟一真正去中心化的技术，并能实现前所未有的安全与可扩展性。请先阅读<a target="_blank" href="https://saintthor.medium.com/">文档</a>。</p>
+
+            <div style="margin-bottom: 20px;">
+                <a target="_blank" href="play_en.html" style="margin-right: 28px" class="link-button">English version</a>
+                <a target="_blank" href="https://github.com/saintthor/decentralization" class="link-button">代码</a>
+            </div>
+
+            <p>原子物权链是高度去中心化的区块链技术，基本运行模式是令若干条私有区块链能在人群之中互相转送。设定每条链代表不同的对象，即可实现不同的业务。</p>
+
+            <div style="margin: 24px 0;">
+                <label for="userNum">首先创建用户，数量为</label>
+                <input type="number" id="userNum" v-model="UserNum" max="6" min="3" style="width:60px;"/> 个。
+                <button :disabled="Users.length!==0" @click="InitUsers">创建</button>
+            </div>
+
+            <div style="margin: 24px 0;">
+                <label for="chainNum">接着创建区块链，数量为</label>
+                <input type="number" id="chainNum" v-model="ChainNum" max="10" min="3" style="width:60px;"/> 条。
+                <button :disabled="Chains.length!==0" @click="InitChains">创建</button>
+            </div>
         </div>
     </div>
-    <div class="right">
-        <div class="title">事件记录</div>
-        <div class="logarea" ref="LogArea">
-            <div class="log" v-for="ln in Logs">{{ ln }}</div>
-        </div>
-    </div>
-    <div class="right">
+
+    <div class="panel">
         <div class="title">操作面板</div>
-        <div class="users">
-            <div class="user" v-for="user in Users">
-                <div v-show="SelUser&&SelUser.Id===user.Id" class="selchar" title="发送者">⇖ ⇗</div>
-                <div v-show="SelTarget&&SelTarget.Id===user.Id" class="selchar" title="接收者">⇘ ⇙</div>
+
+        <h3 style="margin-top: 0;">Players</h3>
+        <div class="players-container" :class="{'three-users': Users.length === 3}">
+            <div class="user" v-for="user in Users" :class="{ 'selected-sender': SelUser&&SelUser.Id===user.Id, 'selected-receiver': SelTarget&&SelTarget.Id===user.Id }">
+                <div v-show="SelUser&&SelUser.Id===user.Id" class="selchar" title="sender">发</div>
+                <div v-show="SelTarget&&SelTarget.Id===user.Id" class="selchar" title="receiver">收</div>
                 <div @click="SelectUser(user)">
-                    <div>{{ user.Name }}</div>
+                    <div class="username">{{ user.Name }}</div>
                     <div class="userid" :title="user.Id">{{ user.Id.slice( 0, 9 ) + '...' }}</div>
                 </div>
-                <div class="owns" v-for="chain in user.OwnChains.values()">
-                    <div @click="SelectChain(chain)">
+            </div>
+        </div>
+
+        <div class="chains-section" v-if="Users.length > 0">
+            <h3>每个用户的区块链</h3>
+
+            <div v-if="SelUser && Array.from(SelUser.OwnChains.values()).length > 0" class="user-chains highlighted">
+                <div style="margin-bottom: 8px; font-weight: bold; display: flex; align-items: center;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); margin-right: 8px;"></div>
+                    {{ SelUser.Name }}&ensp;有：
+                </div>
+
+                <div class="chains-container">
+                    <div v-for="chain in SelUser.OwnChains.values()"
+                         class="chain-item"
+                         :class="{ 'selected': SelChain&&SelChain.Id===chain.Id }"
+                         @click="SelectChain(chain)">
                         <div class="chainname">{{ chain.Name }}</div>
                         <div class="chainid">
-                            <div>{{ chain.Id.slice( 0, 9 ) + '...' }}</div>
+                            {{ chain.Id.slice( 0, 12 ) + '...' }}
+                            <v-branch :branch="SelUser.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
+                            v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-chain>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Then show other users' chains -->
+            <div v-for="user in Users" style="margin-bottom: 16px;"
+                 v-if="Array.from(user.OwnChains.values()).length > 0 && (!SelUser || user.Id !== SelUser.Id)">
+                <div style="margin-bottom: 8px; font-weight: bold; display: flex; align-items: center;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); margin-right: 8px;"></div>
+                    {{ user.Name }}&ensp;有：
+                </div>
+
+                <div class="chains-container">
+                    <div v-for="chain in user.OwnChains.values()"
+                         class="chain-item"
+                         :class="{ 'selected': SelChain&&SelChain.Id===chain.Id }"
+                         @click="SelectChain(chain)">
+                        <div class="chainname">{{ chain.Name }}</div>
+                        <div class="chainid">
+                            {{ chain.Id.slice( 0, 12 ) + '...' }}
                             <v-branch :branch="user.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
                             v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-chain>
                         </div>
@@ -103,7 +531,13 @@
                 </div>
             </div>
         </div>
-        <!--div class="chains">chains</div-->
+    </div>
+
+    <div class="logs">
+        <div class="title">事件记录</div>
+        <div class="logarea" ref="LogArea">
+            <div class="log" v-for="ln in Logs">{{ ln }}</div>
+        </div>
     </div>
 </div>
 
@@ -390,7 +824,6 @@ let V = new Vue( {
         }
     },
 } );
-
 
 </script>
 </body>
