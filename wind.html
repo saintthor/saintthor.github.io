@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vertical Axis Wind Turbine Animation</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 20px 0;
+    }
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .info {
+      max-width: 600px;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .wind {
+      position: absolute;
+      font-size: 24px;
+      color: #3498db;
+      animation: windAnimation 2s infinite linear;
+    }
+    @keyframes windAnimation {
+      0% { opacity: 0; transform: translateX(-20px); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(20px); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Vertical Axis Wind Turbine Simulation</h1>
+
+  <div style="position: relative; width: 500px; height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+    <div class="wind" style="left: 0px;">→</div>
+    <div class="wind" style="left: 40px; animation-delay: 0.5s;">→</div>
+    <div class="wind" style="left: 80px; animation-delay: 1s;">→</div>
+    <div class="wind" style="left: 120px; animation-delay: 1.5s;">→</div>
+    <strong style="margin-left: 200px;">Wind Direction →</strong>
+  </div>
+
+  <div class="controls">
+    <button id="toggleBtn">Pause/Resume</button>
+    <button id="speedBtn">Speed: Normal</button>
+  </div>
+
+  <canvas id="turbineCanvas" width="500" height="500"></canvas>
+
+  <div class="info">
+    <p><strong>Animation Details:</strong></p>
+    <ul>
+      <li>The turbine has three blades connected to the center by rods</li>
+      <li>Wind direction is along the positive X-axis (from left to right)</li>
+      <li>Blade angle changes according to their position in the rotation cycle:</li>
+      <ul>
+        <li>At 0° (facing wind): Blade rapidly flips from 0° to 120° relative to rod</li>
+        <li>From 0° to 60°: Blade maintains 120° angle, driven by wind</li>
+        <li>From 60° to 180°: Blade maintains horizontal position (facing X direction), angle relative to rod gradually decreases</li>
+        <li>From 180° to 360°: Blade aligns with rod (0° angle), driven by wind</li>
+      </ul>
+    </ul>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('turbineCanvas');
+    const ctx = canvas.getContext('2d');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const speedBtn = document.getElementById('speedBtn');
+
+    // Configuration
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const rodLength = 150;
+    const bladeLength = 70;
+    const hubRadius = 15;
+
+    let rotationAngle = 0;
+    let animationSpeed = 1;
+    let isAnimating = true;
+    let speedMode = 'Normal';
+
+    // Toggle animation
+    toggleBtn.addEventListener('click', () => {
+      isAnimating = !isAnimating;
+      if (isAnimating) {
+        requestAnimationFrame(animate);
+      }
+    });
+
+    // Change speed
+    speedBtn.addEventListener('click', () => {
+      if (speedMode === 'Normal') {
+        speedMode = 'Fast';
+        animationSpeed = 2;
+      } else if (speedMode === 'Fast') {
+        speedMode = 'Slow';
+        animationSpeed = 0.5;
+      } else {
+        speedMode = 'Normal';
+        animationSpeed = 1;
+      }
+      speedBtn.textContent = `Speed: ${speedMode}`;
+    });
+
+    function drawBackground() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw coordinate system
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+
+      // Draw X and Y axes
+      ctx.beginPath();
+      ctx.moveTo(0, centerY);
+      ctx.lineTo(canvas.width, centerY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, 0);
+      ctx.lineTo(centerX, canvas.height);
+      ctx.stroke();
+
+      // Draw the circle representing rotation path
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, rodLength, 0, Math.PI * 2);
+      ctx.strokeStyle = '#aaa';
+      ctx.stroke();
+
+      // Draw hub
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, hubRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#555';
+      ctx.fill();
+    }
+
+    function getBladeAngle(rodAngle) {
+      // rodAngle is in radians
+      // Convert to degrees for easier calculation
+      let rodAngleDegrees = (rodAngle * 180 / Math.PI) % 360;
+      if (rodAngleDegrees < 0) rodAngleDegrees += 360;
+
+      // Important: 0° means blade is aligned with rod pointing to center
+
+      if (rodAngleDegrees >= 357 || rodAngleDegrees < 3) {
+        // Almost instantly flip to 120° when facing the wind (at 0°)
+        return 120 * Math.PI / 180;
+      } else if (rodAngleDegrees >= 3 && rodAngleDegrees < 60) {
+        // From 0° to 60°: Maintain 120° angle relative to rod
+        return 120 * Math.PI / 180;
+      } else if (rodAngleDegrees >= 60 && rodAngleDegrees <= 180) {
+        // From 60° to 180°: Blade maintains horizontal position (X direction)
+        // Calculate the angle needed to keep blade horizontal
+
+        // To keep blade horizontal (pointing right), we need to calculate
+        // what angle it should have relative to the rod
+        // When rod is at 90°, blade should be at 0° absolute, so relative is -90°
+        // When rod is at 180°, blade should be at 0° absolute, so relative is -180°
+
+        // Convert back to 0-120 range for our model
+        const horizontalAngle = -rodAngleDegrees;
+
+        // Normalize to 0-120 range
+        // As rod angle increases from 60° to 180°, blade angle decreases from 120° to 0°
+        const normalizedAngle = 120 - ((rodAngleDegrees - 60) / 120) * 120;
+
+        return normalizedAngle * Math.PI / 180;
+      } else {
+        // From 180° to 360°: Blade aligns with rod (0° angle)
+        return 0;
+      }
+    }
+
+    function drawBlade(rodAngle) {
+      // Calculate rod end position
+      const rodEndX = centerX + Math.cos(rodAngle) * rodLength;
+      const rodEndY = centerY + Math.sin(rodAngle) * rodLength;
+
+      // Draw rod
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(rodEndX, rodEndY);
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Calculate blade angle relative to rod
+      const bladeRelativeAngle = getBladeAngle(rodAngle);
+
+      // For 0° (aligned with rod), blade should point opposite to the rod direction
+      const baseBladeAngle = rodAngle + Math.PI; // Add 180° to point toward center when at 0°
+
+      // Then apply the relative angle
+      const absoluteBladeAngle = baseBladeAngle + bladeRelativeAngle;
+
+      // Draw blade
+      ctx.beginPath();
+      ctx.moveTo(rodEndX, rodEndY);
+      ctx.lineTo(
+        rodEndX + Math.cos(absoluteBladeAngle) * bladeLength,
+        rodEndY + Math.sin(absoluteBladeAngle) * bladeLength
+      );
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#3498db';
+      ctx.stroke();
+
+      // Special case: highlight blade at 0° position
+      let rodAngleDegrees = (rodAngle * 180 / Math.PI) % 360;
+      if (rodAngleDegrees < 0) rodAngleDegrees += 360;
+
+      if (rodAngleDegrees >= 357 || rodAngleDegrees < 3) {
+        ctx.beginPath();
+        ctx.arc(rodEndX, rodEndY, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#e74c3c';
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(rodEndX, rodEndY, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#e74c3c';
+        ctx.fill();
+      }
+
+      // Draw debugging info
+      if (rodAngleDegrees >= 357 || rodAngleDegrees < 180) {
+        const debugX = 20;
+        const debugY = 450;
+        ctx.fillStyle = "#000";
+        ctx.font = "12px Arial";
+
+        if (rodAngleDegrees >= 357 || rodAngleDegrees < 3) {
+          ctx.fillText("Zone: At 0° - Rapid flip to 120°", debugX, debugY);
+        } else if (rodAngleDegrees >= 3 && rodAngleDegrees < 60) {
+          ctx.fillText("Zone: 0°-60° - Maintaining 120° angle", debugX, debugY);
+        } else if (rodAngleDegrees >= 60 && rodAngleDegrees <= 180) {
+          ctx.fillText("Zone: 60°-180° - Blade horizontal, angle decreasing", debugX, debugY);
+        }
+      }
+    }
+
+    function animate() {
+      if (!isAnimating) return;
+
+      drawBackground();
+
+      // Draw three blades at 120° intervals
+      for (let i = 0; i < 3; i++) {
+        const bladeAngle = rotationAngle + (i * 2 * Math.PI / 3);
+        drawBlade(bladeAngle);
+      }
+
+      // Increment rotation angle
+      rotationAngle += 0.01 * animationSpeed;
+      if (rotationAngle > Math.PI * 2) {
+        rotationAngle -= Math.PI * 2;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // Start animation
+    animate();
+  </script>
+</body>
+</html>
