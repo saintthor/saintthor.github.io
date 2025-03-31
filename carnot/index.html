@@ -3,38 +3,56 @@
 <head>
 <meta charset="utf-8">
 <title>卡诺热机</title>
+<style>
+    .canvtext { position:absolute; display:none; color:white; background-color:rgba(0,0,0,0.5); padding:5px; z-index:10 }
+    .container { position:relative; vertical-align:top; display:inline-block; margin-right:80px; border:solid 1px; padding:10px }
+</style>
 </head>
 <body>
 <h2>卡诺热机</h2>
 <p>本人发明了世界第一种实用的卡诺热机。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
 <p>与斯特林热机相比，结构更简单，无须换热器，也无须曲轴即可输出旋转动力。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机。</p>
-<p>与常见热机相比，热功效率更高，但单位体积的输出功率不高。</p>
+<p>与常见热机相比，热功效率更高，但单位体积的输出功率不如内燃机。</p>
 <p>正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
 
-<div id="rotate" style="display:inline-block; margin-right:80px; border:solid 1px; padding:10px">
+<div id="rotate" class="container">
+    <div class="canvtext" style="top:10px; left:10px;"></div>
+    <div class="canvtext" style="top:10px; left:280px;"></div>
+    <div class="canvtext" style="top:370px; left:120px;"></div>
     <canvas width="400" height="400"></canvas>
     <div>
         <span>旋转式热机</span>&emsp;
         <button>Start</button>
         <button>Stop</button>
     </div>
+    <div style="width:400px;">
+        <p>气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
+        <p>离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。</p>
+        <p>离开冷源后是<b>绝热压缩</b>过程。</p>
+        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。</p>
+        <p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
+    </div>
 </div>
 
-<div id="rotate2" style="display:inline-block; border:solid 1px; padding:10px">
+<div id="rotate2" class="container">
+    <div class="canvtext" style="top:10px; left:10px;"></div>
+    <div class="canvtext" style="top:10px; left:280px;"></div>
+    <div class="canvtext" style="top:370px; left:120px;"></div>
     <canvas width="400" height="400"></canvas>
     <div>
         <span>旋转式热泵</span>&emsp;
         <button>Start</button>
         <button>Stop</button>
     </div>
+    <div style="width:400px;">
+        <p>气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。</p>
+        <p>在左侧进入冷源，冷源的温度与降温后的气体相同，进入<b>等温膨胀</b>过程，从冷源吸收热量。在最高点离开冷源，开始<b>绝热压缩</b>过程，逐渐升温。</p>
+        <p>在右侧进入热源，热源的温度与升温后的气体相同，开始<b>等温压缩</b>过程，向热源释放热量。</p>
+        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合逆卡诺循环的定义。</p>
+        <p>活塞在右侧时对气缸的旋转做功，在左侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此需要依赖外界做功才能维持运转。</p>
+    </div>
 </div>
 
-<p>左侧为<b>旋转式热机</b>：气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始等温膨胀过程。</p>
-<p>离开热源后是绝热膨胀过程。降温至最高点，进入温度与低温相等的冷源，开始等温压缩过程。</p>
-<p>离开冷源后是绝热压缩过程。</p>
-<p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺热机的定义。</p>
-<p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点。因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
-<p>右侧为<b>旋转式热泵</b>，为左侧热机的逆向运行，接受外界做功，将热量由冷源输送到热源。</p>
 <hr>
 <div id="reciprocate" style="display:inline-block; border:solid 1px; margin-top:20px; margin-bottom:20px; padding:10px">
     <canvas width="600" height="280"></canvas>
@@ -45,11 +63,13 @@
     </div>
 </div>
 <div>
-<p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。在每一边的工质气体压缩至最小时加上与气体温度相等的热源，同时在另一边加上与体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。撤除热/冷源后为绝热膨胀/压缩过程，至另一方向的极限位置后再反向加热/冷源。在每个周期之内每一边的工质气体都经历了卡诺循环的四个过程。</p>
+<p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。在每一边的工质气体压缩至最小时加上与气体温度相等的热源，同时在另一边加上与体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。撤除热/冷源后为绝热膨胀/压缩过程，至另一方向的极限位置后再反向加热/冷源。在每个周期之内每一边的工质气体都经历卡诺循环的四个过程。</p>
 <p>通过气缸的运动对外做功。</p>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script>
+
 class Carnot
 {
     constructor( Id, isEngine )
@@ -60,9 +80,13 @@ class Carnot
         const Bttns = this.Div.querySelectorAll( 'button' );
         Bttns[0].onclick = function() { self.Start() };
         Bttns[1].onclick = function() { self.Stop() };
-        this.CTX = this.Canvas.getContext( '2d' );
+        if( typeof( THREE ) === "undefined")
+        {
+            this.CTX = this.Canvas.getContext( '2d' );
+        }
         this.Angle = 0;
         this.Interval = 40;
+        this.Run = false;
         this.IsEngine = isEngine;
     }
 
@@ -75,16 +99,29 @@ class Carnot
 
         this.Run = true;
 
-        while( this.Run )
+        let loop = async () =>
         {
-            this.Draw();
+            if( !this.Run )
+            {
+                 console.log( "Stopping animation loop." );
+                 return;
+            }
+            this.Draw(); // Call the drawing/rendering method
             this.Angle += this.IsEngine ? 0.01 : -0.01;
             if( this.Angle < 0 )
             {
                 this.Angle += Math.PI * 2;
             }
-            await new Promise( r => setTimeout( r, this.Interval ));
-        }
+            await new Promise( r => setTimeout( r, this.Interval ) );
+            loop(); // Continue loop
+        };
+
+        loop();
+    }
+
+    Draw()
+    {
+        return typeof( THREE ) !== "undefined" ? this.Draw3d() : this.Draw2d();
     }
 
     Stop()
@@ -160,13 +197,148 @@ class RotEngine extends Carnot
     constructor( Id, isEngine )
     {
         super( Id, isEngine );
-        this.Center = [Math.floor( this.Canvas.width / 2 ), Math.floor( this.Canvas.height / 2 )];
-        this.LinderLength = 280;
-        this.LinderWidth = 30;
-        this.Radius = 150;
+
+        // --- 3D Specific Setup ---
+        if( typeof( THREE ) !== "undefined" )
+        {
+            this.scene = new THREE.Scene();
+
+            const aspect = window.innerWidth / window.innerHeight; // Use window aspect ratio
+            this.camera = new THREE.PerspectiveCamera( 75, aspect, 0.1, 1000 );
+            this.camera.position.set( 0, 0, 25 ); // Position camera
+            this.camera.aspect = 1;
+            this.camera.updateProjectionMatrix();
+
+            const ambientLight = new THREE.AmbientLight( 0xffffff, 0.6 );
+            this.scene.add( ambientLight );
+
+            const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
+            directionalLight.position.set( 10, 15, 20 );
+            this.scene.add( directionalLight );
+
+            this.piston = null;
+            this.statusElement = null;
+
+            this.CYLINDER_LENGTH = 24; // 无量纲，只表示比例
+            this.CYLINDER_RADIUS = 2;
+            this.PISTON_HEIGHT = 2;
+
+            this.SetupObjects(); // Creates meshes and defines constants
+            const [width, height] = [this.Canvas.innerWidth, this.Canvas.innerHeight];
+            this.renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
+            this.renderer.setSize( 400, 400 );
+        }
+        else
+        {
+            this.Center = [Math.floor( this.Canvas.width / 2 ), Math.floor( this.Canvas.height / 2 )];
+            this.LinderLength = 280;
+            this.LinderWidth = 30;
+            this.Radius = 150;
+        }
+        this.Draw();
     }
 
-    Draw()
+    SetupObjects()
+    {
+        // Create rotating group
+        this.rotatingGroup = new THREE.Group();
+        this.scene.add( this.rotatingGroup );
+
+        // Create cylinder
+        const cylinderGeometry = new THREE.CylinderGeometry( this.CYLINDER_RADIUS, this.CYLINDER_RADIUS, this.CYLINDER_LENGTH, 32, 1, true );
+        const cylinderMaterial = new THREE.MeshPhongMaterial( {
+            color: 0xaaaaaa, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+        } );
+        const cylinder = new THREE.Mesh( cylinderGeometry, cylinderMaterial );
+        this.rotatingGroup.add( cylinder );
+
+        // Create caps
+        const capGeometry = new THREE.CircleGeometry( this.CYLINDER_RADIUS, 32 );
+        const capMaterial = new THREE.MeshPhongMaterial( { color: 0x666666 } );
+        const topCap = new THREE.Mesh( capGeometry, capMaterial );
+        topCap.position.y = this.CYLINDER_LENGTH / 2;
+        topCap.rotation.x = Math.PI / 2;
+        this.rotatingGroup.add( topCap );
+        const bottomCap = new THREE.Mesh( capGeometry, capMaterial );
+        bottomCap.position.y = -this.CYLINDER_LENGTH / 2;
+        bottomCap.rotation.x = -Math.PI / 2;
+        this.rotatingGroup.add( bottomCap );
+
+        // Create piston
+        const pistonGeometry = new THREE.CylinderGeometry( this.CYLINDER_RADIUS - 0.1, this.CYLINDER_RADIUS - 0.1, this.PISTON_HEIGHT, 32 );
+        const pistonMaterial = new THREE.MeshPhongMaterial( { color: 0x444444 } );
+        this.piston = new THREE.Mesh( pistonGeometry, pistonMaterial ); // Store piston reference
+        this.rotatingGroup.add( this.piston );
+
+        // Heat Source / Cold Source Indicators ( Arcs )
+        const arcRadius = this.CYLINDER_LENGTH * 0.6; // Adjust radius as needed
+        const hotArcGeometry = new THREE.BufferGeometry().setFromPoints(
+         new THREE.ArcCurve( 0, 0, arcRadius, 3 * Math.PI / 2, 2 * Math.PI, false ).getPoints( 50 )
+        );
+        const hotArcMaterial = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 3 } );
+        const hotArc = new THREE.Line( hotArcGeometry, hotArcMaterial );
+        hotArc.position.z = -1; // Push back slightly
+        this.scene.add( hotArc );
+
+        const coldArcGeometry = new THREE.BufferGeometry().setFromPoints(
+         new THREE.ArcCurve( 0, 0, arcRadius, Math.PI / 2, Math.PI, false ).getPoints( 50 )
+        );
+        const coldArcMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff, linewidth: 3 } );
+        const coldArc = new THREE.Line( coldArcGeometry, coldArcMaterial );
+        coldArc.position.z = -1; // Push back slightly
+        this.scene.add( coldArc );
+
+        this.scene.add( new THREE.AxesHelper( 12 ) );
+    }
+
+    Draw3d()
+    {
+         if( !this.renderer || !this.scene || !this.camera )
+         {
+             console.log( "Renderer, scene, or camera not ready for Draw.", this.renderer, this.scene, this.camera );
+             return;
+         }
+
+        // Update objects based on state ( this.Angle )
+        if( this.rotatingGroup )
+        {
+            this.rotatingGroup.rotation.z = this.Angle;
+        }
+
+        if ( !this.piston ) return; // Guard clause
+
+        const [Sin, Cos] = [Math.sin( this.Angle ), Math.cos( this.Angle )];
+        const Offset = -Cos * ( Sin * Cos > 0 ? 1.2 : 0.8 ) + ( Sin > 0 ? 0.2 : -0.2 );
+        this.piston.position.y = Offset * this.CYLINDER_LENGTH / 4;
+
+        if( this.Run )
+        {
+            const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
+            const stage = Sin * Cos > 0 ? '等温' : '绝热';
+
+            TextDoms[0].innerText = '左侧：' + stage + ( this.IsEngine ? '压缩' : '膨胀' );
+            TextDoms[1].innerText = '右侧：' + stage + ( this.IsEngine ? '膨胀' : '压缩' );
+
+            if( Offset * Sin > 0 )
+            {
+                TextDoms[2].innerText = ['气缸对活塞做功', '活塞对气缸做功'][this.IsEngine];
+                TextDoms[2].style.left = '80px';
+            }
+            else
+            {
+                TextDoms[2].innerText = ['活塞对气缸做功', '气缸对活塞做功'][this.IsEngine];
+                TextDoms[2].style.left = '210px';
+            }
+
+            TextDoms.forEach( t => t.style.display = 'block' );
+        }
+
+        // Render the 3D scene
+        this.renderer.setClearColor( 0xebedaf );
+        this.renderer.render( this.scene, this.camera );
+    }
+
+    Draw2d()
     {
         this.CTX.clearRect( 0, 0, this.Canvas.width, this.Canvas.height );
 
@@ -223,7 +395,7 @@ class RotEngine extends Carnot
 
 new RotEngine( 'rotate', 1 ).Draw();
 new RotEngine( 'rotate2', 0 ).Draw();
-new ReciEngine( 'reciprocate', 1 ).Draw();
+//new ReciEngine( 'reciprocate', 1 ).Draw();
 </script>
 </body>
 </html>
