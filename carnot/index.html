@@ -9,12 +9,11 @@
 </style>
 </head>
 <body>
-<h2>卡诺热机/热泵</h2>
-<p>本人发明了世界第一种实用的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
-<p>与斯特林热机/热泵相比，结构更简单，无须换热器，也无须曲轴即可输出旋转动力。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机。</p>
-<p>与常见热机/热泵相比，热功转换效率更高，但单位体积的功率密度不如内燃机。</p>
+<h1>卡诺热机/热泵</h1>
+<p>本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
+<p>具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
 <p>正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
-
+<h2>原理</h2>
 <div id="rotate" class="container">
     <div class="canvtext" style="top:10px; left:10px;"></div>
     <div class="canvtext" style="top:10px; left:280px;"></div>
@@ -23,7 +22,6 @@
     <div>
         <span>旋转式热机</span>&emsp;
         <button>Start</button>
-        <button>Stop</button>
     </div>
     <div style="width:400px;">
         <p>气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
@@ -42,7 +40,6 @@
     <div>
         <span>旋转式热泵</span>&emsp;
         <button>Start</button>
-        <button>Stop</button>
     </div>
     <div style="width:400px;">
         <p>气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。</p>
@@ -61,7 +58,6 @@
     <div>
         <span>往复式热机</span>&emsp;
         <button>Start</button>
-        <button>Stop</button>
     </div>
     <div>
         <p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。</p>
@@ -72,7 +68,50 @@
     </div>
 </div>
 
+<hr>
+<div id="ring" class="container">
+    <div class="canvtext" style="top:10px; left:10px;">left</div>
+    <div class="canvtext" style="top:10px; left:480px;">right</div>
+    <canvas width="400" height="400"></canvas>
+    <div>
+        <span>环管动能式热机</span>&emsp;
+        <button>Start</button>
+    </div>
+    <div>
+        <p>通过气缸的运动对外做功。</p>
+    </div>
+</div>
+
+<div id="ring2" class="container">
+    <div class="canvtext" style="top:10px; left:10px;">left</div>
+    <div class="canvtext" style="top:10px; left:480px;">right</div>
+    <canvas width="400" height="400"></canvas>
+    <div>
+        <span>环管势能式热机</span>&emsp;
+        <button>Start</button>
+    </div>
+    <div>
+        <p>通过气缸的运动对外做功。</p>
+    </div>
+</div>
+<hr>
+<h2>实物模型</h2>
+<div>这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。</div>
+<div>
+    <h3>叉管旋转式卡诺热机</h3>
+    <iframe src="https://embed.wave.video/tk7QOjRSttH0TcbS" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+</div>
+<div>
+    <h3>内环管旋转式卡诺热机</h3>
+    <iframe src="https://embed.wave.video/Nn0ZnBfUu5zJMzl5" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+</div>
+<div id="sfckwt9a3nklac41tmaqer9sbwzzeqshq7y"></div>
+<script type="text/javascript" src="https://counter4.optistats.ovh/private/counter.js?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y&down=async" async></script>
+<noscript><a href="https://www.freecounterstat.com" title="web counter"><img src="https://counter4.optistats.ovh/private/freecounterstat.php?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y" border="0" title="web counter" alt="web counter"></a></noscript>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+
 <script>
 
 class Carnot
@@ -82,9 +121,7 @@ class Carnot
         let self = this;
         this.Div = document.getElementById( Id );
         this.Canvas = this.Div.querySelector( 'canvas' );
-        const Bttns = this.Div.querySelectorAll( 'button' );
-        Bttns[0].onclick = function() { self.Start() };
-        Bttns[1].onclick = function() { self.Stop() };
+        this.Div.querySelector( 'button' ).onclick = () => self.Run ? self.Stop() : self.Start();
         if( typeof( THREE ) === "undefined")
         {
             this.CTX = this.Canvas.getContext( '2d' );
@@ -103,6 +140,7 @@ class Carnot
         }
 
         this.Run = true;
+        this.Div.querySelector( 'button' ).innerText = 'Stop';
 
         let loop = async () =>
         {
@@ -132,6 +170,349 @@ class Carnot
     Stop()
     {
         this.Run = false;
+        this.Div.querySelector( 'button' ).innerText = 'Start';
+    }
+}
+
+class RingEngine0 extends Carnot
+{
+    constructor( Id, isEngine )
+    {
+        super( Id, isEngine );
+        // --- 3D Specific Setup ---
+        if( typeof( THREE ) !== "undefined" )
+        {
+            this.scene = new THREE.Scene();
+            this.scene.background = new THREE.Color( 0xf0f0f0 );
+
+            this.camera = new THREE.PerspectiveCamera( 75, 15 / 7, 0.1, 1000 );
+            this.camera.position.set( 0, mainRadius * 3, mainRadius * 2 );
+            this.camera.lookAt( this.scene.position );
+
+            //this.camera.position.set( 0, 0, 25 ); // Position camera
+            //this.camera.aspect = 15 / 7;
+            //this.camera.position.z = 50;
+            //this.camera.fov = 20;
+            //this.camera.updateProjectionMatrix();
+
+            renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
+            renderer.setSize( this.Canvas.width, this.Canvas.height );
+            //document.body.appendChild(renderer.domElement);
+
+            // Init Materials
+            valveClosedMaterial = new THREE.MeshStandardMaterial( { color: 0xcc4444, metalness: 0.6, roughness: 0.4 } ); // Red Closed
+            valveOpenMaterial = new THREE.MeshStandardMaterial( { color: 0x44cc44, metalness: 0.6, roughness: 0.4 } ); // Green Open
+            ringMaterial = new THREE.MeshStandardMaterial( {
+                color: 0xaaaaaa, metalness: 0.5, roughness: 0.5,
+                transparent: true, opacity: 0.5, side: THREE.DoubleSide // Ring Transparent
+            } );
+            pipeMaterial = new THREE.MeshStandardMaterial( { color: 0x666666, metalness: 0.5, roughness: 0.5 } );
+            liquidMaterial = new THREE.MeshStandardMaterial( { color: 0xc4c81b, metalness: 0.1, roughness: 0.4, side: THREE.DoubleSide } ); // Liquid Blue
+
+            // Lights (Unchanged)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+            directionalLight.position.set(5, 10, 7);
+            scene.add(directionalLight);
+
+            // Controls (Unchanged)
+
+            // Create Geometry
+                rotatingGroup = new THREE.Group();
+                scene.add(rotatingGroup);
+
+                // --- 1. Main Ring Pipe ---
+                const ringGeometry = new THREE.TorusGeometry(mainRadius, pipeRadius, 32, 100);
+                const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+                ringMesh.rotation.x = Math.PI / 2;
+                rotatingGroup.add(ringMesh);
+
+                // --- 2. Main Valves ---
+                // Determine initial state based on 180deg liquid zone
+                const initialValve1InZone = isAngleInActiveZone(mainValveAngles[0]);
+                const initialValve2InZone = isAngleInActiveZone(mainValveAngles[1]);
+                currentMainValve1State = initialValve1InZone || !initialValve2InZone;
+
+                const mainValvePos1 = new THREE.Vector3(mainRadius, 0, 0);
+                // **** CLONE Initial Material for Main Valve 1 ****
+                const mv1Mat = (!currentMainValve1State ? valveOpenMaterial : valveClosedMaterial).clone();
+                const mainValve1 = createValveInstance(mainValvePos1, mainValveSize, mainValveSize*0.6, mv1Mat, true);
+                rotatingGroup.add(mainValve1); mainValveMeshes.push(mainValve1);
+
+                const mainValvePos2 = new THREE.Vector3(-mainRadius, 0, 0);
+                 // **** CLONE Initial Material for Main Valve 2 ****
+                const mv2Mat = (currentMainValve1State ? valveOpenMaterial : valveClosedMaterial).clone();
+                const mainValve2 = createValveInstance(mainValvePos2, mainValveSize, mainValveSize*0.6, mv2Mat, true);
+                rotatingGroup.add(mainValve2); mainValveMeshes.push(mainValve2);
+
+                // --- 3. Connection Points & Straight Pipe Endpoints (Unchanged) ---
+                const offsetAngleRad = THREE.MathUtils.degToRad(connectionAngleOffsetDeg);
+                const angleP1=offsetAngleRad, angleP2=-offsetAngleRad, angleP3=Math.PI-offsetAngleRad, angleP4=Math.PI+offsetAngleRad;
+                const P1 = new THREE.Vector3(mainRadius*Math.cos(angleP1), 0, -mainRadius*Math.sin(angleP1));
+                const P2 = new THREE.Vector3(mainRadius*Math.cos(angleP2), 0, -mainRadius*Math.sin(angleP2));
+                const P3 = new THREE.Vector3(mainRadius*Math.cos(angleP3), 0, -mainRadius*Math.sin(angleP3));
+                const P4 = new THREE.Vector3(mainRadius*Math.cos(angleP4), 0, -mainRadius*Math.sin(angleP4));
+                const EP1=P2, EP2=P4, EP3=P1, EP4=P3;
+
+                // --- 4. Straight Pipes (Unchanged) ---
+                const straightPipe1 = createPipeInstance(EP1, EP2, pipeRadius * 0.9, pipeMaterial);
+                rotatingGroup.add(straightPipe1);
+                const straightPipe2 = createPipeInstance(EP3, EP4, pipeRadius * 0.9, pipeMaterial);
+                rotatingGroup.add(straightPipe2);
+                Pipes.push( ...[straightPipe1, straightPipe2] );
+
+                // --- 5. Small Valves ---
+                // ... (Position calculation svPos1-svPos4 unchanged) ...
+                const dirPipe1 = new THREE.Vector3().subVectors(EP2, EP1).normalize();
+                const dirPipe2 = new THREE.Vector3().subVectors(EP4, EP3).normalize();
+                const pipe1Length = EP1.distanceTo(EP2);
+                const pipe2Length = EP3.distanceTo(EP4);
+                const svPos1 = new THREE.Vector3().addVectors(EP1, dirPipe1.clone().multiplyScalar(pipe1Length * smallValveOffsetRatio));
+                const svPos2 = new THREE.Vector3().addVectors(EP2, dirPipe1.clone().multiplyScalar(-pipe1Length * smallValveOffsetRatio));
+                const svPos3 = new THREE.Vector3().addVectors(EP3, dirPipe2.clone().multiplyScalar(pipe2Length * smallValveOffsetRatio));
+                const svPos4 = new THREE.Vector3().addVectors(EP4, dirPipe2.clone().multiplyScalar(-pipe2Length * smallValveOffsetRatio));
+
+                // **** CLONE Initial Material for Small Valves ****
+                const sv1_isOpen = !currentMainValve1State; const sv2_isOpen = !currentMainValve1State;
+                const sv3_isOpen = currentMainValve1State; const sv4_isOpen = currentMainValve1State;
+
+                const sv1Mat = (sv1_isOpen?valveOpenMaterial:valveClosedMaterial).clone();
+                const smallValve1 = createValveInstance(svPos1, smallValveSize, smallValveSize*0.6, sv1Mat, false, dirPipe1);
+                rotatingGroup.add(smallValve1); smallValveMeshes.push(smallValve1);
+
+                const sv2Mat = (sv2_isOpen?valveOpenMaterial:valveClosedMaterial).clone();
+                const smallValve2 = createValveInstance(svPos2, smallValveSize, smallValveSize*0.6, sv2Mat, false, dirPipe1);
+                rotatingGroup.add(smallValve2); smallValveMeshes.push(smallValve2);
+
+                const sv3Mat = (sv3_isOpen?valveOpenMaterial:valveClosedMaterial).clone();
+                const smallValve3 = createValveInstance(svPos3, smallValveSize, smallValveSize*0.6, sv3Mat, false, dirPipe2);
+                rotatingGroup.add(smallValve3); smallValveMeshes.push(smallValve3);
+
+                const sv4Mat = (sv4_isOpen?valveOpenMaterial:valveClosedMaterial).clone();
+                const smallValve4 = createValveInstance(svPos4, smallValveSize, smallValveSize*0.6, sv4Mat, false, dirPipe2);
+                rotatingGroup.add(smallValve4); smallValveMeshes.push(smallValve4);
+
+                // --- 7. Liquid Segment (Adjust radius for inside view) ---
+                // **** LIQUID GEOMETRY ADJUSTED ****
+                const liquidRadius = mainRadius; // Make liquid radius smaller than ring
+                const liquidTubeRadius = pipeRadius * 0.8; // Make liquid tube thinner
+                console.log("Liquid Geometry Params:", liquidRadius, liquidTubeRadius, liquidLengthRad);
+                if (liquidRadius > 0 && liquidTubeRadius > 0 && liquidLengthRad > 0) {
+                    try {
+                         const liquidArcGeometry = new THREE.TorusGeometry(
+                             liquidRadius, liquidTubeRadius, 16, 50, liquidLengthRad // Use 180 deg length
+                         );
+                         liquidMesh = new THREE.Mesh(liquidArcGeometry, liquidMaterial);
+                         liquidMesh.rotation.x = Math.PI / 2; // Place in XZ plane
+                         // Rotate Y so the *center* of the arc is at the bottom angle (liquidCenterAngleWorld = 3*PI/2)
+                         //liquidMesh.rotation.y = activeZoneStartRad + liquidLengthRad / 2; // Use activeZoneStartRad
+                         scene.add(liquidMesh); // Add liquid directly to scene
+                    } catch(e) {
+                         console.error("Error creating liquid geometry or mesh:", e);
+                    }
+                } else {
+                     console.error("Invalid calculated parameters for liquid geometry!");
+                }
+            //window.addEventListener('resize', onWindowResize, false);
+            //animate();
+        }
+        else
+        {
+            console.log( 'RingEngine supports 3D only.' );
+        }
+        this.Draw();
+    }
+
+    SetupObjects()
+    {
+        // Create rotating group
+        this.CyldGroup = new THREE.Group();
+        this.scene.add( this.CyldGroup );
+
+        // Create cylinder
+        const cylinderGeometry = new THREE.CylinderGeometry( this.CYLINDER_RADIUS, this.CYLINDER_RADIUS, this.CYLINDER_LENGTH, 32, 1, true );
+        const cylinderMaterial = new THREE.MeshPhongMaterial( {
+            color: 0xaaaaaa, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+        } );
+        const cylinder = new THREE.Mesh( cylinderGeometry, cylinderMaterial );
+        this.CyldGroup.add( cylinder );
+
+        // Create caps
+        const capGeometry = new THREE.CircleGeometry( this.CYLINDER_RADIUS, 32 );
+        const capMaterial = new THREE.MeshPhongMaterial( { color: 0x666666 } );
+        const topCap = new THREE.Mesh( capGeometry, capMaterial );
+        topCap.position.y = this.CYLINDER_LENGTH / 2;
+        topCap.rotation.x = Math.PI / 2;
+        this.CyldGroup.add( topCap );
+        const bottomCap = new THREE.Mesh( capGeometry, capMaterial );
+        bottomCap.position.y = -this.CYLINDER_LENGTH / 2;
+        bottomCap.rotation.x = -Math.PI / 2;
+        this.CyldGroup.add( bottomCap );
+
+        // Create piston
+        const pistonGeometry = new THREE.CylinderGeometry( this.CYLINDER_RADIUS - 0.1, this.CYLINDER_RADIUS - 0.1, this.PISTON_HEIGHT, 32 );
+        const pistonMaterial = new THREE.MeshPhongMaterial( { color: 0x444444 } );
+        this.piston = new THREE.Mesh( pistonGeometry, pistonMaterial ); // Store piston reference
+        this.CyldGroup.add( this.piston );
+
+        this.CyldGroup.rotation.z = Math.PI / 2;
+
+        const HotGeometry = new THREE.PlaneGeometry( 3, 1 );
+        const HotMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+        const ColdMaterial = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
+        this.HotSrc = new THREE.Mesh( HotGeometry, HotMaterial );
+        this.ColdSrc = new THREE.Mesh( HotGeometry, ColdMaterial );
+        this.HotSrc.position.y = this.ColdSrc.position.y = -3;
+        //this.LeftSrc.visible = false;
+        this.HotSrc.position.x = -9;
+        this.ColdSrc.position.x = 9;
+        //hotArc.position.z = -1; // Push back slightly
+        this.scene.add( this.HotSrc );
+        this.scene.add( this.ColdSrc );
+
+        this.scene.add( new THREE.AxesHelper( 12 ));
+    }
+
+    createValveInstance(position, radius, height, material, isMainValve = false, pipeDirection = null) {
+                  if (radius <= 0 || height <= 0) {console.error("Valve dims invalid:", radius, height); return new THREE.Object3D();}
+                 try {
+                     const geometry = new THREE.CylinderGeometry(radius, radius, height, 20);
+                     const mesh = new THREE.Mesh(geometry, material); // Use passed material
+                     mesh.position.copy(position);
+                     if (isMainValve) {
+                         mesh.lookAt(0, 0, 0);
+                         mesh.rotateX(Math.PI / 2);
+                     } else if (pipeDirection && pipeDirection.lengthSq() > 0.0001) {
+                         const lookAtPos = new THREE.Vector3().addVectors(position, pipeDirection);
+                         if (lookAtPos.distanceTo(position) < 0.0001) { lookAtPos.add(new THREE.Vector3(0,1,0)); }
+                         const orientation = new THREE.Matrix4();
+                         const up = Math.abs(pipeDirection.normalize().y) > 0.99 ? new THREE.Vector3(1,0,0) : new THREE.Vector3(0,1,0);
+                         orientation.lookAt(position, lookAtPos, up);
+                         mesh.quaternion.setFromRotationMatrix(orientation);
+                         mesh.rotateY(Math.PI / 2);
+                     } else if (!isMainValve) { console.warn("Invalid pipe direction for small valve at", position); }
+                     return mesh;
+                 } catch(e) { console.error("Error creating valve instance:", e); return new THREE.Object3D(); }
+            }
+
+    createPipeInstance(point1, point2, radius, material) {
+                 const direction = new THREE.Vector3().subVectors(point2, point1);
+                 const length = direction.length();
+                 if (length < 0.0001) {console.warn("Pipe length near zero"); return new THREE.Object3D();}
+                 if (radius <= 0) {console.error("Pipe radius invalid:", radius); return new THREE.Object3D();}
+                 try {
+                     const geometry = new THREE.CylinderGeometry(radius, radius, length, 16);
+                     const mesh = new THREE.Mesh(geometry, material);
+                     mesh.position.copy(point1).add(direction.multiplyScalar(0.5));
+                     const orientation = new THREE.Matrix4();
+                     const offsetRotation = new THREE.Matrix4();
+                     const up = Math.abs(direction.normalize().y) > 0.99 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+                     orientation.lookAt(point1, point2, up);
+                     offsetRotation.makeRotationX(Math.PI / 2);
+                     orientation.multiply(offsetRotation);
+                     mesh.quaternion.setFromRotationMatrix(orientation);
+                     return mesh;
+                 } catch(e) { console.error("Error creating pipe instance:", e); return new THREE.Object3D(); }
+            }
+
+    normalizeAngle(angle) { /* ... */ return ((angle % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI); }
+
+             // --- Helper: Check if angle is within a range (handles wrap around) (Unchanged) ---
+    isAngleInRange(angle, start, end) { /* ... */ angle = normalizeAngle(angle); start = normalizeAngle(start); end = normalizeAngle(end); if (start <= end) { return angle >= start && angle <= end; } else { return angle >= start || angle <= end; } }
+
+             // --- Helper: Check if angle is within the 'active zone' (180deg liquid zone) ---
+    isAngleInActiveZone(angle) {
+                 return isAngleInRange(angle, activeZoneStartRad, activeZoneEndRad);
+             }
+
+    InHeatingZone(angle) {
+                 return isAngleInRange(angle, activeZoneStartRad, activeZoneEndRad - 1);
+             }
+
+    Draw()
+    {
+         if( !this.renderer || !this.scene || !this.camera )
+         {
+             console.log( "Renderer, scene, or camera not ready for Draw.", this.renderer, this.scene, this.camera );
+             return;
+         }
+
+        if ( !this.piston ) return; // Guard clause
+
+        //const [Sin, Cos] = [Math.sin( this.Angle ), Math.cos( this.Angle )];
+        const Offset = Math.sin( this.Angle );
+        this.CyldGroup.position.x = Offset * this.CYLINDER_LENGTH / 8;
+        this.piston.position.y = Offset * this.CYLINDER_LENGTH / 4;
+
+        if( this.Run )
+        {
+            const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
+            const Quadrant = Math.floor( this.Angle / Math.PI * 2 ) % 4;
+            const Stages = [['绝热压缩', '绝热膨胀'], ['等温膨胀', '等温压缩'], ['绝热膨胀', '绝热压缩'], ['等温压缩', '等温膨胀']][Quadrant];
+
+            this.HotSrc.position.x = [50, -6, 50, 6][Quadrant];
+            this.ColdSrc.position.x = [50, 9, 50, -9][Quadrant];
+
+            TextDoms[0].innerText = '左侧：' + Stages[0];
+            TextDoms[1].innerText = '右侧：' + Stages[1];
+            TextDoms.forEach( t => t.style.display = 'block' );
+        }
+
+        // Render the 3D scene
+        this.renderer.setClearColor( 0xebedaf );
+        this.renderer.render( this.scene, this.camera );
+
+
+                if (!renderer || !rotatingGroup) return;
+                requestAnimationFrame(animate);
+                const delta = clock.getDelta();
+
+                // 1. Rotate group
+                rotatingGroup.rotation.y += rotationSpeed * delta;
+                const currentGroupRotation = normalizeAngle(rotatingGroup.rotation.y);
+
+                // 2. Determine desired state
+                const worldAngleValve0 = normalizeAngle(mainValveAngles[0] - currentGroupRotation);
+                const worldAngleValve1 = normalizeAngle(mainValveAngles[1] - currentGroupRotation);
+                const valve0InZone = isAngleInActiveZone(worldAngleValve0);
+                const valve1InZone = isAngleInActiveZone(worldAngleValve1);
+                const Heat0 = InHeatingZone(worldAngleValve0);
+                const Heat1 = InHeatingZone(worldAngleValve1);
+                let desiredMainValve1State = currentMainValve1State;
+                if (valve0InZone && !valve1InZone) { desiredMainValve1State = true; }
+                else if (!valve0InZone && valve1InZone) { desiredMainValve1State = false; }
+
+                let DesiredPipeState = Heat0;
+                if( DesiredPipeState !== CurPipeState )
+                {
+                    CurPipeState = DesiredPipeState;
+                    Pipes[0].material = CurPipeState ? ( desiredMainValve1State ? HotMaterial : ColdMaterial ) : pipeMaterial;
+                    Pipes[1].material = CurPipeState ? ( !desiredMainValve1State ? HotMaterial : ColdMaterial ) : pipeMaterial;
+                }
+                // 3. Update materials IF state changed
+                if (desiredMainValve1State !== currentMainValve1State) {
+                    currentMainValve1State = desiredMainValve1State;
+                    // console.log(`Position Switch: isMainValve1Open is now: ${currentMainValve1State}`); // Optional log
+
+                    // **** USE SIMPLE MATERIAL SWAP ****
+                    if (mainValveMeshes.length === 2) {
+                        mainValveMeshes[0].material = !currentMainValve1State ? valveOpenMaterial : valveClosedMaterial;
+                        mainValveMeshes[1].material = currentMainValve1State ? valveOpenMaterial : valveClosedMaterial;
+                    }
+                    if (smallValveMeshes.length === 4) {
+                        const sv1_sv2_material = currentMainValve1State ? valveOpenMaterial : valveClosedMaterial;
+                        smallValveMeshes[0].material = sv1_sv2_material;
+                        smallValveMeshes[2].material = sv1_sv2_material;
+                        const sv3_sv4_material = !currentMainValve1State ? valveOpenMaterial : valveClosedMaterial;
+                        smallValveMeshes[1].material = sv3_sv4_material;
+                        smallValveMeshes[3].material = sv3_sv4_material;
+                    }
+                }
+
+                // 4. Update controls and render
+                if (controls) controls.update();
+                renderer.render(scene, camera);
     }
 }
 
@@ -169,6 +550,11 @@ class ReciEngine extends Carnot
             console.log( width, height );
             this.renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
             this.renderer.setSize( width, height );
+
+            if( typeof THREE.OrbitControls !== 'undefined' )
+            {
+                this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+            }
         }
         else
         {
@@ -262,6 +648,10 @@ class ReciEngine extends Carnot
         }
 
         // Render the 3D scene
+        if( this.Controls )
+        {
+            this.Controls.update();
+        }
         this.renderer.setClearColor( 0xebedaf );
         this.renderer.render( this.scene, this.camera );
     }
@@ -346,6 +736,11 @@ class RotEngine extends Carnot
             const [width, height] = [this.Canvas.innerWidth, this.Canvas.innerHeight];
             this.renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
             this.renderer.setSize( 400, 400 );
+
+            if( typeof THREE.OrbitControls !== 'undefined' )
+            {
+                this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+            }
         }
         else
         {
@@ -452,7 +847,10 @@ class RotEngine extends Carnot
             TextDoms.forEach( t => t.style.display = 'block' );
         }
 
-        // Render the 3D scene
+        if( this.Controls )
+        {
+            this.Controls.update();
+        }
         this.renderer.setClearColor( 0xebedaf );
         this.renderer.render( this.scene, this.camera );
     }
@@ -512,9 +910,388 @@ class RotEngine extends Carnot
     }
 }
 
+class RingEngine extends Carnot
+{
+    constructor(Id, isEngine)
+    {
+        super(Id, isEngine);
+
+        // 3D环管式热机的参数
+        this.mainRadius = 8;
+        this.pipeRadius = 0.8;
+        this.connectionAngleOffsetDeg = 30;
+        this.mainValveSize = 1.2;
+        this.smallValveSize = 0.8;
+        this.smallValveOffsetRatio = 0.3;
+        this.rotationSpeed = 1.0;
+        this.liquidLengthRad = Math.PI; // 180度液体区域
+        this.activeZoneStartRad = Math.PI; // 从π开始
+        this.activeZoneEndRad = 2 * Math.PI; // 到2π结束
+
+        // 阀门角度位置
+        this.mainValveAngles = [0, Math.PI]; // 主阀门在0度和180度
+
+        // 状态变量
+        this.currentMainValve1State = true;
+        this.curPipeState = false;
+
+        // 存储网格对象
+        this.mainValveMeshes = [];
+        this.smallValveMeshes = [];
+        this.pipes = [];
+
+        // --- 3D 设置 ---
+        if (typeof(THREE) !== "undefined")
+        {
+            this.setupScene();
+            this.setupObjects();
+        }
+        else
+        {
+            console.log('RingEngine 仅支持 3D 模式');
+        }
+
+        this.Draw();
+    }
+
+    setupScene()
+    {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xf0f0f0);
+
+        this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        this.camera.position.set(0, this.mainRadius * 3, this.mainRadius * 2);
+        this.camera.lookAt(0, 0, 0);
+
+        this.renderer = new THREE.WebGLRenderer({canvas: this.Canvas, antialias: true});
+        this.renderer.setSize(this.Canvas.width, this.Canvas.height);
+
+        // 材质
+        this.valveClosedMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcc4444, metalness: 0.6, roughness: 0.4
+        });
+        this.valveOpenMaterial = new THREE.MeshStandardMaterial({
+            color: 0x44cc44, metalness: 0.6, roughness: 0.4
+        });
+        this.ringMaterial = new THREE.MeshStandardMaterial({
+            color: 0xaaaaaa, metalness: 0.5, roughness: 0.5,
+            transparent: true, opacity: 0.5, side: THREE.DoubleSide
+        });
+        this.pipeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x666666, metalness: 0.5, roughness: 0.5
+        });
+        this.liquidMaterial = new THREE.MeshStandardMaterial({
+            color: 0x1bc4c8, metalness: 0.1, roughness: 0.4, side: THREE.DoubleSide
+        });
+        this.hotMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff4444, metalness: 0.3, roughness: 0.3
+        });
+        this.coldMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4444ff, metalness: 0.3, roughness: 0.3
+        });
+
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        this.scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(5, 10, 7);
+        this.scene.add(directionalLight);
+
+        this.clock = new THREE.Clock();
+    }
+
+    setupObjects()
+    {
+        // 创建旋转组
+        this.rotatingGroup = new THREE.Group();
+        this.scene.add(this.rotatingGroup);
+
+        // 1. 主环管
+        const ringGeometry = new THREE.TorusGeometry(this.mainRadius, this.pipeRadius, 32, 100);
+        const ringMesh = new THREE.Mesh(ringGeometry, this.ringMaterial);
+        ringMesh.rotation.x = Math.PI / 2;
+        this.rotatingGroup.add(ringMesh);
+
+        // 2. 主阀门
+        const initialValve1InZone = this.isAngleInActiveZone(this.mainValveAngles[0]);
+        const initialValve2InZone = this.isAngleInActiveZone(this.mainValveAngles[1]);
+        this.currentMainValve1State = initialValve1InZone || !initialValve2InZone;
+
+        const mainValvePos1 = new THREE.Vector3(this.mainRadius, 0, 0);
+        const mainValve1 = this.createValve(
+            mainValvePos1,
+            this.mainValveSize,
+            this.mainValveSize * 0.6,
+            !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial,
+            true
+        );
+        this.rotatingGroup.add(mainValve1);
+        this.mainValveMeshes.push(mainValve1);
+
+        const mainValvePos2 = new THREE.Vector3(-this.mainRadius, 0, 0);
+        const mainValve2 = this.createValve(
+            mainValvePos2,
+            this.mainValveSize,
+            this.mainValveSize * 0.6,
+            this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial,
+            true
+        );
+        this.rotatingGroup.add(mainValve2);
+        this.mainValveMeshes.push(mainValve2);
+
+        // 3. 连接点和直管
+        const offsetAngleRad = THREE.MathUtils.degToRad(this.connectionAngleOffsetDeg);
+        const angleP1 = offsetAngleRad;
+        const angleP2 = -offsetAngleRad;
+        const angleP3 = Math.PI - offsetAngleRad;
+        const angleP4 = Math.PI + offsetAngleRad;
+
+        const P1 = new THREE.Vector3(this.mainRadius * Math.cos(angleP1), 0, -this.mainRadius * Math.sin(angleP1));
+        const P2 = new THREE.Vector3(this.mainRadius * Math.cos(angleP2), 0, -this.mainRadius * Math.sin(angleP2));
+        const P3 = new THREE.Vector3(this.mainRadius * Math.cos(angleP3), 0, -this.mainRadius * Math.sin(angleP3));
+        const P4 = new THREE.Vector3(this.mainRadius * Math.cos(angleP4), 0, -this.mainRadius * Math.sin(angleP4));
+
+        // 4. 直管
+        const straightPipe1 = this.createPipe(P2, P4, this.pipeRadius * 0.9, this.pipeMaterial);
+        this.rotatingGroup.add(straightPipe1);
+        this.pipes.push(straightPipe1);
+
+        const straightPipe2 = this.createPipe(P1, P3, this.pipeRadius * 0.9, this.pipeMaterial);
+        this.rotatingGroup.add(straightPipe2);
+        this.pipes.push(straightPipe2);
+
+        // 5. 小阀门
+        const dirPipe1 = new THREE.Vector3().subVectors(P4, P2).normalize();
+        const dirPipe2 = new THREE.Vector3().subVectors(P3, P1).normalize();
+        const pipe1Length = P2.distanceTo(P4);
+        const pipe2Length = P1.distanceTo(P3);
+
+        const svPos1 = new THREE.Vector3().addVectors(P2, dirPipe1.clone().multiplyScalar(pipe1Length * this.smallValveOffsetRatio));
+        const svPos2 = new THREE.Vector3().addVectors(P4, dirPipe1.clone().multiplyScalar(-pipe1Length * this.smallValveOffsetRatio));
+        const svPos3 = new THREE.Vector3().addVectors(P1, dirPipe2.clone().multiplyScalar(pipe2Length * this.smallValveOffsetRatio));
+        const svPos4 = new THREE.Vector3().addVectors(P3, dirPipe2.clone().multiplyScalar(-pipe2Length * this.smallValveOffsetRatio));
+
+        const sv1_isOpen = !this.currentMainValve1State;
+        const sv2_isOpen = !this.currentMainValve1State;
+        const sv3_isOpen = this.currentMainValve1State;
+        const sv4_isOpen = this.currentMainValve1State;
+
+        const smallValve1 = this.createValve(svPos1, this.smallValveSize, this.smallValveSize * 0.6,
+            sv1_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe1);
+        this.rotatingGroup.add(smallValve1);
+        this.smallValveMeshes.push(smallValve1);
+
+        const smallValve2 = this.createValve(svPos2, this.smallValveSize, this.smallValveSize * 0.6,
+            sv2_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe1);
+        this.rotatingGroup.add(smallValve2);
+        this.smallValveMeshes.push(smallValve2);
+
+        const smallValve3 = this.createValve(svPos3, this.smallValveSize, this.smallValveSize * 0.6,
+            sv3_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe2);
+        this.rotatingGroup.add(smallValve3);
+        this.smallValveMeshes.push(smallValve3);
+
+        const smallValve4 = this.createValve(svPos4, this.smallValveSize, this.smallValveSize * 0.6,
+            sv4_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe2);
+        this.rotatingGroup.add(smallValve4);
+        this.smallValveMeshes.push(smallValve4);
+
+        // 6. 液体段
+        try {
+            const liquidArcGeometry = new THREE.TorusGeometry(
+                this.mainRadius,
+                this.pipeRadius * 0.8,
+                16, 50,
+                this.liquidLengthRad
+            );
+            this.liquidMesh = new THREE.Mesh(liquidArcGeometry, this.liquidMaterial);
+            this.liquidMesh.rotation.x = Math.PI / 2;
+            this.liquidMesh.rotation.y = this.activeZoneStartRad + this.liquidLengthRad / 2;
+            this.scene.add(this.liquidMesh);
+        } catch(e) {
+            console.error("创建液体几何体时出错:", e);
+        }
+    }
+
+    createValve(position, radius, height, material, isMainValve = false, pipeDirection = null)
+    {
+        if (radius <= 0 || height <= 0) {
+            console.error("阀门尺寸无效:", radius, height);
+            return new THREE.Object3D();
+        }
+
+        try {
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 20);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(position);
+
+            if (isMainValve) {
+                mesh.lookAt(0, 0, 0);
+                mesh.rotateX(Math.PI / 2);
+            } else if (pipeDirection && pipeDirection.lengthSq() > 0.0001) {
+                const lookAtPos = new THREE.Vector3().addVectors(position, pipeDirection);
+                if (lookAtPos.distanceTo(position) < 0.0001) {
+                    lookAtPos.add(new THREE.Vector3(0, 1, 0));
+                }
+                const orientation = new THREE.Matrix4();
+                const up = Math.abs(pipeDirection.normalize().y) > 0.99 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+                orientation.lookAt(position, lookAtPos, up);
+                mesh.quaternion.setFromRotationMatrix(orientation);
+                mesh.rotateY(Math.PI / 2);
+            }
+
+            return mesh;
+        } catch(e) {
+            console.error("创建阀门实例时出错:", e);
+            return new THREE.Object3D();
+        }
+    }
+
+    createPipe(point1, point2, radius, material)
+    {
+        const direction = new THREE.Vector3().subVectors(point2, point1);
+        const length = direction.length();
+
+        if (length < 0.0001) {
+            console.warn("管道长度接近零");
+            return new THREE.Object3D();
+        }
+        if (radius <= 0) {
+            console.error("管道半径无效:", radius);
+            return new THREE.Object3D();
+        }
+
+        try {
+            const geometry = new THREE.CylinderGeometry(radius, radius, length, 16);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(point1).add(direction.multiplyScalar(0.5));
+
+            const orientation = new THREE.Matrix4();
+            const offsetRotation = new THREE.Matrix4();
+            const up = Math.abs(direction.normalize().y) > 0.99 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+            orientation.lookAt(point1, point2, up);
+            offsetRotation.makeRotationX(Math.PI / 2);
+            orientation.multiply(offsetRotation);
+            mesh.quaternion.setFromRotationMatrix(orientation);
+
+            return mesh;
+        } catch(e) {
+            console.error("创建管道实例时出错:", e);
+            return new THREE.Object3D();
+        }
+    }
+
+    normalizeAngle(angle)
+    {
+        return ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    }
+
+    isAngleInRange(angle, start, end)
+    {
+        angle = this.normalizeAngle(angle);
+        start = this.normalizeAngle(start);
+        end = this.normalizeAngle(end);
+
+        if (start <= end) {
+            return angle >= start && angle <= end;
+        } else {
+            return angle >= start || angle <= end;
+        }
+    }
+
+    isAngleInActiveZone(angle)
+    {
+        return this.isAngleInRange(angle, this.activeZoneStartRad, this.activeZoneEndRad);
+    }
+
+    inHeatingZone(angle)
+    {
+        return this.isAngleInRange(angle, this.activeZoneStartRad, this.activeZoneEndRad - 1);
+    }
+
+    Draw3d()
+    {
+        if (!this.renderer || !this.scene || !this.camera) {
+            console.log("渲染器、场景或相机未准备好:", this.renderer, this.scene, this.camera);
+            return;
+        }
+
+        const delta = this.clock.getDelta();
+
+        // 1. 旋转组
+        this.rotatingGroup.rotation.y += this.rotationSpeed * delta;
+        const currentGroupRotation = this.normalizeAngle(this.rotatingGroup.rotation.y);
+
+        // 2. 确定期望状态
+        const worldAngleValve0 = this.normalizeAngle(this.mainValveAngles[0] - currentGroupRotation);
+        const worldAngleValve1 = this.normalizeAngle(this.mainValveAngles[1] - currentGroupRotation);
+        const valve0InZone = this.isAngleInActiveZone(worldAngleValve0);
+        const valve1InZone = this.isAngleInActiveZone(worldAngleValve1);
+        const heat0 = this.inHeatingZone(worldAngleValve0);
+        const heat1 = this.inHeatingZone(worldAngleValve1);
+
+        let desiredMainValve1State = this.currentMainValve1State;
+        if (valve0InZone && !valve1InZone) {
+            desiredMainValve1State = true;
+        } else if (!valve0InZone && valve1InZone) {
+            desiredMainValve1State = false;
+        }
+
+        let desiredPipeState = heat0;
+        if (desiredPipeState !== this.curPipeState) {
+            this.curPipeState = desiredPipeState;
+            this.pipes[0].material = this.curPipeState ?
+                (desiredMainValve1State ? this.hotMaterial : this.coldMaterial) : this.pipeMaterial;
+            this.pipes[1].material = this.curPipeState ?
+                (!desiredMainValve1State ? this.hotMaterial : this.coldMaterial) : this.pipeMaterial;
+        }
+
+        // 3. 更新材质（如果状态改变）
+        if (desiredMainValve1State !== this.currentMainValve1State) {
+            this.currentMainValve1State = desiredMainValve1State;
+
+            if (this.mainValveMeshes.length === 2) {
+                this.mainValveMeshes[0].material = !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.mainValveMeshes[1].material = this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+            }
+            if (this.smallValveMeshes.length === 4) {
+                const sv1_sv3_material = !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.smallValveMeshes[0].material = sv1_sv3_material;
+                this.smallValveMeshes[2].material = sv1_sv3_material;
+                const sv2_sv4_material = this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.smallValveMeshes[1].material = sv2_sv4_material;
+                this.smallValveMeshes[3].material = sv2_sv4_material;
+            }
+        }
+
+        // 4. 更新文本显示
+        if (this.Run) {
+            const textDoms = Array.from(this.Div.querySelectorAll('.canvtext'));
+            const quadrant = Math.floor(this.Angle / Math.PI * 2) % 4;
+            const stages = [
+                ['绝热压缩', '绝热膨胀'],
+                ['等温膨胀', '等温压缩'],
+                ['绝热膨胀', '绝热压缩'],
+                ['等温压缩', '等温膨胀']
+            ][quadrant];
+
+            if (textDoms.length >= 2) {
+                textDoms[0].innerText = '上半环：' + stages[0];
+                textDoms[1].innerText = '下半环：' + stages[1];
+                textDoms.forEach(t => t.style.display = 'block');
+            }
+        }
+
+        // 5. 渲染
+        this.renderer.setClearColor(0xebedaf);
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
 new RotEngine( 'rotate', 1 );
 new RotEngine( 'rotate2', 0 );
-new ReciEngine( 'reciprocate', 1 );
+let Reci = new ReciEngine( 'reciprocate', 1 );
+//new RingEngine( 'ring', 1 );
 </script>
 </body>
 </html>
