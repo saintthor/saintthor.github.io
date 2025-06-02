@@ -79,8 +79,9 @@
     </div>
     <div style="width:400px;">
         <p>气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。</p>
-        <p>环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。任一时刻，管中的通路是由一根直管的红色阀门开始，经过三个绿色阀门到达另一根直管的红色阀门，形状如同 C 字的两端各自向里回钩，其开口方向在每次阀门切换时会由向左变为向右。</p>
-        <p>环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会导致环形管转动。</p>
+        <p>任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同 C 字的两端各自向里回钩。</p>
+        <p>环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。C 字形的开口在每次阀门切换时会由向左变为向右。</p>
+        <p>环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。</p>
         <p>每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。</p>
         <p>撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。</p>
         <p>绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。</p>
@@ -406,6 +407,8 @@ class RotEngine extends Carnot
             {
                 this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
             }
+            this.DiffAngle = 0.01;
+            this.OldPistonPos = 0;
         }
         else
         {
@@ -502,14 +505,26 @@ class RotEngine extends Carnot
             {
                 TextDoms[2].innerText = ['气缸对活塞做功', '活塞对气缸做功'][this.IsEngine];
                 TextDoms[2].style.left = '80px';
+                this.DiffAngle += 0.0001;
             }
             else
             {
                 TextDoms[2].innerText = ['活塞对气缸做功', '气缸对活塞做功'][this.IsEngine];
                 TextDoms[2].style.left = '210px';
+                this.DiffAngle += -0.0001;
             }
 
             TextDoms.forEach( t => t.style.display = 'block' );
+
+            if( this.IsEngine )
+            {
+                if( this.OldPistonPos < 0 && Offset * Sin > 0 )
+                {
+                    this.DiffAngle = 0;
+                }
+                this.Angle += this.DiffAngle;
+                this.OldPistonPos = Offset * Sin;
+            }
         }
 
         if( this.Controls )
@@ -589,6 +604,7 @@ class RingEngine extends Carnot
         this.smallValveSize = 0.8;
         this.smallValveOffsetRatio = 0.02;
         this.rotationSpeed = 1.0;
+        this.DiffAngle = 0;
         this.liquidLengthRad = Math.PI; // 180度液体区域
         this.activeZoneStartRad = Math.PI; // 从π开始
         this.activeZoneEndRad = 2 * Math.PI; // 到2π结束
@@ -941,7 +957,11 @@ class RingEngine extends Carnot
                 this.smallValveMeshes[1].material = sv2_sv4_material;
                 this.smallValveMeshes[3].material = sv2_sv4_material;
             }
+            this.DiffAngle = 0;
         }
+
+        this.DiffAngle += heat ? 0.001 : -0.0014;
+        this.Angle += this.DiffAngle;
 
         // 4. 更新文本显示
         if (this.Run) {
