@@ -130,44 +130,71 @@ class Carnot
         this.Div = document.getElementById( Id );
         this.Canvas = this.Div.querySelector( 'canvas' );
         this.Div.querySelector( 'button' ).onclick = () => self.Run ? self.Stop() : self.Start();
+        this.Div.onmouseover = () =>
+        {
+            if( this.Run < 0 )
+            {
+                this.Run = 0;
+                this.Start();
+                this.Stop();
+            }
+        }
         if( typeof( THREE ) === "undefined")
         {
             this.CTX = this.Canvas.getContext( '2d' );
         }
         this.Angle = 0;
         this.Interval = 40;
-        this.Run = false;
+        this.Run = -1;
         this.IsEngine = isEngine;
     }
 
     async Start()
     {
-        if( this.Run )
+        if( this.Run > 0 )
         {
             return;
         }
 
-        this.Run = true;
+        this.Run = 1;
         this.Div.querySelector( 'button' ).innerText = 'Stop';
 
         let loop = async () =>
         {
-            if( !this.Run )
+            this.StaticProcess();
+            if( this.Run === 0 )
             {
-                 console.log( "Stopping animation loop." );
-                 return;
+                console.log( "Stopping animation loop." );
+                await new Promise( r => setTimeout( r, this.Interval * 4 ));
+                //return;
             }
-            this.Draw(); // Call the drawing/rendering method
-            this.Angle += this.IsEngine ? 0.01 : -0.01;
-            if( this.Angle < 0 )
+            else
             {
-                this.Angle += Math.PI * 2;
+                this.Draw(); // Call the drawing/rendering method
+                this.Angle += this.IsEngine ? 0.01 : -0.01;
+                if( this.Angle < 0 )
+                {
+                    this.Angle += Math.PI * 2;
+                }
             }
-            await new Promise( r => setTimeout( r, this.Interval ) );
+            await new Promise( r => setTimeout( r, this.Interval ));
             loop(); // Continue loop
         };
 
         loop();
+    }
+
+    StaticProcess()
+    {
+        if( this.Controls )
+        {
+            this.Controls.update();
+            if( this.Run === 0 && this.renderer )
+            {
+                this.renderer.setClearColor( 0xebedaf );
+                this.renderer.render( this.scene, this.camera );
+            }
+        }
     }
 
     Draw()
@@ -177,7 +204,7 @@ class Carnot
 
     Stop()
     {
-        this.Run = false;
+        this.Run = 0;
         this.Div.querySelector( 'button' ).innerText = 'Start';
     }
 }
@@ -299,7 +326,7 @@ class ReciEngine extends Carnot
         this.CyldGroup.position.x = Offset * this.CYLINDER_LENGTH / 8;
         this.piston.position.y = Offset * this.CYLINDER_LENGTH / 4;
 
-        if( this.Run )
+        if( this.Run > 0 )
         {
             const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
             const Quadrant = Math.floor( this.Angle / Math.PI * 2 ) % 4;
@@ -314,10 +341,10 @@ class ReciEngine extends Carnot
         }
 
         // Render the 3D scene
-        if( this.Controls )
-        {
-            this.Controls.update();
-        }
+        //if( this.Controls )
+        //{
+            //this.Controls.update();
+        //}
         this.renderer.setClearColor( 0xebedaf );
         this.renderer.render( this.scene, this.camera );
     }
@@ -493,7 +520,7 @@ class RotEngine extends Carnot
         const Offset = -Cos * ( Sin * Cos > 0 ? 1.2 : 0.8 ) + ( Sin > 0 ? 0.2 : -0.2 );
         this.piston.position.y = Offset * this.CYLINDER_LENGTH / 4;
 
-        if( this.Run )
+        if( this.Run > 0 )
         {
             const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
             const stage = Sin * Cos > 0 ? '等温' : '绝热';
@@ -527,10 +554,10 @@ class RotEngine extends Carnot
             }
         }
 
-        if( this.Controls )
-        {
-            this.Controls.update();
-        }
+        //if( this.Controls )
+        //{
+            //this.Controls.update();
+        //}
         this.renderer.setClearColor( 0xebedaf );
         this.renderer.render( this.scene, this.camera );
     }
@@ -907,7 +934,8 @@ class RingEngine extends Carnot
 
     Draw3d()
     {
-        if (!this.renderer || !this.scene || !this.camera) {
+        if( !this.renderer || !this.scene || !this.camera )
+        {
             console.log("渲染器、场景或相机未准备好:", this.renderer, this.scene, this.camera);
             return;
         }
@@ -960,11 +988,13 @@ class RingEngine extends Carnot
             this.DiffAngle = 0;
         }
 
-        this.DiffAngle += heat ? 0.001 : -0.0014;
+        this.DiffAngle += heat ? 0.0002 : -0.0003;
         this.Angle += this.DiffAngle;
 
         // 4. 更新文本显示
-        if (this.Run) {
+
+        if( this.Run > 0 )
+        {
             const textDoms = Array.from(this.Div.querySelectorAll('.canvtext'));
             const HeatStr = heat ? '等温' : '绝热';
             if (textDoms.length >= 2) {
@@ -975,10 +1005,6 @@ class RingEngine extends Carnot
         }
 
         // 5. 渲染
-        if( this.Controls )
-        {
-            this.Controls.update();
-        }
         this.renderer.render(this.scene, this.camera);
     }
 }
