@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOB Playground</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 data-text="app_title">AOB Playground</h1>
+                <button id="language-toggle" class="language-toggle" data-text="language_switch">中文/English</button>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <section id="control-panel" class="panel control-panel">
+                <h2 data-text="control_panel">Control Panel</h2>
+                <div class="panel-content">
+                </div>
+            </section>
+            
+            <section id="main-panel" class="panel main-panel">
+                <div class="panel-content">
+                </div>
+            </section>
+            
+            <section id="log-panel" class="panel log-panel minimized">
+                <h2 data-text="log_panel">Logs</h2>
+                <div class="panel-content">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- D3.js for network visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script src="src/services/Text.js"></script>
+    <script src="src/services/Crypto.js"></script>
+    <script src="src/models/peer.js"></script>
+    <script src="src/models/user.js"></script>
+    <script src="src/models/blockchain.js"></script>
+    <script src="src/services/PerformanceOptimizer.js"></script>
+    <script src="src/ui/HelpTabContent.js"></script>
+    <script src="src/ui/NetworkTabContent.js"></script>
+    <script src="src/ui/UsersTabContent.js"></script>
+    <script src="src/ui/ChainsTabContent.js"></script>
+    <script src="src/ui/ResizeManager.js"></script>
+    <script src="src/ui/TabManager.js"></script>
+    <script src="src/ui/CtrlPanel.js"></script>
+    <script src="src/ui/MainPanel.js"></script>
+    <script src="src/ui/LogPanel.js"></script>
+    <script src="src/ui/UIManager.js"></script>
+    <script src="src/index.js"></script>
+</body>
+
+</html>
