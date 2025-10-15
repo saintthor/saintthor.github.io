@@ -71,6 +71,7 @@ class User
         this.Waiting = new Map();
         this.ChainNum = 0;
         this.LastSend = null;
+        this.Status = '';
         return ( async () =>
         {
             let key = await crypto.subtle.generateKey( { name: "ECDSA", namedCurve: "P-256", }, true, ["sign", "verify"] );
@@ -130,12 +131,15 @@ class User
         console.log( 'User.Transfer', dida, chain.Id, targetUId );
         const PrevBlocks = [...this.Peers.values()].map( p => p.FindTail( chain.Id )).filter( b => b && b.Status === 0 );
         const s = new Set( PrevBlocks.map( b => b.Id ));
-        if( s.size === 1 )
+        if( s.size === 1 && !this.Status )
         {
             const TransBlock = await this.SendBlockchain( PrevBlocks[0], chain.Id, dida, targetUId );
             const SrcPeerKs = [...this.Peers.keys()];
             window.LogPanel.AddLog( { dida: dida, user: this.Id, blockchain: chain.Id, block: TransBlock.Id, content: 'add transfer block by ' + SrcPeerKs.join( ',' ) + ' to target user' + targetUId.slice( 0, 8 ) + '...', category: 'user' } );
             Peer.StartTransing( TransBlock, dida, SrcPeerKs );
+            chain.Transfer( 1 );
+            this.Status = 'sending';
+            this.Waiting.set(() => this.Status = '', dida + Peer.BroadcastTicks * 4 );
         }
         else
         {
@@ -143,40 +147,40 @@ class User
         }
     };
     
-    //RecvBlockchain( block )
-    //{
-        //const ChainIds = block.GetBlockChain(); //[root, block...]
-        ////console.log( 'RecvBlockchain', ChainIds, block.Id );
-        //this.OwnChains.set( ChainIds[0], ChainIds );
-    //};
-
-    async Sign( s, pswd )
+    SendMsgMeta( msgBlock )
     {
-        const ua8 = s instanceof String ? Base642ABuff( s ) : s;
-        const sig = ABuff2Base64( await crypto.subtle.sign( { name: "ECDSA", hash: { name: "SHA-1" }, }, this.PriKey, ua8 ));
-        this.constructor.Cache.set( sig, [this.PubKeyStr, s].join( '\n' ));
-        //console.log( 'Verify Cache set.', sig, this.constructor.Cache.get( sig ));
+        const SrcPeerKs = [...this.Peers.keys()];
+        window.LogPanel.AddLog( { dida: msgBlock.Tick, user: this.Id, block: msgBlock.Id, content: 'add message meta by ' + SrcPeerKs.join( ',' ), category: 'user' } );
+        Peer.StartTransing( msgBlock, msgBlock.Tick, SrcPeerKs, 0 );
+        this.Waiting.set(() => this.SendMsgText( msgBlock ), msgBlock.Tick + Peer.BroadcastTicks * 2 );
+    }
+
+    SendMsgText( msgBlock )
+    {
+        const SrcPeerKs = [...this.Peers.keys()];
+        window.LogPanel.AddLog( { dida: msgBlock.Tick, user: this.Id, block: msgBlock.Id, content: 'add message text by ' + SrcPeerKs.join( ',' ), category: 'user' } );
+        Peer.StartTransing( msgBlock, msgBlock.Tick, SrcPeerKs, 1 );
+    }
+
+    async Sign( hash )
+    {
+        const HashStr = ABuff2Base64( hash );
+        const sig = ABuff2Base64( await crypto.subtle.sign( { name: "ECDSA", hash: { name: "SHA-1" }, }, this.PriKey, hash ));
+        this.constructor.Cache.set( sig, [this.PubKeyStr, HashStr].join( '\n' ));
         return sig;
     };
 
-    static async Verify( sig, s, pubKeyS )
+    static async Verify( sig, hash, pubKeyS )
     {
-        //console.log( 'Verify', this, sig, data, pubKeyS );
-        if( this.Cache.get( sig ) === [pubKeyS, s].join( '\n' ))
+        const HashStr = ABuff2Base64( hash );
+        if( this.Cache.get( sig ) === [pubKeyS, HashStr].join( '\n' ))
         {
             //console.log( 'Verify Cache shot.', sig, this.Cache.get( sig ));
             return true;
         }
-        const hash = await Hash( s, 'SHA-1' );
         const pubK = await crypto.subtle.importKey( "raw", Base642ABuff( pubKeyS ),
                                 { name: "ECDSA", namedCurve: "P-256", }, false, ["verify"] )
-        const Rslt = crypto.subtle.verify( { name: "ECDSA", hash: { name: "SHA-1" }, }, pubK, Base642ABuff( sig ), hash );
-        if( Rslt )
-        {
-            //console.log( 'Verify Cache set.' );
-            this.Cache.set( sig, [pubKeyS, s].join( '\n' ));
-        }
-        return Rslt;
+        return await crypto.subtle.verify( { name: "ECDSA", hash: { name: "SHA-1" }, }, pubK, Base642ABuff( sig ), hash );
     };
     
     GetAssets()
@@ -184,16 +188,17 @@ class User
         return [...[...this.OwnChains].map( rootId => BlockChain.All.get( rootId ).FaceVal ), 0, 0].reduce(( x, y ) => x + y );
     };
 
-    async CreateBlock( prevIdx, dida, data, prevId )
-    {
-        let block = await new Block( prevIdx + 1, dida, data, prevId );
-        block.Id = await this.Sign( block.Hash );
-        return block;
-    };
+    //async CreateBlock( prevIdx, dida, data, prevId )
+    //{
+        //let block = await new Block( prevIdx + 1, dida, data, prevId );
+        //block.Id = await this.Sign( block.Hash );
+        //return block;
+    //};
     
     StartWait( blockId, tick )
     {
         this.Waiting.set( blockId, tick );
+        this.Status = 'receiving';
     };
     
     static WaitTrusted( tick )
@@ -203,16 +208,28 @@ class User
             [...u.Waiting.entries()].forEach(( [k, v] ) =>
             {
                 //console.log( 'WaitTrusted', k, v );
-                if( [...u.Peers.values()].map( p => p.LocalBlocks.get( k )).every( b => b && b.Status === 0 ))
+                if( typeof k === 'function' && v < tick )
+                {
+                    k();
+                    u.Waiting.delete( k );
+                }
+                else if( [...u.Peers.values()].map( p => p.LocalBlocks.get( k )).every( b => b && b.Status === 0 ))
                 {
                     window.LogPanel.AddLog( { dida: tick, user: u.Id, block: k, content: 'Receiver trusts. Transfer completes.', category: 'user' } );
                     u.Waiting.delete( k );
+                    u.Status = '';
                 }
                 else if( v < tick )
                 {
                     u.Waiting.delete( k );
+                    u.Status = '';
                 }
             } );
         } );
     };
+    
+    static GetByShort( shortK )
+    {
+        return [...this.All.entries()].map(( [k, v] ) => k.startsWith( shortK ) ? v : null ).filter( v => v );
+    }
 }

@@ -61,7 +61,8 @@ class App {
     constructor() {
         /** @type {UIManager} 用户界面管理器 */
         this.uiManager = new UIManager(this);
-        this.DefHash = '';
+        this.ChainDefHash = '';
+        this.TreeDefHash = '';
         /** @type {boolean} 系统运行状态 */
         this.isRunning = false;
 
@@ -97,6 +98,7 @@ class App {
         this.AllPeers = Peer.All;
         this.BlockChainNum = 500;
         this.AllBlockchains = BlockChain.All;
+        this.AllBlockTrees = BaseTreeBlock.AllTrees;
 
         /** @type {Map<string, Object>} 模拟区块链数据存储 */
         this.mockChains = new Map();
@@ -309,6 +311,8 @@ class App {
         this.AllUsers.clear();
         this.AllPeers.clear();
         this.mockChains.clear();
+        this.AllBlockTrees.clear();
+        TreeBlock.All.clear();
         this.selectedUser = null;
         this.selectedChain = null;
     }
@@ -479,7 +483,7 @@ class App {
         await Promise.all( Array.from( new Array( config.userCount )).map( _ => new User()));
         this.uiManager.panels.log.AddLog( { dida: -1, user: 'all ' + config.userCount, content: 'users created.', category: 'user' } );
         await Promise.all( Array.from( new Array( this.BlockChainNum )).map(( _, i ) => 
-                                        new BlockChain( this.DefHash, i + 1, this.SysUser.Id )));
+                                        new BlockChain( this.ChainDefHash, i + 1, this.SysUser.Id )));
         this.uiManager.panels.log.AddLog( { dida: -1, blockchain: 'all ' + this.BlockChainNum, content: 'blockchains created.', category: 'blockchain' } );
         const Peers = [...this.AllPeers.values()];
         const PeerNum = Peers.length;
@@ -519,10 +523,10 @@ class App {
                 }
             }
             
-            await Promise.all( Blockchains.map( c => p.Receive( { Id: "NewBlock" + c.Root.Id, type: "NewBlock",
-                                                                    block: c.Root.TransData() } )));
-            await Promise.all( TransBlocks.map( b => p.Receive( { Id: "NewBlock" + b.Id, type: "NewBlock",
-                                                                    block: b.TransData() } )));
+            await Promise.all( Blockchains.map( c => p.Receive( { Id: "AOBlock" + c.Root.Id, type: "AOBlock",
+                                                                    block: c.Root.Copy() } )));
+            await Promise.all( TransBlocks.map( b => p.Receive( { Id: "AOBlock" + b.Id, type: "AOBlock",
+                                                                    block: b.Copy() } )));
         }
         this.uiManager.panels.log.AddLog( { dida: -1, peer: 'all', content: 'peers connected to others.', category: 'node' } );
         this.uiManager.panels.log.AddLog( { dida: -1, blockchain: 'all', content: 'sent blockchains.', category: 'blockchain' } );
@@ -575,6 +579,7 @@ class App {
                 AllPeers: this.AllPeers,
                 AllUsers: this.AllUsers,
                 chainData: this.AllBlockchains,
+                msgData: this.AllBlockTrees,
             };
         }
 
@@ -589,7 +594,8 @@ class App {
                 AllPeers: this.AllPeers,
                 AllUsers: this.AllUsers,
             userData: this.AllUsers,
-            chainData: this.AllBlockchains
+            chainData: this.AllBlockchains,
+            msgData: this.AllBlockTrees
         };
     }
 

@@ -32,6 +32,13 @@ class TabManager {
                 lastUpdateTime: null,
                 isLoaded: false,
                 isVisible: false
+            },
+            msgs: {
+                selectedMsg: null,
+                scrollPosition: 0,
+                lastUpdateTime: null,
+                isLoaded: false,
+                isVisible: false
             }
         };
         
@@ -50,6 +57,7 @@ class TabManager {
         this.networkTabContent = null;
         this.usersTabContent = null;
         this.chainsTabContent = null;
+        this.msgTabContent = null;
         
         // 调整大小管理器
         this.resizeManager = null;
@@ -195,6 +203,9 @@ class TabManager {
                 case 'chains':
                     await this.loadChainsTabContent();
                     break;
+                case 'msgs':
+                    await this.loadMsgTabContent();
+                    break;
             }
             
             // 标记为已加载
@@ -214,6 +225,23 @@ class TabManager {
             setTimeout(() => {
                 if (this.helpTabContent) {
                     this.helpTabContent.renderHelpContent();
+                }
+                resolve();
+            }, 10);
+        });
+    }
+
+    /**
+     * 加载消息标签页内容
+     */
+    async loadMsgTabContent() {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                if (this.msgTabContent && this.mainPanel.app) {
+                    const data = this.mainPanel.app.getMainPanelData();
+                    if (data && data.msgData) {
+                        this.msgTabContent.renderMsgsGrid(data.msgData);
+                    }
                 }
                 resolve();
             }, 10);
@@ -372,16 +400,16 @@ class TabManager {
     /**
      * 保存当前标签页状态
      */
-    saveCurrentTabState() {
-        try {
-            const currentState = this.getCurrentTabState();
-            if (currentState) {
-                this.saveTabState(this.activeTab, currentState);
-            }
-        } catch (error) {
-            console.error('保存标签页状态失败:', error);
-        }
-    }
+    //saveCurrentTabState() {
+        //try {
+            //const currentState = this.getCurrentTabState();
+            //if (currentState) {
+                //this.saveTabState(this.activeTab, currentState);
+            //}
+        //} catch (error) {
+            //console.error('保存标签页状态失败:', error);
+        //}
+    //}
     
     /**
      * 保存标签页状态
@@ -925,7 +953,7 @@ class TabManager {
      * @returns {boolean} - 是否有效
      */
     isValidTabName(tabName) {
-        return ['help', 'network', 'users', 'chains'].includes(tabName);
+        return ['help', 'network', 'users', 'chains', 'msgs'].includes(tabName);
     }
     
     /**
@@ -953,73 +981,73 @@ class TabManager {
      * @param {string} eventType - 事件类型
      * @param {Function} handler - 事件处理器
      */
-    addEventListener(eventType, handler) {
-        if (!this.eventListeners.has(eventType)) {
-            this.eventListeners.set(eventType, []);
-        }
-        this.eventListeners.get(eventType).push(handler);
-    }
+    //addEventListener(eventType, handler) {
+        //if (!this.eventListeners.has(eventType)) {
+            //this.eventListeners.set(eventType, []);
+        //}
+        //this.eventListeners.get(eventType).push(handler);
+    //}
     
     /**
      * 移除事件监听器
      * @param {string} eventType - 事件类型
      * @param {Function} handler - 事件处理器
      */
-    removeEventListener(eventType, handler) {
-        if (this.eventListeners.has(eventType)) {
-            const handlers = this.eventListeners.get(eventType);
-            const index = handlers.indexOf(handler);
-            if (index > -1) {
-                handlers.splice(index, 1);
-            }
-        }
-    }
+    //removeEventListener(eventType, handler) {
+        //if (this.eventListeners.has(eventType)) {
+            //const handlers = this.eventListeners.get(eventType);
+            //const index = handlers.indexOf(handler);
+            //if (index > -1) {
+                //handlers.splice(index, 1);
+            //}
+        //}
+    //}
     
     /**
      * 显示节点详情（占位方法，将在后续任务中实现）
      * @param {string} nodeId - 节点ID
      */
-    showNodeDetails(nodeId) {
-        // 这个方法将在后续的任务中实现
-        console.log('显示节点详情:', nodeId);
-    }
+    //showNodeDetails(nodeId) {
+        //// 这个方法将在后续的任务中实现
+        //console.log('显示节点详情:', nodeId);
+    //}
     
     /**
      * 显示用户详情（占位方法，将在后续任务中实现）
      * @param {string} userId - 用户ID
      */
-    showUserDetails(userId) {
-        // 这个方法将在后续的任务中实现
-        console.log('显示用户详情:', userId);
-    }
+    //showUserDetails(userId) {
+        //// 这个方法将在后续的任务中实现
+        //console.log('显示用户详情:', userId);
+    //}
     
     /**
      * 显示区块链详情
      * @param {string} chainId - 区块链ID
      */
-    showChainDetails(chainId) {
-        try {
-            // 确保切换到区块链标签页
-            if (this.activeTab !== 'chains') {
-                this.switchTab('chains');
-            }
+    //showChainDetails(chainId) {
+        //try {
+            //// 确保切换到区块链标签页
+            //if (this.activeTab !== 'chains') {
+                //this.switchTab('chains');
+            //}
             
-            // 通过ChainsTabContent显示区块链详情
-            if (this.chainsTabContent) {
-                // 延迟执行以确保标签页切换完成
-                setTimeout(() => {
-                    this.chainsTabContent.setSelectedChain(chainId);
-                }, 100);
-            } else {
-                console.error('ChainsTabContent 未初始化');
-            }
+            //// 通过ChainsTabContent显示区块链详情
+            //if (this.chainsTabContent) {
+                //// 延迟执行以确保标签页切换完成
+                //setTimeout(() => {
+                    //this.chainsTabContent.setSelectedChain(chainId);
+                //}, 100);
+            //} else {
+                //console.error('ChainsTabContent 未初始化');
+            //}
             
-            console.log('显示区块链详情:', chainId);
+            //console.log('显示区块链详情:', chainId);
             
-        } catch (error) {
-            console.error('显示区块链详情失败:', error);
-        }
-    }
+        //} catch (error) {
+            //console.error('显示区块链详情失败:', error);
+        //}
+    //}
     
     /**
      * 初始化标签页管理器
@@ -1085,6 +1113,9 @@ class TabManager {
             
             // 初始化区块链标签页内容组件
             this.chainsTabContent = new ChainsTabContent(this);
+
+            // 初始化消息标签页内容组件
+            this.msgTabContent = new MsgTabContent(this);
             
             console.log('标签页内容组件初始化完成');
             
@@ -1177,7 +1208,10 @@ class TabManager {
                     this.updateUsersDataIncremental(newData.userData, previousData?.userData);
                     break;
                 case 'chains':
-                    //this.updateChainsDataIncremental(newData.chainData, previousData?.chainData);
+                    this.updateChainsDataIncremental(newData.chainData, previousData?.chainData);
+                    break;
+                case 'msgs':
+                    this.updateMsgsDataIncremental(newData.msgData, previousData?.msgData);
                     break;
             }
             
@@ -1287,6 +1321,25 @@ class TabManager {
             console.error('增量更新区块链数据失败:', error);
         }
     }
+
+    /**
+     * 增量更新消息数据
+     * @param {Map} newMsgData - 新消息数据
+     * @param {Map} previousMsgData - 之前的消息数据
+     */
+    updateMsgsDataIncremental(newMsgData, previousMsgData) {
+        if (!this.msgTabContent || !newMsgData) {
+            return;
+        }
+
+        try {
+            // 直接进行完整渲染，确保数据能正确显示
+            this.msgTabContent.renderMsgsGrid(newMsgData);
+
+        } catch (error) {
+            console.error('增量更新消息数据失败:', error);
+        }
+    }
     
     /**
      * 检查网络配置是否发生变化
@@ -1308,22 +1361,22 @@ class TabManager {
      * 只更新网络统计信息
      * @param {Object} networkData - 网络数据
      */
-    updateNetworkStatsOnly(networkData) {
-        const container = document.getElementById('network-graph');
-        if (!container) return;
+    //updateNetworkStatsOnly(networkData) {
+        //const container = document.getElementById('network-graph');
+        //if (!container) return;
         
-        const statsContainer = container.querySelector('.network-stats');
-        if (statsContainer) {
-            const nodeCount = networkData.nodeCount || 0;
-            const failedConnections = Math.floor((networkData.totalConnections || 0) * (networkData.failureRate || 0));
+        //const statsContainer = container.querySelector('.network-stats');
+        //if (statsContainer) {
+            //const nodeCount = networkData.nodeCount || 0;
+            //const failedConnections = Math.floor((networkData.totalConnections || 0) * (networkData.failureRate || 0));
             
-            statsContainer.innerHTML = `
-                <span class="network-stat">节点: ${nodeCount}</span>
-                <span class="network-stat">连接: ${networkData.activeConnections || 0}</span>
-                <span class="network-stat">故障: ${failedConnections}</span>
-            `;
-        }
-    }
+            //statsContainer.innerHTML = `
+                //<span class="network-stat">节点: ${nodeCount}</span>
+                //<span class="network-stat">连接: ${networkData.activeConnections || 0}</span>
+                //<span class="network-stat">故障: ${failedConnections}</span>
+            //`;
+        //}
+    //}
     
     /**
      * 找出发生变化的用户
@@ -1331,27 +1384,27 @@ class TabManager {
      * @param {Map} previousUserData - 之前的用户数据
      * @returns {Map} - 发生变化的用户
      */
-    findChangedUsers(newUserData, previousUserData) {
-        const changedUsers = new Map();
+    //findChangedUsers(newUserData, previousUserData) {
+        //const changedUsers = new Map();
         
-        // 检查新增或修改的用户
-        for (const [userId, newUser] of newUserData) {
-            const previousUser = previousUserData.get(userId);
+        //// 检查新增或修改的用户
+        //for (const [userId, newUser] of newUserData) {
+            //const previousUser = previousUserData.get(userId);
             
-            if (!previousUser || this.hasUserChanged(newUser, previousUser)) {
-                changedUsers.set(userId, newUser);
-            }
-        }
+            //if (!previousUser || this.hasUserChanged(newUser, previousUser)) {
+                //changedUsers.set(userId, newUser);
+            //}
+        //}
         
-        // 检查删除的用户
-        for (const [userId] of previousUserData) {
-            if (!newUserData.has(userId)) {
-                changedUsers.set(userId, null); // null 表示删除
-            }
-        }
+        //// 检查删除的用户
+        //for (const [userId] of previousUserData) {
+            //if (!newUserData.has(userId)) {
+                //changedUsers.set(userId, null); // null 表示删除
+            //}
+        //}
         
-        return changedUsers;
-    }
+        //return changedUsers;
+    //}
     
     /**
      * 找出发生变化的区块链
@@ -1359,27 +1412,27 @@ class TabManager {
      * @param {Map} previousChainData - 之前的区块链数据
      * @returns {Map} - 发生变化的区块链
      */
-    findChangedChains(newChainData, previousChainData) {
-        const changedChains = new Map();
+    //findChangedChains(newChainData, previousChainData) {
+        //const changedChains = new Map();
         
-        // 检查新增或修改的区块链
-        for (const [chainId, newChain] of newChainData) {
-            const previousChain = previousChainData.get(chainId);
+        //// 检查新增或修改的区块链
+        //for (const [chainId, newChain] of newChainData) {
+            //const previousChain = previousChainData.get(chainId);
             
-            if (!previousChain || this.hasChainChanged(newChain, previousChain)) {
-                changedChains.set(chainId, newChain);
-            }
-        }
+            //if (!previousChain || this.hasChainChanged(newChain, previousChain)) {
+                //changedChains.set(chainId, newChain);
+            //}
+        //}
         
-        // 检查删除的区块链
-        for (const [chainId] of previousChainData) {
-            if (!newChainData.has(chainId)) {
-                changedChains.set(chainId, null); // null 表示删除
-            }
-        }
+        //// 检查删除的区块链
+        //for (const [chainId] of previousChainData) {
+            //if (!newChainData.has(chainId)) {
+                //changedChains.set(chainId, null); // null 表示删除
+            //}
+        //}
         
-        return changedChains;
-    }
+        //return changedChains;
+    //}
     
     /**
      * 检查用户是否发生变化
@@ -1546,35 +1599,35 @@ class TabManager {
     /**
      * 销毁标签页管理器
      */
-    destroy() {
-        try {
-            // 保存当前状态
-            //this.saveCurrentTabState();
-            //this.persistTabStates();
+    //destroy() {
+        //try {
+            //// 保存当前状态
+            ////this.saveCurrentTabState();
+            ////this.persistTabStates();
             
-            // 清理性能优化相关资源
-            this.cleanupPerformanceResources();
+            //// 清理性能优化相关资源
+            //this.cleanupPerformanceResources();
             
-            // 清理事件监听器
-            this.eventListeners.clear();
+            //// 清理事件监听器
+            //this.eventListeners.clear();
             
-            // 销毁标签页内容组件
-            if (this.networkTabContent) {
-                this.networkTabContent.destroy();
-            }
-            if (this.usersTabContent) {
-                this.usersTabContent.destroy();
-            }
-            if (this.chainsTabContent) {
-                this.chainsTabContent.destroy();
-            }
+            //// 销毁标签页内容组件
+            //if (this.networkTabContent) {
+                //this.networkTabContent.destroy();
+            //}
+            //if (this.usersTabContent) {
+                //this.usersTabContent.destroy();
+            //}
+            //if (this.chainsTabContent) {
+                //this.chainsTabContent.destroy();
+            //}
             
-            console.log('TabManager 已销毁');
+            //console.log('TabManager 已销毁');
             
-        } catch (error) {
-            console.error('TabManager 销毁失败:', error);
-        }
-    }
+        //} catch (error) {
+            //console.error('TabManager 销毁失败:', error);
+        //}
+    //}
 }
 
 // 导出 TabManager 类

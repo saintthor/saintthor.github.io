@@ -12,6 +12,7 @@ class Peer
         this.Connections = new Map();
         this.RecvedMsgs = new Map();
         this.BlackList = new Set();
+        this.MsgFgprnts = new Set();
         this.Messages = new Map();      //on the way
         this.WaitList = [];
         this.constructor.All.set( this.Id, this );
@@ -72,6 +73,12 @@ class Peer
                 {
                     if( w[1] <= currTick )
                     {
+                        if( typeof w[0] === 'function' )
+                        {
+                            w[0]();
+                            return false;
+                        }
+
                         if( w[0].Status > 0 )
                         {
                             window.LogPanel.AddLog( { dida: currTick, peer: p.Id, block: w[0].Id, content: 'new block trusted.', category: 'peer' } );
@@ -107,6 +114,7 @@ class Peer
             {
                 const key = [...p.Connections.keys()][Math.floor( Math.random() * ConnNum )];
                 p.BreakConn( key );
+                window.LogPanel.AddLog( { dida: currTick, peer: p.Id, content: `Break conn ${ p.Id } with ${ key }`, category: 'peer' } );
             }
             
             for( let i = minConnNum - p.Connections.size; i > 0; )
@@ -118,11 +126,14 @@ class Peer
                     const Tick = Math.floor( Math.random() * 5 + 1 );
                     p.Connect( peer, Tick );
                     peer.Connect( p, Tick );
+                    if( currTick > 1 )
+                    {
+                        window.LogPanel.AddLog( { dida: currTick, peer: p.Id, content: `New conn ${ p.Id } with ${ peer.Id }`, category: 'peer' } );
+                    }
                     i--;
                 }
             }
         };
-        
         if( Reached.length + Trusted.length > 0 )
         {
             window.app.NetWorkPanal.UpdateTrans( Reached, Trusted );
@@ -140,7 +151,7 @@ class Peer
         }
     }
 
-    Broadcast( msg, currTick, sourceId )  //inner & outer
+    Broadcast( msg, currTick, sourceId )
     {
         [...this.Connections.values()].filter( c => c[0].Id != sourceId ).forEach(( [n, t] ) =>
         {
@@ -152,26 +163,69 @@ class Peer
         sourceId || window.app.NetWorkPanal.ShowMessage( msg );
     };
 
+    GetMsgTreeView( treeId )
+    {
+    };
+    
     async Receive( message, neighborId )
     {
+        //console.log( 'Receive', message, neighborId );
         if( neighborId && !this.Connections.has( neighborId ))
         {
+            console.log( 'Recv false', this.Id );
             return false;
         }
         if( this.RecvedMsgs.has( message.Id ))
         {
+            //console.log( 'Received before', this.Id );
             return false;
         }
         
         this.RecvedMsgs.set( message.Id, message );
         
-        if( message.type === 'NewBlock' )
+        if( message.type === 'MsgMeta' )
         {
-            const CurrBlock = new RebuildBlock( message.block.Id, message.block.Content );
-            if( this.LocalBlocks.has( CurrBlock.Id ))
+            if( this.LocalBlocks.has( message.block.Id ))
+            {
+                console.log( 'Received before', this.Id );
+                return false;
+            }
+            
+            const Meta = JSON.parse( message.block.Meta );
+            const FingerPrint = await Hash( Meta.contentHash + Meta.parentId, 'SHA-1' );
+            if( this.MsgFgprnts.has( FingerPrint ))
+            {
+                window.LogPanel.AddLog( { dida: window.app.Tick, peer: this.Id, content: 'finger print duplicated.', category: 'peer' } );
+				return false;
+			}
+			this.MsgFgprnts.add( FingerPrint );
+            //console.log( 'Recv MsgMeta', this.Id, message.block );
+            
+            const MsgBlock = await TreeBlock.Rebuild( message.block.Id, message.block.Meta );
+            if( MsgBlock )
+            {
+                this.LocalBlocks.set( MsgBlock.Id, MsgBlock );
+                return true;
+            }
+        }
+        else if( message.type === 'MsgText' )
+        {
+            const MsgBlock = window.M = this.LocalBlocks.get( message.block.Id );
+            if( !MsgBlock )
+            {
+                console.log( 'no meta got', this.Id );
+                return false;
+            }
+            console.log( 'Recv MsgText', this.Id, message.block );
+            return !MsgBlock.SetContent || ( await MsgBlock.SetContent( message.block.Text ));
+        }
+        else if( message.type === 'AOBlock' )
+        {
+            if( this.LocalBlocks.has( message.block.Id ))
             {
                 return false;
             }
+            const CurrBlock = new RebuildBlock( message.block.Id, message.block.Content );
             try
             {
                 await this.Verify( CurrBlock );
@@ -183,7 +237,7 @@ class Peer
                 return false;
             }
             
-            this.AcceptBlockchain( CurrBlock );
+            this.AcceptBlock( CurrBlock );
         }
         else if( message.type === "Alarm" )
         {
@@ -196,11 +250,20 @@ class Peer
                     this.BlackList.add( Prev.OwnerId );
                     b1.Status = b0.Status = -1;
                     this.LocalBlocks.set( b1.Id, b1 );
-                    this.WaitList = this.WaitList.filter(( [b, t] ) => b.Id != b0.Id && b.Id != b1.Id );
-                    const ExistB0 = this.LocalBlocks.get( b0.Id )
+                    this.WaitList = this.WaitList.filter(( [b, t] ) => b?.Id != b0.Id && b?.Id != b1.Id );
+                    const ExistB0 = this.LocalBlocks.get( b0.Id );
+                    const ChainId = ExistB0.GetBlockChain()[0];
                     if( ExistB0?.Status > 0 )
                     {
                         ExistB0.Status *= -1;
+                        if( this.Users.has( ExistB0.OwnerId ))
+                        {
+                            window.LogPanel.AddLog( { dida: window.app.Tick, peer: this.Id, user: ExistB0.OwnerId, blockchain: ChainId, content: 'transfer rejected.', category: 'blockchain' } );
+                        }
+                    }
+                    else if( ExistB0?.Status === 0 )
+                    {
+                        BlockChain.SupportFork( ChainId, this.Id, ExistB0.Id );
                     }
                     else if( ExistB0 == null )
                     {
@@ -209,9 +272,6 @@ class Peer
                     window.LogPanel.AddLog( { dida: window.app.Tick, peer: this.Id, user: Prev.OwnerId, content: 'user blacklisted', category: 'user' } );
                 }
             }
-        }
-        else if( message.type === "Article" )
-        {
         }
         return true;
     };
@@ -227,25 +287,32 @@ class Peer
         return block;
     }
     
-    AcceptBlockchain( block )
+    AcceptBlock( block )
     {
         this.LocalBlocks.set( block.Id, block );
+        if( block instanceof TreeBlock )
+        {
+            //console.log( 'AcceptBlockchain treeblock.' );
+            return;
+        }
         block.RootId = this.FindRoot( block.Id );
+        const WaitTicks = window.app.Tick + this.constructor.BroadcastTicks * ( this.Users.has( block.OwnerId ) ? 4 : 2 );
         if( block.Index > 1 )
         {
             window.LogPanel.AddLog( { dida: window.app.Tick, peer: this.Id, block: block.Id, content: 'new block veryfied.', category: 'peer' } );
             block.Status = 1;
-            const WaitTicks = window.app.Tick + this.constructor.BroadcastTicks * ( this.Users.has( block.OwnerId ) ? 4 : 2 );
             this.WaitList.push( [block, WaitTicks] );
         }
         if( block.Index >= 1 && this.Users.has( block.OwnerId ))
         {
             //console.log( 'Receive find owner', block.OwnerId.slice( 0, 9 ), block.RootId.slice( 0, 9 ));
             const Receiver = this.Users.get( block.OwnerId )
-            BlockChain.All.get( block.RootId ).Update( Receiver, block );
+            const Chain = BlockChain.All.get( block.RootId );
+            Chain.Update( Receiver, block );
             
             if( block.Index > 1 )
             {
+                this.WaitList.push( [() => Chain.Transfer( 0 ), WaitTicks] );
                 Receiver.StartWait( block.Id, window.app.Tick + 200 );
             }
         }
@@ -298,10 +365,12 @@ class Peer
     OnDoubleSpend( preOwner, block, block0 )
     {
         const AlarmMsg = { Id: "Alarm" + preOwner.slice( 0, 13 ) + block.Id.slice( 0, 13 ), from: this.Id,
-                            type: "Alarm", blocks: [block.TransData(), block0.TransData()],
+                            type: "Alarm", blocks: [block.Copy(), block0.Copy()],
                             color: getColor(( r, g, b ) => r + g > b * 2 && r + g + b < 600 && r + g + b > 100 ) };
         this.Broadcast( AlarmMsg, window.app.Tick );
-        this.WaitList = this.WaitList.filter(( [b, t] ) => b.Id != block.Id && b.Id != block0.Id );
+        this.WaitList = this.WaitList.filter(( [b, t] ) => b?.Id != block.Id && b?.Id != block0.Id );
+        const ChainId = block.GetBlockChain()[0];
+        BlockChain.SetFork( ChainId, [block.Id, block0.Id] );
     }
     
     static GetOther( n, exceptKs )
@@ -318,14 +387,16 @@ class Peer
         return Rslt;        
     }
 
-    static StartTransing( block, dida, srcPeerKs )
+    static StartTransing( block, dida, srcPeerKs, step )
     {
-        const TransMsg = { Id: "NewBlock" + block.Id, type: "NewBlock", block: block.TransData(),
+        const Type = block instanceof Block ? "AOBlock" : ["MsgMeta", "MsgText"][step || 0];
+        const TransMsg = { Id: Type + block.Id, type: Type, block: block.Copy( step ),
                             color: getColor(( r, g, b ) => r + g > b * 2 && r + g + b < 600 && r + g + b > 100 ) };
         srcPeerKs.forEach( k =>
         {
             const peer = this.All.get( k );
-            peer.AcceptBlockchain( block );
+            peer.AcceptBlock( block );
+            //console.log( 'StartTransing', dida, peer.Id, TransMsg );
             peer.Broadcast( TransMsg, dida )
         } );
         

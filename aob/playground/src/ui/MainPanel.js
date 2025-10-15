@@ -62,12 +62,15 @@ class MainPanel {
                     <div class="tab-actions">
                         <button class="btn btn-primary btn-sm" id="send-btn" data-text="transfer" onclick="window.mainPanel.Transfer()">${GetText('transfer')}</button>
                         <button class="btn btn-danger btn-sm" id="attack-btn" data-text="attack" onclick="window.mainPanel.Attack()">${GetText('attack')}</button>
+                        <button class="btn btn-primary btn-sm" id="msg-btn" data-text="new_msg" onclick="window.mainPanel.NewMsg()">${GetText('new_msg')}</button>
+                        <button class="btn btn-primary btn-sm" id="reply-btn" data-text="reply" onclick="window.mainPanel.Reply()">${GetText('reply')}</button>
                     </div>
                     <div class="tab-buttons">
                         <button class="tab-button active" data-tab="help" data-text="help_tab">${GetText('help_tab')}</button>
                         <button class="tab-button" data-tab="network" data-text="network_tab">${GetText('network_tab')}</button>
                         <button class="tab-button" data-tab="users" data-text="users_tab">${GetText('users_tab')}</button>
                         <button class="tab-button" data-tab="chains" data-text="chains_tab">${GetText('chains_tab')}</button>
+                        <button class="tab-button" data-tab="msgs" data-text="trees_tab">${GetText('trees_tab')}</button>
                     </div>
                 </div>
                 
@@ -125,6 +128,19 @@ class MainPanel {
                             </div>
                         </div>
                     </div>
+
+                    <div class="tab-pane" id="msgs-tab">
+                        <div class="tab-section-upper">
+                            <div class="msgs-container" id="msgs-container">
+                                <p class="text-muted" data-text="sys_not_started">${GetText('sys_not_started')}</p>
+                            </div>
+                        </div>
+                        <div class="tab-section-lower">
+                            <div class="msg-details-container" id="msg-details-container">
+                                <p class="text-muted" data-text="click_msg">${GetText('click_msg')}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -168,7 +184,40 @@ class MainPanel {
             return;
         }
         this.LastTransUser.DoubleSpend( this.app.Tick );
-     }
+    }
+
+    async NewMsg()
+    {
+        const PostUser = this.tabManager.usersTabContent.GetSelected() || this.app.AllUsers.RandVal();
+        const NewMsg = await new TreeBlock( this.app.Tick, 'content_' + this.app.Tick, PostUser, this.RandTags());
+        window.LogPanel.AddLog( { dida: this.app.Tick, user: PostUser.Id, post: NewMsg.Id, content: 'start posting.', category: 'post' } );
+        BlockTree.All.set( NewMsg.Id, NewMsg );
+        PostUser.SendMsgMeta( NewMsg );
+    }
+    
+    RandTags()
+    {
+        const Tags = new Set( GetText( 'msg_tags' ).split( '|' ));
+        const GetTags = new Set();
+        for( let i = 3; i-- > 0; )
+        {
+            GetTags.add( Tags.RandVal());
+        }
+        return [...GetTags];
+    }
+    
+    async Reply()
+    {
+        const PostUser = this.app.AllUsers.RandVal();
+        const ParentMsg = TreeBlock.All.RandVal();
+        const ReplyMsg = await new TreeBlock( this.app.Tick, 'content_' + this.app.Tick, PostUser, this.RandTags(), ParentMsg?.Id || '' );
+        window.LogPanel.AddLog( { dida: this.app.Tick, user: PostUser.Id, post: ReplyMsg.Id, content: 'start reply.', category: 'post' } );
+        if( !ParentMsg )
+        {
+            BlockTree.All.set( ReplyMsg.Id, ReplyMsg );
+        }
+        PostUser.SendMsgMeta( ReplyMsg );
+    }
 
 
     /**
@@ -215,7 +264,7 @@ class MainPanel {
         }
     }
     
-    renderNetworkGraph(container, networkData) {
+    /* renderNetworkGraph(container, networkData) {
         if (!networkData) {
             container.innerHTML = `<p class="text-muted" data-text="no_network_data">${GetText('no_network_data')}</p>`;
             this.networkGraphInitialized = false;
@@ -271,9 +320,9 @@ class MainPanel {
         }
         
         this.lastNetworkConfig = currentConfig;
-    }  
+    } */  
   
-    renderD3NetworkGraph(nodeCount, networkData) {
+    /* renderD3NetworkGraph(nodeCount, networkData) {
         const container = document.getElementById('d3-network-container');
         if (!container) return;
         
@@ -405,15 +454,15 @@ class MainPanel {
         
         this.networkLinks = finalLinks;
         this.networkSimulation = simulation;
-    }    
+    } */    
   
-  updateNetworkStats(networkData) {
+  /* updateNetworkStats(networkData) {
         console.log('Updating network stats:', networkData);
-    }
+    } */
     
-    updateNetworkConnections(networkData) {
+    /* updateNetworkConnections(networkData) {
         console.log('Updating network connections:', networkData);
-    }
+    } */
     
     /**
      * Starts real-time updates.
@@ -453,10 +502,10 @@ class MainPanel {
         }
     }
     
-    /**
+    /*
      * Shows a detail modal.
      */
-    showDetailModal(title, content) {
+    /* showDetailModal(title, content) {
         const modalHTML = `
             <div id="detail-modal" class="detail-modal show">
                 <div class="detail-modal-overlay" onclick="document.getElementById('detail-modal').remove()"></div>
@@ -478,13 +527,13 @@ class MainPanel {
         }
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-    }
+    } */
     
     
-    /**
+    /*
      * Gets user-related logs.
      */
-    getUserRelatedLogs(userId) {
+    /* getUserRelatedLogs(userId) {
         if (this.app && this.app.uiManager && this.app.uiManager.panels && this.app.uiManager.panels.log && this.app.uiManager.panels.log.logs) {
             return this.app.uiManager.panels.log.logs.filter(log => 
                 log.message.includes(userId) || 
@@ -492,7 +541,7 @@ class MainPanel {
             );
         }
         return [];
-    }
+    } */
     
     onLanguageChanged( language )
     {

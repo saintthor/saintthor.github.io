@@ -46,12 +46,18 @@ class UsersTabContent {
         for (const [userId, user] of userData) {
             let userCard = usersGrid.querySelector(`[data-user-id="${userId}"]`);
             const isTransferring = user.isTransferring || false;
+            const BlackListed = Peer.ChkBlackList( userId ).length > 0;
             
             if (!userCard) {
                 // 创建新的用户卡片
                 userCard = document.createElement('div');
-                userCard.className = `user-card ${isTransferring ? 'transferring' : ''}`;
+                userCard.className = `user-card ${ user.Status }`;
+                userCard.title = user.Status ? GetText( 'user_st_' + user.Status ) : null;
                 userCard.setAttribute('data-user-id', userId);
+                if( BlackListed )
+                {
+                    userCard.style.backgroundColor = '#ccc';
+                }
                 
                 // 生成公钥预览（前6个字符）
                 const keyPreview = this.generateKeyPreview(userId);
@@ -68,13 +74,20 @@ class UsersTabContent {
                 userCard.addEventListener('click', () => {
                     this.handleUserClick(userId);
                 });
-            } else {
-                // 更新转账状态样式
-                if (isTransferring && !userCard.classList.contains('transferring')) {
-                    userCard.classList.add('transferring');
-                } else if (!isTransferring && userCard.classList.contains('transferring')) {
-                    userCard.classList.remove('transferring');
-                }
+            }
+            else
+            {
+                ['sending', 'receiving'].forEach( st =>
+                {
+                    if( user.Status === st && !userCard.classList.contains( st ))
+                    {
+                        userCard.classList.add( st );
+                    }
+                    else if( user.Status !== st && userCard.classList.contains( st ))
+                    {
+                        userCard.classList.remove( st );
+                    }
+                } );
             }
         }
         
@@ -303,11 +316,11 @@ class UsersTabContent {
      * 更新用户详情
      * @param {Object} userData - 用户数据
      */
-    updateUserDetails(userData) {
-        if (this.selectedUser !== null) {
-            this.showUserDetails(this.selectedUser);
-        }
-    }
+    //updateUserDetails(userData) {
+        //if (this.selectedUser !== null) {
+            //this.showUserDetails(this.selectedUser);
+        //}
+    //}
     
     /**
      * 清除选中状态
@@ -362,15 +375,15 @@ class UsersTabContent {
     /**
      * 重置用户网格
      */
-    resetUsersGrid() {
-        this.usersGridInitialized = false;
-        this.clearSelection();
+    //resetUsersGrid() {
+        //this.usersGridInitialized = false;
+        //this.clearSelection();
         
-        const container = document.getElementById('users-container');
-        if (container) {
-            container.innerHTML = `<p class="text-muted" data-text="sys_not_started">${GetText('sys_not_started')}</p>`;
-        }
-    }
+        //const container = document.getElementById('users-container');
+        //if (container) {
+            //container.innerHTML = `<p class="text-muted" data-text="sys_not_started">${GetText('sys_not_started')}</p>`;
+        //}
+    //}
     
     /**
      * 生成公钥预览（前6个字符）

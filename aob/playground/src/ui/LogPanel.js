@@ -52,13 +52,6 @@ class LogPanel {
         }
         
         panelContent.innerHTML = `
-            <div class="log-header">
-                <h3 data-text="log_panel">系统日志</h3>
-                <div class="log-controls">
-                    <!--button class="btn btn-sm btn-secondary" id="clear-logs">清空日志</button-->
-                    <button class="btn btn-sm btn-info" id="export-logs" data-text="export_logs">导出日志</button>
-                </div>
-            </div>
             <div class="log-tabs">
                 <ul class="nav nav-tabs" id="log-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -79,6 +72,11 @@ class LogPanel {
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="blockchain-logs-tab" data-tab="blockchain" type="button" role="tab" data-text="blockchain_logs">
                             区块链日志
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="post-logs-tab" data-tab="post" type="button" role="tab" data-text="post_logs">
+                            消息
                         </button>
                     </li>
                 </ul>
@@ -103,6 +101,11 @@ class LogPanel {
                     <div class="tab-pane" id="blockchain-logs-content">
                         <div class="log-list" id="blockchain-logs-list">
                             <div class="log-placeholder" data-text="no_blockchain_logs">暂无区块链日志</div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="post-logs-content">
+                        <div class="log-list" id="post-logs-list">
+                            <div class="log-placeholder" data-text="no_post_logs">暂无消息日志</div>
                         </div>
                     </div>
                     <div class="tab-pane" id="filter-logs-content">
@@ -230,6 +233,9 @@ class LogPanel {
     getLogCategory(log) {
         // 根据日志内容和类别判断分类
         if (log.category) {
+            if (log.category.includes('post')) {
+                return 'post';
+            }
             if (log.category.includes('node') || log.category.includes('peer')) {
                 return 'node';
             }
@@ -266,7 +272,8 @@ class LogPanel {
             all: 'no_logs',
             node: 'no_node_logs',
             user: 'no_user_logs',
-            blockchain: 'no_blockchain_logs'
+            blockchain: 'no_blockchain_logs',
+            post: 'no_post_logs'
         };
         return GetText(textIds[tabName] || 'no_logs');
     }
@@ -277,7 +284,7 @@ class LogPanel {
      */
     switchToCategory( category, itemId )
     {
-        if( ['node', 'user', 'blockchain'].includes( category ))
+        if( ['node', 'user', 'blockchain', 'post'].includes( category ))
         {
             this.switchTab( category );
             const tabPane = document.querySelector( '#log-tab-content .active' );
@@ -288,7 +295,7 @@ class LogPanel {
             FilterList.innerHTML = '';
             tabPane.querySelectorAll( '.log-entry' ).forEach( div =>
             {
-                console.log( div );
+                //console.log( div );
                 if( div.childNodes[5].innerText == itemId )
                 {
                     FilterList.appendChild( div );
@@ -349,7 +356,7 @@ class LogPanel {
         return logElement;
     }
 
-    clearLogs() {
+    /* clearLogs() {
         this.logs = [];
         
         // 清空所有标签页的日志列表
@@ -362,7 +369,7 @@ class LogPanel {
                 logList.innerHTML = `<div class="log-placeholder">${placeholder}</div>`;
             }
         });
-    }
+    } */
 
     exportLogs() {
         const currentTab = this.currentTab || 'all';
@@ -393,10 +400,10 @@ class LogPanel {
         }
     }
     
-    /**
+    /*
      * 格式化日志消息，截断base64数据只显示前6个字符
      */
-    formatLogIds(message) {
+    /* formatLogIds(message) {
         // 匹配base64格式的数据（长度大于10的字母数字字符串）
         return message.toString().replace(/\b[A-Za-z0-9+/]{10,}={0,2}\b/g, (match) => {
             if (match.length > 12) {
@@ -404,7 +411,7 @@ class LogPanel {
             }
             return match;
         });
-    }
+    } */
     
     /**
      * 语言变更处理

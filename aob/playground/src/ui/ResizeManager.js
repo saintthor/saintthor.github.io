@@ -25,7 +25,8 @@ class ResizeManager {
         this.tabRatios = {
             network: this.defaultRatio,
             users: this.defaultRatio,
-            chains: this.defaultRatio
+            chains: this.defaultRatio,
+            msgs: this.defaultRatio
         };
         
         // 存储管理
@@ -77,7 +78,7 @@ class ResizeManager {
      */
     createResizeHandles() {
         try {
-            const tabNames = ['network', 'users', 'chains'];
+            const tabNames = ['network', 'users', 'chains', 'msgs'];
             
             tabNames.forEach(tabName => {
                 const tabPane = document.getElementById(`${tabName}-tab`);
@@ -753,10 +754,10 @@ class ResizeManager {
         return false;
     }
     
-    /**
+    /*
      * 清除存储的设置
      */
-    clearSettings() {
+    /* clearSettings() {
         try {
             localStorage.removeItem(this.storageKey);
             sessionStorage.removeItem(this.storageKey);
@@ -764,13 +765,13 @@ class ResizeManager {
         } catch (error) {
             console.error('清除设置失败:', error);
         }
-    }
+    } */
     
-    /**
+    /*
      * 检查本地存储是否可用
      * @returns {boolean} - 是否可用
      */
-    isStorageAvailable() {
+    /* isStorageAvailable() {
         try {
             const test = '__storage_test__';
             localStorage.setItem(test, test);
@@ -779,7 +780,7 @@ class ResizeManager {
         } catch (error) {
             return false;
         }
-    }
+    } */
     
     /**
      * 验证标签页名称是否有效
@@ -787,7 +788,7 @@ class ResizeManager {
      * @returns {boolean} - 是否有效
      */
     isValidTabName(tabName) {
-        return ['network', 'users', 'chains'].includes(tabName);
+        return ['network', 'users', 'chains', 'msgs'].includes(tabName);
     }
     
     /**
@@ -802,12 +803,12 @@ class ResizeManager {
         return this.tabRatios[tabName];
     }
     
-    /**
+    /*
      * 设置标签页比例
      * @param {string} tabName - 标签页名称
      * @param {number} ratio - 比例值
      */
-    setTabRatio(tabName, ratio) {
+    /* setTabRatio(tabName, ratio) {
         if (!this.isValidTabName(tabName)) {
             console.error('无效的标签页名称:', tabName);
             return;
@@ -817,15 +818,15 @@ class ResizeManager {
         this.tabRatios[tabName] = validatedRatio;
         this.applyRatio(tabName, validatedRatio);
         this.saveSettings();
-    }
+    } */
     
-    /**
+    /*
      * 获取所有标签页比例
      * @returns {Object} - 所有标签页比例
      */
-    getAllTabRatios() {
+    /* getAllTabRatios() {
         return { ...this.tabRatios };
-    }
+    } */
     
     /**
      * 节流函数
@@ -853,10 +854,10 @@ class ResizeManager {
         };
     }
     
-    /**
+    /*
      * 销毁调整大小管理器
      */
-    destroy() {
+    /* destroy() {
         try {
             // 移除事件监听器
             document.removeEventListener('mousedown', this.handleMouseDown);
@@ -891,7 +892,7 @@ class ResizeManager {
         } catch (error) {
             console.error('ResizeManager 销毁失败:', error);
         }
-    }
+    } */
 }
 
 // 导出 ResizeManager 类
