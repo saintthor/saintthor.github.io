@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UBB.js Test</title>
+    <style>
+        body { font-family: sans-serif; }
+        #container { display: flex; flex-direction: column; }
+        #controls { display: flex; flex-direction: row; flex-wrap: wrap; margin-bottom: 10px; }
+        #controls .btn {
+            background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px;
+            margin-right: 5px; margin-bottom: 5px; cursor: pointer; text-align: center;
+        }
+        #controls .btn:hover { background-color: #e0e0e0; }
+        #editor { display: flex; flex-direction: column; }
+        textarea { width: 100%; height: 250px; box-sizing: border-box; }
+        #render-output { border: 1px solid #ccc; padding: 10px; min-height: 200px; margin-top: 10px; background-color: #f9f9f9; }
+        .title { font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
+        .content { margin-top: 10px; }
+        .toggle { border-left: 3px solid #ccc; padding-left: 10px; margin-bottom: 10px; }
+        .toggle .trigger { cursor: pointer; user-select: none; margin-right: 5px; }
+        .select .head { margin-bottom: 5px; }
+        .selkey { cursor: pointer; padding: 5px; border: 1px solid #ddd; background-color: #eee; margin-right: 5px; display: inline-block; }
+        .selkey[data-sel="on"] { background-color: #ffcc22; }
+    </style>
+</head>
+<body>
+    <h1>UBB.js Test Page</h1>
+    <div id="container">
+        <div id="controls">
+            <!-- UBB Buttons will be generated here -->
+        </div>
+        <div id="editor">
+            <textarea id="text-input">[b]Hello, UBB.js![/b]
+[i]This is a test.[/i]
+
+[toggle=on]
+[title]Click to Toggle[/title]
+[content]This is some hidden content.[/content]
+[/toggle]
+
+[select]
+[choice=on][title]Tab 1[/title][content]Content for tab 1.[/content][/choice]
+[choice][title]Tab 2[/title][content]Content for tab 2.[/content][/choice]
+[/select]
+
+[goto=section1]Jump to Section 1[/goto]
+...
+[a=section1]Section 1[/a]
+</textarea>
+            <button id="render-btn">Generate</button>
+        </div>
+    </div>
+
+    <h3>Output:</h3>
+    <div id="render-output"></div>
+
+    <script src="ubb.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnArea = document.getElementById('controls');
+            const textArea = document.getElementById('text-input');
+            const renderBtn = document.getElementById('render-btn');
+            const outputArea = document.getElementById('render-output');
+
+            try {
+                const ubb = new UBB(btnArea, textArea, null);
+
+                renderBtn.addEventListener('click', () => {
+                    const ubbText = textArea.value;
+                    try {
+                        const html = ubb.express(ubbText);
+                        outputArea.innerHTML = html;
+                        ubb.awake(outputArea);
+                    } catch (e) {
+                        outputArea.innerHTML = `<p style="color: red;">Error: ${e.message}</p>`;
+                        console.error(e);
+                    }
+                });
+
+                // Initial render on page load for convenience
+                renderBtn.click();
+            } catch (e) {
+                console.error("Failed to initialize UBB script:", e);
+                alert("Error initializing UBB script. See console for details.");
+            }
+        });
+    </script>
+</body>
+</html>
