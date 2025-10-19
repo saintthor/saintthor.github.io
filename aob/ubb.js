@@ -12,7 +12,7 @@ class UBB {
     }
 
     static LabelType = {
-        a: { num: 1, note: '锚标', express: (attrs) => `<a name="${attrs}"></a>` },
+        a: { num: 1, note: '锚标', express: (attrs) => `<a name="${attrs}" style="display: inline-block; width: 1px; height: 1px;"></a>` },
         b: { num: 2, note: '粗体', express: (content) => `<b>${content}</b>` },
         i: { num: 2, note: '斜体', express: (content) => `<i>${content}</i>` },
         u: { num: 2, note: '带下划线', express: (content, attrs) => attrs ? `<u title="${UBB.escapeHTML(attrs.slice(0, 200))}" style="cursor:pointer">${content}</u>` : `<u>${content}</u>` },
@@ -207,8 +207,36 @@ class UBB {
                 e.preventDefault();
                 const anchorName = link.dataset.anchor;
                 const target = dom.querySelector(`a[name="${anchorName}"]`);
+
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Check if the target is inside a hidden toggle
+                    const toggle = target.closest('.toggle');
+                    if (toggle) {
+                        const title = toggle.querySelector('.title');
+                        const trigger = title ? title.querySelector('.trigger') : null;
+                        if (trigger && trigger.textContent === '◣') {
+                            title.click();
+                        }
+                    }
+
+                    // Check if the target is inside a hidden select pane
+                    const choice = target.closest('.choice');
+                    if (choice) {
+                        const select = choice.closest('.select');
+                        const content = choice.querySelector('.content');
+                        if (select && content && content.style.display === 'none') {
+                            const choiceIndex = Array.from(select.querySelectorAll('.choice')).indexOf(choice);
+                            const tab = select.querySelector(`.selkey[data-index="${choiceIndex}"]`);
+                            if (tab) {
+                                tab.click();
+                            }
+                        }
+                    }
+
+                    // Use a short timeout to allow the UI to update before scrolling
+                    setTimeout(() => {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 300);
                 }
             });
         });

@@ -34,19 +34,19 @@
             <textarea id="text-input">[b]Hello, UBB.js![/b]
 [i]This is a test.[/i]
 
-[toggle=on]
-[title]Click to Toggle[/title]
-[content]This is some hidden content.[/content]
+[toggle=off]
+[title]Hidden Toggle[/title]
+[content]This is a hidden anchor: [a=hidden_anchor] Anchor is here.[/content]
 [/toggle]
+[goto=hidden_anchor]Jump to Hidden Anchor[/goto]
+
+<hr>
 
 [select]
-[choice=on][title]Tab 1[/title][content]Content for tab 1.[/content][/choice]
-[choice][title]Tab 2[/title][content]Content for tab 2.[/content][/choice]
+[choice=on][title]Tab 1[/title][content]This is tab 1. The anchor is in tab 2.[/content][/choice]
+[choice][title]Tab 2[/title][content]This is tab 2, with the [a=tab_anchor].[/content][/choice]
 [/select]
-
-[goto=section1]Jump to Section 1[/goto]
-...
-[a=section1]Section 1[/a]
+[goto=tab_anchor]Jump to Tab Anchor[/goto]
 </textarea>
             <button id="render-btn">Generate</button>
         </div>
