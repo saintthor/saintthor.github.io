@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UBB.js Test Page</title>
+    <meta charset="UTF-8">
+    <script src="aob/ubb.js"></script>
+    <style>
+        body { font-family: sans-serif; }
+        #editor { display: flex; }
+        #btnArea { display: flex; flex-direction: column; padding: 5px; }
+        #btnArea .btn { cursor: pointer; border: 1px solid #ccc; padding: 2px 5px; margin-bottom: 2px; }
+        #input { width: 600px; height: 250px; }
+        #generate { margin-top: 10px; padding: 10px; }
+        #output { border: 1px solid #000; padding: 10px; margin-top: 10px; min-height: 100px; }
+        /* styles from original CSS */
+        .common { margin: 5px; padding: 5px; border: 1px solid #CCC; }
+        .title { background-color: #EEE; margin: -5px -5px 5px -5px; padding: 5px 5px 2px 10px; font-weight: bold; }
+        .content { padding: 5px; }
+        .toggle .title { cursor: pointer; }
+        .toggle .trigger { font-size: 80%; margin-right: 5px; }
+        .leftborder { border-left: 3px solid #090; }
+        .select .head { margin-bottom: 5px; }
+        .select .selkey { cursor: pointer; display: inline-block; padding: 2px 10px; border: 1px solid #CCC; border-bottom: none; }
+        .select .selkey[data-sel="on"] { background-color: #EEE; }
+        .select .body { border: 1px solid #CCC; padding: 5px; }
+        a.goto { cursor: pointer; text-decoration: underline; color: blue; }
+    </style>
+</head>
+<body>
+
+    <h1>UBB.js Test Page</h1>
+
+    <div id="editor">
+        <div id="btnArea"></div>
+        <textarea id="input">[div=#ffffcc|float=right|width=400px]This is a div with complex styles.[/div]
+
+[r]This text should be raw. [b]This bold tag should NOT be rendered.[/b][/r]
+
+[a=anchor1]
+[select]
+[choice=on]
+    [title]Tab 1[/title]
+    [content]Content of tab 1.[/content]
+[/choice]
+[choice]
+    [title]Tab 2[/title]
+    [content]Content of tab 2, with an anchor. [a=anchor2][/content]
+[/choice]
+[/select]
+
+[toggle=off]
+[title]Hidden Content[/title]
+[content]
+This content is initially hidden. It also contains an anchor. [a=anchor3]
+[/content]
+[/toggle]
+
+[goto=anchor1]Go to start[/goto]
+[goto=anchor2]Go to Tab 2[/goto]
+[goto=anchor3]Go to hidden content[/goto]
+</textarea>
+    </div>
+
+    <button id="generate">Generate</button>
+
+    <div id="output"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnArea = document.getElementById('btnArea');
+            const textArea = document.getElementById('input');
+            const generateBtn = document.getElementById('generate');
+            const outputDiv = document.getElementById('output');
+
+            const ubb = new UBB(btnArea, textArea);
+
+            generateBtn.addEventListener('click', () => {
+                const inputText = textArea.value;
+                console.log('--- UBB Generation Triggered ---');
+                console.log('Input Text:', inputText);
+                try {
+                    const html = ubb.express(inputText);
+                    console.log('Output HTML:', html);
+                    outputDiv.innerHTML = html;
+                    ubb.awake(outputDiv); // Activate dynamic elements
+                    console.log('--- UBB Generation Successful ---');
+                } catch (e) {
+                    console.error('Error during UBB express:', e);
+                    outputDiv.textContent = 'Error: ' + e.message;
+                }
+            });
+
+            // Initial generation on load
+            generateBtn.click();
+        });
+    </script>
+
+</body>
+</html>
