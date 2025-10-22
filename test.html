@@ -24,6 +24,10 @@
         .select .selkey[data-sel="on"] { background-color: #EEE; }
         .select .body { border: 1px solid #CCC; padding: 5px; }
         a.goto { cursor: pointer; text-decoration: underline; color: blue; }
+        .tabs { border: 1px solid #ccc; padding: 5px; margin: 5px 0; }
+        .tab-buttons button { padding: 5px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; }
+        .tab-buttons button.active { background: #fff; border-bottom: 1px solid #fff; }
+        .tab-contents { border: 1px solid #ccc; padding: 10px; border-top: none; }
     </style>
 </head>
 <body>
@@ -34,28 +38,24 @@
         <div id="btnArea"></div>
         <textarea id="input">[div=#ffffcc|float=right|width=400px]This is a div with complex styles.[/div]
 
-[r]This text should be raw. [b]This bold tag should NOT be rendered.[/b][/r]
+[r][b][/r] should become [b]
+[r][b]bold[/b][/r] should become [r]&lt;b&gt;bold&lt;/b&gt;[/r]
 
-[a=anchor1]
-[select]
-[choice=on]
-    [title]Tab 1[/title]
-    [content]Content of tab 1.[/content]
-[/choice]
-[choice]
-    [title]Tab 2[/title]
-    [content]Content of tab 2, with an anchor. [a=anchor2][/content]
-[/choice]
-[/select]
+[tabs]
+[tab=Tab 1]Content for the first tab.[/tab]
+[tab=Tab 2]
+Content for the second tab.
+[a=anchor2]Anchor inside a tab.[/a]
+[/tab]
+[/tabs]
 
-[toggle=off]
+[toggle]
 [title]Hidden Content[/title]
 [content]
 This content is initially hidden. It also contains an anchor. [a=anchor3]
 [/content]
 [/toggle]
 
-[goto=anchor1]Go to start[/goto]
 [goto=anchor2]Go to Tab 2[/goto]
 [goto=anchor3]Go to hidden content[/goto]
 </textarea>
@@ -76,18 +76,9 @@ This content is initially hidden. It also contains an anchor. [a=anchor3]
 
             generateBtn.addEventListener('click', () => {
                 const inputText = textArea.value;
-                console.log('--- UBB Generation Triggered ---');
-                console.log('Input Text:', inputText);
-                try {
-                    const html = ubb.express(inputText);
-                    console.log('Output HTML:', html);
-                    outputDiv.innerHTML = html;
-                    ubb.awake(outputDiv); // Activate dynamic elements
-                    console.log('--- UBB Generation Successful ---');
-                } catch (e) {
-                    console.error('Error during UBB express:', e);
-                    outputDiv.textContent = 'Error: ' + e.message;
-                }
+                const html = ubb.express(inputText);
+                outputDiv.innerHTML = html;
+                ubb.awake(outputDiv);
             });
 
             // Initial generation on load

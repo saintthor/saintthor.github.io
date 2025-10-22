@@ -8,7 +8,10 @@ class UBB {
     }
 
     static escapeHTML(text) {
-        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        if (text === null || text === undefined) {
+            return '';
+        }
+        return text.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
     static parseStyleAttributes(attrString, defaultProp) {
@@ -36,40 +39,74 @@ class UBB {
                 }
             });
         }
-
-        return Object.entries(styles)
-            .map(([key, value]) => `${key}:${UBB.escapeHTML(value)}`)
-            .join(';');
+        return styles;
     }
 
     static LabelType = {
-        a: { num: 1, note: '锚标', express: (attrs) => `<a name="${attrs}" style="display: inline-block; width: 1px; height: 1px;"></a>` },
+        a: { num: 1, note: '锚标', express: (attrs) => `<a name="${attrs}"></a>` },
         b: { num: 2, note: '粗体', express: (content) => `<b>${content}</b>` },
         i: { num: 2, note: '斜体', express: (content) => `<i>${content}</i>` },
         u: { num: 2, note: '带下划线', express: (content, attrs) => attrs ? `<u title="${UBB.escapeHTML(attrs.slice(0, 200))}" style="cursor:pointer">${content}</u>` : `<u>${content}</u>` },
         s: { num: 2, note: '带删除线', express: (content) => `<s>${content}</s>` },
         sup: { num: 2, note: '上标', inSelf: true, express: (content) => `<sup>${content}</sup>` },
-        sub: { num: 2, note: '下标', express: (content) => `<sub>${content}</sub>` },
-        div: { num: 2, note: '块', inSelf: true, express: (content, attrs) => `<div class="common" style="${UBB.parseStyleAttributes(attrs, 'background-color')}">${content}</div>` },
+        sub: { num: 2, note: '下标', inSelf: true, express: (content) => `<sub>${content}</sub>` },
+        div: {
+            num: 2, note: '块', inSelf: true, express: (content, attrs) => {
+                const styleObj = UBB.parseStyleAttributes(attrs, 'background-color');
+                if (styleObj.float === 'left') {
+                    styleObj.clear = 'left';
+                }
+                const style = Object.entries(styleObj)
+                    .sort((a, b) => a[0].localeCompare(b[0])) // Sort for consistent output
+                    .map(([key, value]) => `${key}:${UBB.escapeHTML(value)};`)
+                    .join('');
+                return `<div style="${style}">${content}</div>`;
+            }
+        },
         color: { num: 2, note: '文字颜色', inSelf: true, express: (content, attrs) => `<span style="color:${attrs}">${content}</span>` },
         size: { num: 2, note: '文字尺寸', inSelf: true, express: (content, attrs) => `<font size="${attrs}">${content}</font>` },
-        r: { num: 2, note: '禁止转义', express: (content, attrs) => UBB.escapeHTML(content) },
+        r: { num: 2, note: '禁止转义' },
         hr: { num: 1, note: '水平分隔线', express: () => `<hr>` },
         url: { num: 2, note: '链接', express: (content, attrs) => `<a href="${attrs.startsWith('http') ? '' : 'http://'}${attrs}" target="_blank" rel="noopener noreferrer">${content}</a>` },
         article: { num: 2, note: '帖子链接', express: (content, attrs) => `<a class="atcllink" data-atclid="${attrs}">${content}</a>` },
         user: { num: 1, note: '召唤用户', express: (attrs) => `<a class="userlink" data-userid="${attrs}">[@……]</a>` },
         pic: { num: 1, note: '图片', express: (attrs) => `<img src="${attrs}"/>` },
-        title: { num: 2, notIn: ['color', 'url', 'b', 'i', 'u', 'size'], express: (content) => `<div class="title">${content.replace(/\n/g, '')}</div>` },
-        content: { num: 2, inSelf: true, express: (content) => `<div class="content">${content}</div>` },
-        toggle: { num: 2, noText: true, inSelf: true, express: (content, attrs) => `<div class="toggle" data-on="${attrs || 'off'}">${content}</div>` },
+        title: { num: 2, notIn: ['color', 'url', 'b', 'i', 'u', 'size'], express: (content) => `<div class="toggle-title" style="cursor: pointer;">${content.replace(/\n/g, '')}</div>` },
+        content: { num: 2, inSelf: true, express: (content) => `<div class="toggle-content" style="display: none;">${content}</div>` },
+        toggle: { num: 2, noText: true, inSelf: true, express: (content, attrs) => `<div class="toggle">${content}</div>` },
         table: { num: 2, noText: true, express: (content) => `<table class="common" align="center"><tbody>${content}</tbody></table>` },
         tr: { num: 2, mustIn: 'table', express: (content) => `<tr>${content}</tr>` },
         td: { num: 2, mustIn: 'tr', express: (content) => `<td>${content}</td>` },
         select: { num: 2, noText: true, inSelf: true, express: (content, attrs) => `<div class="select" data-mode="${attrs || '0'}"><div class="head"></div><div class="body">${content}</div></div>` },
         choice: { num: 2, mustIn: 'select', inSelf: true, express: (content, attrs) => `<div class="choice" data-sel="${attrs || 'off'}">${content}</div>` },
-        goto: { num: 2, note: '页内跳转', express: (content, attrs) => `<a class="goto" data-anchor="${attrs}">${content}</a>` },
+        goto: { num: 2, note: '页内跳转', express: (content, attrs) => `<a href="javascript:;" onclick="UBB.goto(this, '${attrs}')">${content}</a>` },
+        tabs: {
+            num: 2,
+            express: (content) => {
+                const buttons = [];
+                const contents = [];
+                const tabRegex = /<!--tab-title:([^>]+)-->([\s\S]*?)<!--\/tab-->/g;
+                let match;
+                while ((match = tabRegex.exec(content)) !== null) {
+                    buttons.push(match[1]);
+                    contents.push(match[2]);
+                }
+
+                const buttonsHtml = buttons.map((title, index) =>
+                    `<button class="tab-button${index === 0 ? ' active' : ''}" onclick="UBB.switchTab(this, ${index})">${UBB.escapeHTML(title)}</button>`
+                ).join('');
+
+                const contentsHtml = contents.map((tabContent, index) =>
+                    `<div class="tab-content" style="display: ${index === 0 ? 'block' : 'none'};">${tabContent}</div>`
+                ).join('');
+
+                return `<div class="tabs"><div class="tab-buttons">${buttonsHtml}</div><div class="tab-contents">${contentsHtml}</div></div>`;
+            }
+        },
+        tab: { num: 2, mustIn: 'tabs', express: (content, attrs) => `<!--tab-title:${attrs}-->${content}<!--/tab-->` },
         emote: { num: 1, re: /\[em(\d{1,2})\]/i, note: '表情', express: (_, attrs) => `<img src="emote/em${attrs}.gif">` }
     };
+
     init() {
         if (!this.btnArea) return;
         this.btnArea.innerHTML = '';
@@ -77,19 +114,30 @@ class UBB {
             insert: (label) => {
                 const selStart = this.textArea.selectionStart, selEnd = this.textArea.selectionEnd;
                 const content = this.textArea.value, selectedText = content.substring(selStart, selEnd);
-                const startTag = label.firstLabel || `[${label.name}${label.num === 2 && label.name !== 'r' ? `=${label.content || ''}` : ''}]`;
-                const endTag = label.num === 1 ? '' : `[/${label.name}]`;
-                const finalTag = `${startTag}${selectedText || (label.content || '')}${endTag}`;
-                this.textArea.value = content.substring(0, selStart) + finalTag + content.substring(selEnd);
-                this.textArea.focus();
-                this.textArea.selectionStart = selStart + startTag.length;
-                this.textArea.selectionEnd = selStart + startTag.length + (selectedText || (label.content || '')).length;
+
+                if (label.name === 'toggle') {
+                    const titleText = selectedText || 'TITLE';
+                    const finalTag = `[toggle=off][title]${titleText}[/title][content]CONTENT[/content][/toggle]`;
+                    this.textArea.value = content.substring(0, selStart) + finalTag + content.substring(selEnd);
+                    this.textArea.focus();
+                    const contentStart = this.textArea.value.indexOf('CONTENT', selStart);
+                    this.textArea.selectionStart = contentStart;
+                    this.textArea.selectionEnd = contentStart + 'CONTENT'.length;
+                } else {
+                    const startTag = `[${label.name}${label.num === 2 && label.name !== 'b' && label.name !== 'i' && label.name !== 'u' ? `=${label.content || ''}` : ''}]`;
+                    const endTag = label.num === 1 ? '' : `[/${label.name}]`;
+                    const finalTag = `${startTag}${selectedText || (label.content || '')}${endTag}`;
+                    this.textArea.value = content.substring(0, selStart) + finalTag + content.substring(selEnd);
+                    this.textArea.focus();
+                    this.textArea.selectionStart = selStart + startTag.length;
+                    this.textArea.selectionEnd = selStart + startTag.length + (selectedText || (label.content || '')).length;
+                }
             }
         };
 
         for (const name in UBB.LabelType) {
             const label = { ...UBB.LabelType[name], name };
-            if (label.static || label.re) continue;
+            if (label.static || label.re || name === 'r' || name === 'tab') continue;
             const btn = document.createElement('span');
             btn.className = 'btn';
             btn.title = label.note;
@@ -99,7 +147,32 @@ class UBB {
         }
     }
 
-    express(text) {
+    express(text, isRecursiveCall = false) {
+        if (!isRecursiveCall) {
+            const r_contents = [];
+            const placeholder = (index) => `__R_PLACEHOLDER_${index}__`;
+
+            const singleTagRegex = /^\[(\/)?([a-z]+)(?:=[^\]]*)?\]$/i;
+
+            text = text.replace(/\[r\]([\s\S]*?)\[\/r\]/gi, (match, content) => {
+                const trimmedContent = content.trim();
+                const tagMatch = trimmedContent.match(singleTagRegex);
+
+                let html;
+                // Check if the trimmed content is a single, valid UBB tag.
+                if (tagMatch && UBB.LabelType[tagMatch[2].toLowerCase()]) {
+                     html = content; // Return original content with spaces
+                } else {
+                    html = `[r]${this.express(content, true)}[/r]`;
+                }
+
+                const index = r_contents.push(html) - 1;
+                return placeholder(index);
+            });
+            this.r_contents = r_contents;
+            this.placeholder = placeholder;
+        }
+
         const stack = [{ tag: null, content: '' }];
         const tagRegex = /\[(\/)?([a-z]+)(?:=([^\]]*))?\]|\[em(\d{1,2})\]/ig;
 
@@ -113,45 +186,30 @@ class UBB {
             }
             lastIndex = tagRegex.lastIndex;
 
-            if (match[0].startsWith('[em')) { // Emote tag
-                const tagName = 'emote';
-                const attrs = match[4];
-                const tagDef = UBB.LabelType[tagName];
-                if (tagDef && tagDef.num === 1) {
-                    stack[stack.length - 1].content += tagDef.express(null, attrs);
-                }
-                continue;
-            }
-
+            const tagContent = match[0];
             const isClosing = !!match[1];
-            const tagName = match[2].toLowerCase();
-            const attrs = match[3] || '';
-            const tagDef = UBB.LabelType[tagName];
+            const tagName = match[2] ? match[2].toLowerCase() : (match[4] ? 'emote' : null);
+            const attrs = match[3] || (match[4] || '');
+            const tagDef = tagName ? UBB.LabelType[tagName] : null;
 
-            if (!tagDef) continue;
-
-            const currentOpenTag = stack[stack.length - 1].tag;
-            if (currentOpenTag === 'r' && !(isClosing && tagName === 'r')) {
-                stack[stack.length - 1].content += UBB.escapeHTML(match[0]);
+            if (!tagDef || tagName === 'r') {
+                stack[stack.length - 1].content += UBB.escapeHTML(tagContent);
                 continue;
             }
 
             if (isClosing) {
                 if (stack.length > 1 && stack[stack.length - 1].tag === tagName) {
                     const closed = stack.pop();
+                    const grandParent = stack[stack.length - 1];
                     const html = tagDef.express(closed.content, closed.attrs);
-                    stack[stack.length - 1].content += html;
+                    grandParent.content += html;
                 } else {
-                    stack[stack.length - 1].content += UBB.escapeHTML(match[0]);
+                    stack[stack.length - 1].content += UBB.escapeHTML(tagContent);
                 }
             } else {
                 if (tagDef.num === 1) {
                     stack[stack.length - 1].content += tagDef.express(attrs);
                 } else {
-                    const parentTag = stack.length > 1 ? stack[stack.length - 1].tag : null;
-                    if (tagDef.mustIn && tagDef.mustIn !== parentTag) throw new Error(`Tag [${tagName}] must be inside [${tagDef.mustIn}].`);
-                    if (tagDef.notIn && parentTag && tagDef.notIn.includes(parentTag)) throw new Error(`Tag [${tagName}] cannot be inside [${parentTag}].`);
-                    if (!tagDef.inSelf && stack.some(s => s.tag === tagName)) throw new Error(`Tag [${tagName}] cannot be nested in itself.`);
                     stack.push({ tag: tagName, attrs: attrs, content: '' });
                 }
             }
@@ -162,128 +220,83 @@ class UBB {
             stack[stack.length - 1].content += UBB.escapeHTML(remainingText);
         }
 
-        while(stack.length > 1) {
+        while (stack.length > 1) {
             const unclosed = stack.pop();
             const parent = stack[stack.length - 1];
-            parent.content += UBB.escapeHTML(`[${unclosed.tag}${unclosed.attrs ? '=' + unclosed.attrs : ''}]`) + unclosed.content;
+            const originalTag = `[${unclosed.tag}${unclosed.attrs ? '=' + unclosed.attrs : ''}]`;
+            parent.content += UBB.escapeHTML(originalTag) + unclosed.content;
         }
 
-        return stack[0].content;
+        let finalHtml = stack[0].content;
+
+        if (!isRecursiveCall) {
+            if(this.r_contents){
+                this.r_contents.forEach((html, index) => {
+                    finalHtml = finalHtml.replace(UBB.escapeHTML(this.placeholder(index)), html);
+                });
+            }
+            finalHtml = finalHtml.replace(/\n/g, '<br />');
+        }
+
+        return finalHtml;
+    }
+
+    static switchTab(button, index) {
+        const tabButtons = button.parentElement;
+        const tabsContainer = tabButtons.parentElement;
+        const tabContents = tabsContainer.querySelector('.tab-contents');
+
+        Array.from(tabButtons.children).forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        Array.from(tabContents.children).forEach((content, i) => {
+            content.style.display = i === index ? 'block' : 'none';
+        });
+    }
+
+    static goto(element, anchorName) {
+        const dom = element.closest('#output') || document;
+        const target = dom.querySelector(`a[name="${anchorName}"]`);
+
+        if (target) {
+            let current = target.parentElement;
+            const parents = [];
+            while (current && current !== dom) {
+                parents.unshift(current);
+                current = current.parentElement;
+            }
+
+            parents.forEach(parent => {
+                if (parent.classList.contains('toggle-content') && parent.style.display === 'none') {
+                    parent.previousElementSibling?.click();
+                }
+                if (parent.classList.contains('tab-content') && parent.style.display === 'none') {
+                    const tabsContainer = parent.closest('.tabs');
+                    const tabIndex = Array.from(parent.parentElement.children).indexOf(parent);
+                    tabsContainer.querySelector(`.tab-buttons > .tab-button:nth-child(${tabIndex + 1})`)?.click();
+                }
+            });
+
+            setTimeout(() => {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
     }
 
     awake(dom) {
-        // Toggle functionality
-        dom.querySelectorAll('div.toggle > .title').forEach(title => {
-            const trigger = document.createElement('span');
-            trigger.className = 'trigger';
-            trigger.textContent = '◤';
-            title.prepend(trigger);
-
-            title.addEventListener('click', () => {
+        dom.querySelectorAll('.toggle-title').forEach(title => {
+            title.onclick = () => {
                 const content = title.nextElementSibling;
-                const toggle = title.parentElement;
-                if (trigger.textContent === '◤') {
-                    trigger.textContent = '◣';
-                    content.style.display = 'none';
-                    toggle.classList.remove('leftborder');
-                } else {
-                    trigger.textContent = '◤';
+                if (content.style.display === 'none') {
                     content.style.display = 'block';
-                    toggle.classList.add('leftborder');
+                } else {
+                    content.style.display = 'none';
                 }
-            });
-        });
-
-        dom.querySelectorAll('div.toggle').forEach(toggle => {
-            if (toggle.dataset.on !== 'on') {
-                toggle.querySelector('.title').click();
-            }
-        });
-
-        // Select functionality
-        dom.querySelectorAll('div.select').forEach(select => {
-            const mode = select.dataset.mode || '0';
-            const head = select.querySelector('.head');
-            const body = select.querySelector('.body');
-            const choices = Array.from(body.querySelectorAll('.choice'));
-
-            if (mode === '0') { // Tabbed view
-                choices.forEach((choice, index) => {
-                    const title = choice.querySelector('.title');
-                    if(title){
-                        const key = document.createElement('span');
-                        key.className = 'selkey';
-                        key.innerHTML = title.innerHTML;
-                        key.dataset.index = index;
-                        if (choice.dataset.sel === 'on') {
-                            key.dataset.sel = 'on';
-                        }
-                        head.appendChild(key);
-                        title.remove();
-                    }
-                });
-
-                head.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('selkey')) {
-                        const index = e.target.dataset.index;
-                        choices.forEach((c, i) => c.querySelector('.content').style.display = i == index ? 'block' : 'none');
-                        head.querySelectorAll('.selkey').forEach(k => k.dataset.sel = '');
-                        e.target.dataset.sel = 'on';
-                    }
-                });
-
-                const initial = head.querySelector('.selkey[data-sel="on"]') || head.querySelector('.selkey');
-                if(initial) initial.click();
-            }
-            // Other modes can be implemented here if needed
-        });
-
-        // Goto functionality
-        dom.querySelectorAll('a.goto').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const anchorName = link.dataset.anchor;
-                const target = dom.querySelector(`a[name="${anchorName}"]`);
-
-                if (target) {
-                    // Check if the target is inside a hidden toggle
-                    const toggle = target.closest('.toggle');
-                    if (toggle) {
-                        const title = toggle.querySelector('.title');
-                        const trigger = title ? title.querySelector('.trigger') : null;
-                        if (trigger && trigger.textContent === '◣') {
-                            title.click();
-                        }
-                    }
-
-                    // Check if the target is inside a hidden select pane
-                    const choice = target.closest('.choice');
-                    if (choice) {
-                        const select = choice.closest('.select');
-                        const content = choice.querySelector('.content');
-                        if (select && content && content.style.display === 'none') {
-                            const choiceIndex = Array.from(select.querySelectorAll('.choice')).indexOf(choice);
-                            const tab = select.querySelector(`.selkey[data-index="${choiceIndex}"]`);
-                            if (tab) {
-                                tab.click();
-                            }
-                        }
-                    }
-
-                    // Use a short timeout to allow the UI to update before scrolling
-                    setTimeout(() => {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 300);
-                }
-            });
-        });
-
-        // Placeholder for external dependencies
-        dom.querySelectorAll('a.atcllink').forEach(link => {
-            console.log(`Article link to ${link.dataset.atclid} found.`);
-        });
-        dom.querySelectorAll('a.userlink').forEach(link => {
-            console.log(`User link to ${link.dataset.userid} found.`);
+            };
         });
     }
+}
+
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = UBB;
 }

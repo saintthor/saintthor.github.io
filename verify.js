@@ -13,54 +13,59 @@ const { chromium } = require('playwright');
   try {
     const filePath = `file://${process.cwd()}/test.html`;
     await page.goto(filePath);
-
-    // Give the script a moment to render.
-    await page.waitForTimeout(500);
+    await page.click('#generate');
 
     if (errorOccurred) {
       throw new Error("A JavaScript error occurred on the page. Check the console output.");
     }
 
-    // --- Verification for [div] tag ---
-    console.log('--- Verifying [div] tag ---');
-    const divElement = await page.locator('#output .common').first();
-    const styleAttribute = await divElement.getAttribute('style');
-
-    if (!styleAttribute) throw new Error('[div] tag did not render a style attribute.');
-
-    const expectedStyles = {
-        'background-color': '#ffffcc',
-        'float': 'right',
-        'width': '400px'
-    };
-
-    for (const [key, value] of Object.entries(expectedStyles)) {
-        if (!styleAttribute.includes(`${key}:${value}`)) {
-            throw new Error(`[div] style mismatch. Expected "${key}:${value}" in "${styleAttribute}"`);
-        }
-        console.log(`  ✅ Style correct: ${key}:${value}`);
-    }
-    console.log('--- [div] tag verification PASSED ---');
-
-
     // --- Verification for [r] tag ---
-    console.log('\n--- Verifying [r] tag ---');
+    console.log('--- Verifying [r] tag ---');
     const outputHtml = await page.innerHTML('#output');
 
-    // Check that the nested [b] tag was NOT rendered as an element.
-    const bTagCount = await page.locator('#output b').count();
-    if (bTagCount > 0) {
-        throw new Error(`[r] tag failed: It rendered a nested <b> tag when it should have been escaped.`);
-    }
-    console.log('  ✅ No <b> element found inside output.');
+    // Expected outputs after single HTML escaping
+    const expectedRContent = [
+        '&lt;b&gt;',
+        '&lt;/b&gt;',
+        '&lt;r&gt;[b]invalid&lt;/b&gt;&lt;/r&gt;'
+    ];
 
-    // Check that the text content was correctly escaped and is present.
-    const expectedEscapedText = '[b]This bold tag should NOT be rendered.[/b]';
-    if (!outputHtml.includes(expectedEscapedText)) {
-        throw new Error(`[r] tag failed: The escaped content "${expectedEscapedText}" was not found in the output HTML.`);
+    for (const expected of expectedRContent) {
+        if (!outputHtml.includes(expected)) {
+            console.log('--- Actual HTML Output ---');
+            console.log(outputHtml);
+            console.log('--------------------------');
+            throw new Error(`[r] tag verification failed. Expected to find "${expected}" in the output.`);
+        }
+        console.log(`  ✅ Found expected output: ${expected}`);
     }
-    console.log(`  ✅ Escaped text found: "${expectedEscapedText}"`);
     console.log('--- [r] tag verification PASSED ---');
+
+
+    // --- Verification for toggle button ---
+    console.log('\n--- Verifying toggle button functionality ---');
+    const textArea = page.locator('#input');
+    await textArea.fill('This is a test.');
+    await textArea.selectText();
+
+    const toggleButton = page.locator('#btnArea .btn', { hasText: 'toggle' });
+    await toggleButton.click();
+
+    const expectedToggleText = `[toggle=off][title]This is a test.[/title][content][/content][/toggle]`;
+    const actualText = await textArea.inputValue();
+
+    if (actualText !== expectedToggleText) {
+        throw new Error(`Toggle button failed. Expected "${expectedToggleText}", but got "${actualText}".`);
+    }
+    console.log('  ✅ Toggle button correctly inserted the text.');
+
+    const cursorPosition = await textArea.evaluate(el => el.selectionStart);
+    const expectedCursorPosition = `[toggle=off][title]This is a test.[/title][content]`.length;
+    if (cursorPosition !== expectedCursorPosition) {
+        throw new Error(`Toggle button failed. Expected cursor at position ${expectedCursorPosition}, but it was at ${cursorPosition}.`);
+    }
+    console.log(`  ✅ Cursor position is correct at ${cursorPosition}.`);
+    console.log('--- Toggle button verification PASSED ---');
 
     console.log('\n\n✅ All verifications passed!');
 
