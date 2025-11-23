@@ -151,11 +151,18 @@
     <div class="canvtext" style="top:10px; left:480px;">right</div>
     <canvas width="400" height="400"></canvas>
     <div>
-        <span>环管势能式热机</span>&emsp;
+        <span>空管式热机</span>&emsp;
         <button>Start</button>
     </div>
-    <div>
-        <p>通过气缸的运动对外做功。</p>
+    <div style="width:400px;">
+        <p>环形管内充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
+        <p>环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。</p>
+        <p>每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。</p>
+        <p>离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。</p>
+        <p>在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。</p>
+        <p>离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。</p>
+        <p>左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。</p>
+        <p>由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。</p>
     </div>
 </div>
 <hr>
@@ -203,6 +210,21 @@ class Carnot
         {
             this.CTX = this.Canvas.getContext( '2d' );
         }
+        else
+        {
+            let loop = async () =>
+            {
+                if( this.Run === 0 )
+                {
+                    this.StaticProcess();
+                }
+                await new Promise( r => setTimeout( r, this.Interval * 8 ));
+                loop();
+            };
+            
+            loop();
+        }
+        
         this.Angle = 0;
         this.Interval = 40;
         this.Run = -1;
@@ -226,11 +248,11 @@ class Carnot
             {
                 console.log( "Stopping animation loop." );
                 await new Promise( r => setTimeout( r, this.Interval * 4 ));
-                //return;
+                return;
             }
             else
             {
-                this.Draw(); // Call the drawing/rendering method
+                this.Draw();
                 this.Angle += this.IsEngine ? 0.01 : -0.01;
                 if( this.Angle < 0 )
                 {
@@ -690,7 +712,7 @@ class RingEngine extends Carnot
         this.mainValveSize = 1.2;
         this.smallValveSize = 0.8;
         this.smallValveOffsetRatio = 0.02;
-        this.rotationSpeed = 1.0;
+        //this.rotationSpeed = 1.0;
         this.DiffAngle = 0;
         this.liquidLengthRad = Math.PI; // 180度液体区域
         this.activeZoneStartRad = Math.PI; // 从π开始
@@ -1065,7 +1087,195 @@ class RingEngine extends Carnot
         }
 
         // 5. 渲染
-        this.renderer.render(this.scene, this.camera);
+        this.renderer.render( this.scene, this.camera );
+    }
+}
+
+class EmptyEngine extends Carnot
+{
+    constructor( Id, isEngine )
+    {
+        super( Id, isEngine );
+
+        // --- 1. 场景初始化 ---
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color( 0xfff0ff );
+
+        this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
+        this.camera.position.set( -10, 10, 135 );
+
+        this.renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
+        this.renderer.setSize( 400, 400 );
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+        if( typeof THREE.OrbitControls !== 'undefined' )
+        {
+            this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+            this.Controls.enableDamping = true;
+        }
+
+        //const controls = new OrbitControls( camera, renderer.domElement );
+        //controls.enableDamping = true;
+
+        // --- 2. 灯光系统 ---
+        const ambientLight = new THREE.AmbientLight( 0xffffff, 0.6 );
+        this.scene.add( ambientLight );
+
+        const mainLight = new THREE.DirectionalLight( 0xffffff, 1.2 );
+        mainLight.position.set( 10, 20, 20 );
+        mainLight.castShadow = true;
+        this.scene.add( mainLight );
+
+        const backLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        backLight.position.set( -10, -10, -10 );
+        this.scene.add( backLight );
+
+        // --- 3. 几何体构建 ---
+        
+        // 3.1 外层环形管
+        const tubeRadius = 30;
+        const tubeThickness = 5;
+        const torusGeometry = new THREE.TorusGeometry( tubeRadius, tubeThickness, 24, 100 );
+        
+        const torusMaterial = new THREE.MeshPhysicalMaterial( {
+            color: 0x88ccff,
+            metalness: 0.1,
+            roughness: 0.1,
+            transmission: 0.7,
+            thickness: 1.5,
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide
+        } );
+        this.torus = new THREE.Mesh( torusGeometry, torusMaterial );
+        this.scene.add( this.torus );
+
+        // 3.2 隔板 (阀门)
+        const separatorCount = 12;
+        this.separators = [];
+        this.separatorGroup = new THREE.Group();
+        this.scene.add( this.separatorGroup );
+
+        const sepRadius = tubeThickness * 0.92; 
+        const sepThickness = 0.3; 
+        const cylinderGeo = new THREE.CylinderGeometry( sepRadius, sepRadius, sepThickness, 32 );
+        const cylinderMat = new THREE.MeshStandardMaterial( {
+            color: 0xffee44,
+            roughness: 0.4,
+            metalness: 0.3
+        } );
+
+        for( let i = 0; i < separatorCount; i++ )
+        {
+            const angle = ( i / separatorCount ) * Math.PI * 2;
+            // --- Pivot (枢轴) ---
+            const pivot = new THREE.Object3D();
+            pivot.position.x = Math.cos( angle ) * tubeRadius;
+            pivot.position.y = Math.sin( angle ) * tubeRadius;
+            pivot.rotation.z = angle + Math.PI / 2;
+
+            // --- Valve (隔板本体) ---
+            const valve = new THREE.Mesh( cylinderGeo, cylinderMat );
+
+            pivot.add( valve );
+            this.separatorGroup.add( pivot );
+
+            this.separators.push( {
+                pivot: pivot,
+                valve: valve,
+                baseAngle: angle
+            } );
+        }
+
+        const arcRadius = 40; // Adjust radius as needed
+        const hotArcGeometry = new THREE.BufferGeometry().setFromPoints(
+         new THREE.ArcCurve( 0, 0, arcRadius, 3 * Math.PI / 2, 2 * Math.PI, false ).getPoints( 50 )
+        );
+        const hotArcMaterial = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 3 } );
+        const hotArc = new THREE.Line( hotArcGeometry, hotArcMaterial );
+        hotArc.position.z = -1; // Push back slightly
+        this.scene.add( hotArc );
+
+        const coldArcGeometry = new THREE.BufferGeometry().setFromPoints(
+         new THREE.ArcCurve( 0, 0, arcRadius, Math.PI / 2, Math.PI, false ).getPoints( 50 )
+        );
+        const coldArcMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff, linewidth: 3 } );
+        const coldArc = new THREE.Line( coldArcGeometry, coldArcMaterial );
+        coldArc.position.z = -1; // Push back slightly
+        this.scene.add( coldArc );
+
+        this.scene.add( new THREE.AxesHelper( 40 ));
+        this.Draw();
+    }
+
+    Draw3d()
+    {
+        if( !this.renderer || !this.scene || !this.camera )
+        {
+            console.log("渲染器、场景或相机未准备好:", this.renderer, this.scene, this.camera);
+            return;
+        }
+
+        //const delta = this.clock.getDelta();
+        
+        const PI = Math.PI;
+        const TWO_PI = Math.PI * 2;
+        const BOTTOM_ANGLE = -PI / 2; // 6点钟
+        const SEGMENT = TWO_PI / 12; 
+        const ANGLE_OPEN = 0;
+        const ANGLE_CLOSED = Math.PI / 2;
+        
+        this.torus.rotation.z = this.Angle;
+        this.separatorGroup.rotation.z = this.Angle;
+
+        //function updateValves() {
+            this.separators.forEach(item => {
+                // 1. 计算当前世界角度
+                let currentWorldAngle = (item.baseAngle + this.separatorGroup.rotation.z) % TWO_PI;
+                
+                // 归一化到 -PI ~ PI
+                if (currentWorldAngle > PI) currentWorldAngle -= TWO_PI;
+                if (currentWorldAngle < -PI) currentWorldAngle += TWO_PI;
+
+                // 2. 计算与6点钟的距离
+                let diff = currentWorldAngle - BOTTOM_ANGLE;
+                
+                if (diff > PI) diff -= TWO_PI;
+                if (diff < -PI) diff += TWO_PI;
+
+                let targetRotation = ANGLE_OPEN; 
+
+                // 3. 状态控制
+                
+                // A区间 [7点 -> 6点]: 渐渐关闭 (Open -> Closed)
+                // diff: -30度 -> 0
+                if (diff >= -2 * SEGMENT && diff <= -SEGMENT ) {
+                    const ratio = (Math.abs(diff) / SEGMENT);
+                    // ratio: 0(Open) -> 1(Closed)
+                    targetRotation = ANGLE_OPEN * (1 - ratio) + ANGLE_CLOSED * ratio;
+                } 
+                // B区间 [6点 -> 5点]: 保持关闭 (Hold Closed)
+                // diff: 0 -> 30度
+                else if (diff > -SEGMENT && diff <= 0) {
+                    targetRotation = ANGLE_CLOSED;
+                }
+                // C区间 [5点 -> 4点]: 渐渐开启 (Closed -> Open)
+                // diff: 30度 -> 60度
+                else if ( diff > 0 && diff <= SEGMENT ) {
+                    const ratio = 1 - (diff - SEGMENT) / SEGMENT;
+                    // ratio: 0(Closed) -> 1(Open)
+                    targetRotation = ANGLE_CLOSED * (1 - ratio) + ANGLE_OPEN * ratio;
+                }
+                else {
+                    targetRotation = ANGLE_OPEN;
+                }
+
+                item.valve.rotation.z = targetRotation;
+            });
+        //}
+        
+        this.renderer.render( this.scene, this.camera );
     }
 }
 
@@ -1073,6 +1283,7 @@ new RotEngine( 'rotate', 1 );
 new RotEngine( 'rotate2', 0 );
 new ReciEngine( 'reciprocate', 1 );
 new RingEngine( 'ring', 1 );
+new EmptyEngine( 'ring2', 1 );
 </script>
 </body>
 </html>
