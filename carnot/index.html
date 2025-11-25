@@ -155,16 +155,35 @@
         <button>Start</button>
     </div>
     <div style="width:400px;">
-        <p>环形管内充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
+        <p>环形管里没有活塞，充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
         <p>环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。</p>
         <p>每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。</p>
         <p>离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。</p>
         <p>在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。</p>
         <p>离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。</p>
-        <p>左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。</p>
+        <p>左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。也可以不设阀门，改为在环形管内加涡轮发电。</p>
         <p>由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。</p>
     </div>
 </div>
+
+<hr>
+<div id="switch" class="container">
+    <div class="canvtext" style="top:10px; left:10px;">left</div>
+    <div class="canvtext" style="top:10px; left:480px;">right</div>
+    <canvas width="600" height="600"></canvas>
+    <div>
+        <span>导热切换</span>&emsp;
+        <button>Start</button>
+    </div>
+    <div>
+        <p>前面的各种卡诺热机都面临导热切换的问题。气缸时而导热，时而绝热，由于现实固体材料的比热容太大，导热切换会造成明显的损耗。</p>
+        <p>这是一个高效的切换方案。气缸两侧各有一个固定腔。左侧为热腔，保持在高温；右侧为冷腔，保持在低温。</p>
+        <p>气缸与两腔之间各有两条通道。前面的通道上有阀门。后面的通道内有一个活塞，用于保证三个腔的压强总是相等。</p>
+        <p>当两个阀门都关闭时，气缸内气体处于绝热过程。当左阀门开启，气缸与热腔相连，处于等温膨胀；当右阀门开启，气缸与冷腔相连，处于等温压缩。</p>
+        <p>飞轮有助于理解活塞的周期性运动。现实的热机如果这样做，活塞的气密性可能挑战较大。推荐的用法是作为旋转式或往复式气缸的一端，也可用于环管式。</p>
+    </div>
+</div>
+
 <hr>
 <h2>实物模型</h2>
 <div>这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。</div>
@@ -173,12 +192,12 @@
     <iframe src="https://embed.wave.video/tk7QOjRSttH0TcbS" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
 </div>
 <div>
-    <h3>内环管旋转式卡诺热机</h3>
-    <iframe src="https://embed.wave.video/Nn0ZnBfUu5zJMzl5" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
-</div>
-<div>
     <h3>低温差满管旋转式卡诺热机</h3>
     <iframe src="https://embed.wave.video/iJUNKnerXzky7jQw" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+</div>
+<div>
+    <h3>环管动能式卡诺热机</h3>
+    <iframe src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
 </div>
 
 <script type="text/javascript" src="https://counter4.optistats.ovh/private/counter.js?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y&down=async" async></script>
@@ -257,6 +276,10 @@ class Carnot
                 if( this.Angle < 0 )
                 {
                     this.Angle += Math.PI * 2;
+                }
+                else if( this.Angle >= Math.PI * 2 )
+                {
+                    this.Angle -= Math.PI * 2;
                 }
             }
             await new Promise( r => setTimeout( r, this.Interval ));
@@ -1115,9 +1138,6 @@ class EmptyEngine extends Carnot
             this.Controls.enableDamping = true;
         }
 
-        //const controls = new OrbitControls( camera, renderer.domElement );
-        //controls.enableDamping = true;
-
         // --- 2. 灯光系统 ---
         const ambientLight = new THREE.AmbientLight( 0xffffff, 0.6 );
         this.scene.add( ambientLight );
@@ -1226,54 +1246,346 @@ class EmptyEngine extends Carnot
         const ANGLE_OPEN = 0;
         const ANGLE_CLOSED = Math.PI / 2;
         
-        this.torus.rotation.z = this.Angle;
         this.separatorGroup.rotation.z = this.Angle;
 
-        //function updateValves() {
-            this.separators.forEach(item => {
-                // 1. 计算当前世界角度
-                let currentWorldAngle = (item.baseAngle + this.separatorGroup.rotation.z) % TWO_PI;
-                
-                // 归一化到 -PI ~ PI
-                if (currentWorldAngle > PI) currentWorldAngle -= TWO_PI;
-                if (currentWorldAngle < -PI) currentWorldAngle += TWO_PI;
+        this.separators.forEach( item =>
+        {
+            // 1. 计算当前世界角度
+            let currentWorldAngle = ( item.baseAngle + this.Angle ) % TWO_PI;
+            
+            // 2. 计算与6点钟的距离
+            let diff = currentWorldAngle - BOTTOM_ANGLE;
+            diff -= diff > PI ? TWO_PI : 0;
 
-                // 2. 计算与6点钟的距离
-                let diff = currentWorldAngle - BOTTOM_ANGLE;
-                
-                if (diff > PI) diff -= TWO_PI;
-                if (diff < -PI) diff += TWO_PI;
+            let targetRotation = ANGLE_OPEN; 
 
-                let targetRotation = ANGLE_OPEN; 
+            // 3. 状态控制
+            if( diff >= -2 * SEGMENT && diff <= -SEGMENT )
+            {
+                const ratio = Math.abs( diff ) / SEGMENT;
+                targetRotation = ANGLE_OPEN * ( 1 - ratio ) + ANGLE_CLOSED * ratio;
+            }
+            else if( diff > -SEGMENT && diff <= 0 )
+            {
+                targetRotation = ANGLE_CLOSED;
+            }
+            else if( diff > 0 && diff <= SEGMENT )
+            {
+                const ratio = 1 - ( diff - SEGMENT ) / SEGMENT;
+                targetRotation = ANGLE_CLOSED * ( 1 - ratio ) + ANGLE_OPEN * ratio;
+            }
+            else
+            {
+                targetRotation = ANGLE_OPEN;
+            }
 
-                // 3. 状态控制
-                
-                // A区间 [7点 -> 6点]: 渐渐关闭 (Open -> Closed)
-                // diff: -30度 -> 0
-                if (diff >= -2 * SEGMENT && diff <= -SEGMENT ) {
-                    const ratio = (Math.abs(diff) / SEGMENT);
-                    // ratio: 0(Open) -> 1(Closed)
-                    targetRotation = ANGLE_OPEN * (1 - ratio) + ANGLE_CLOSED * ratio;
-                } 
-                // B区间 [6点 -> 5点]: 保持关闭 (Hold Closed)
-                // diff: 0 -> 30度
-                else if (diff > -SEGMENT && diff <= 0) {
-                    targetRotation = ANGLE_CLOSED;
-                }
-                // C区间 [5点 -> 4点]: 渐渐开启 (Closed -> Open)
-                // diff: 30度 -> 60度
-                else if ( diff > 0 && diff <= SEGMENT ) {
-                    const ratio = 1 - (diff - SEGMENT) / SEGMENT;
-                    // ratio: 0(Closed) -> 1(Open)
-                    targetRotation = ANGLE_CLOSED * (1 - ratio) + ANGLE_OPEN * ratio;
-                }
-                else {
-                    targetRotation = ANGLE_OPEN;
-                }
+            item.valve.rotation.z = targetRotation;
+        } );
+        
+        this.renderer.render( this.scene, this.camera );
+    }
+}
 
-                item.valve.rotation.z = targetRotation;
-            });
-        //}
+class ThermalSwitch extends Carnot
+{
+    constructor( Id, isEngine )
+    {
+        super( Id, isEngine );
+
+        // --- 1. 场景初始化 ---
+        const Scene = this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color( 0xfff0ff );
+
+        this.camera = new THREE.PerspectiveCamera( 45, 1, 0.1, 1000 );
+        this.camera.position.set( -13, 22, 35 );
+
+        this.renderer = new THREE.WebGLRenderer( { canvas: this.Canvas, antialias: true } );
+        this.renderer.setSize( 600, 600 );
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+        if( typeof THREE.OrbitControls !== 'undefined' )
+        {
+            this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+            this.Controls.enableDamping = true;
+            this.Controls.target.set( 0, 7, 0 );
+        }
+
+        // --- 2. 灯光系统 ---
+        const ambientLight = new THREE.AmbientLight( 0xffffff, 0.6 );
+        this.scene.add( ambientLight );
+
+        const mainLight = new THREE.DirectionalLight( 0xffffff, 1.2 );
+        mainLight.position.set( 10, 20, 20 );
+        mainLight.castShadow = true;
+        this.scene.add( mainLight );
+
+        const backLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        backLight.position.set( -10, -10, -10 );
+        this.scene.add( backLight );
+
+        // --- 2. 材质 ---
+        const glassMat = new THREE.MeshPhysicalMaterial( {
+            color: 0x778899, transmission: 0.8, opacity: 0.3, transparent: true, roughness: 0.1, side: THREE.DoubleSide
+        } );
+        const metalMat = new THREE.MeshStandardMaterial( { color: 0x888833, roughness: 0.4, metalness: 0.8 } );
+        const rodMat = new THREE.MeshStandardMaterial( { color: 0x777055, roughness: 0.5, metalness: 0.5 } );
+        
+        // 气体 & 阀门材质
+        const gasLeftMat = new THREE.MeshBasicMaterial( { color: 0xff3333, transparent: true, opacity: 0.5 } );
+        const gasRightMat = new THREE.MeshBasicMaterial( { color: 0x3333ff, transparent: true, opacity: 0.5 } );
+        this.gasMidMat = new THREE.MeshBasicMaterial( { color: 0xff3333, transparent: true, opacity: 0.6 } );
+        this.valveOpenMat = new THREE.MeshBasicMaterial( { color: 0x00cc00 } );
+        const valveClosedMat = this.valveClosedMat = new THREE.MeshBasicMaterial( { color: 0x443399 } );
+        const isobaricPistonMat = new THREE.MeshStandardMaterial( { color: 0x000000 } );
+
+        // --- 3. 几何体构建 ---
+        // 3.1 腔室
+        function createChamber( xPos, material, hasTop, height = 8 )
+        {
+            const group = new THREE.Group();
+            group.position.x = xPos;
+
+            // 玻璃外壳
+            const cylGeo = new THREE.CylinderGeometry( 2, 2, height, 32, 1, true );
+            const cyl = new THREE.Mesh( cylGeo, glassMat );
+            cyl.position.y = height / 2;
+            group.add( cyl );
+
+            // 底部/顶部封盖
+            const capGeo = new THREE.CylinderGeometry( 2.05, 2.05, 0.2, 32 );
+            const capBot = new THREE.Mesh( capGeo, metalMat );
+            group.add( capBot );
+            
+            if( hasTop )
+            {
+                const capTop = new THREE.Mesh( capGeo, metalMat );
+                capTop.position.y = height;
+                group.add( capTop );
+            }
+
+            // 气体
+            const gasGeo = new THREE.CylinderGeometry( 1.9, 1.9, 1, 32 );
+            gasGeo.translate( 0, 0.5, 0 ); // 锚点底部
+            const gas = new THREE.Mesh( gasGeo, material );
+            gas.position.y = 0.1; 
+            group.add( gas );
+
+            return { group, gas };
+        }
+
+        const leftChamber = createChamber( -6, gasLeftMat, 1 );
+        this.midChamber = createChamber( 0, this.gasMidMat, 0 );
+        const rightChamber = createChamber( 6, gasRightMat, 1 );
+        this.scene.add( leftChamber.group );
+        this.scene.add( this.midChamber.group );
+        this.scene.add( rightChamber.group );
+        
+                // 3.2 底部通道系统
+        function createBottomPipes( zOffset, isValve, r = 0.3 )
+        {
+            const group = new THREE.Group();
+            group.position.set( 0, 1.0, zOffset ); // 位于Y=1高度
+
+            const pipeGeo = new THREE.CylinderGeometry( r, r, 4, 16 );
+            pipeGeo.rotateZ( Math.PI / 2 );
+            const leftPipe = new THREE.Mesh( pipeGeo, glassMat );
+            leftPipe.position.x = -3;
+            const rightPipe = new THREE.Mesh( pipeGeo, glassMat );
+            rightPipe.position.x = 3;
+            group.add( leftPipe, rightPipe );
+
+            let leftComp, rightComp;
+            if( isValve )
+            {
+                const valveGeo = new THREE.BoxGeometry( 0.3, 0.7, 0.7 );
+                leftComp = new THREE.Mesh( valveGeo, valveClosedMat );
+                rightComp = new THREE.Mesh( valveGeo, valveClosedMat );
+            }
+            else
+            {
+                const isoGeo = new THREE.CylinderGeometry( r * 0.8, r * 0.8, 0.15, 16 );
+                isoGeo.rotateZ( Math.PI/2 );
+                leftComp = new THREE.Mesh( isoGeo, isobaricPistonMat );
+                rightComp = new THREE.Mesh( isoGeo, isobaricPistonMat );
+            }
+            leftComp.position.x = 3;
+            rightComp.position.x = -3;
+            group.add( leftComp, rightComp );
+            Scene.add( group );
+            return { left: leftComp, right: rightComp };
+        }
+        
+        this.valves = createBottomPipes( 1.2, true );
+        this.valves.left.scale.set( 0.4, 1.2, 1.2 );
+        this.valves.right.scale.set( 0.4, 1.2, 1.2 );
+        this.isoPistons = createBottomPipes( -1, false, 0.8 );
+
+        // --- 4. 机械与运动参数设置 ---
+        
+        // 关键尺寸参数
+        const cylinderHeight = 8;
+        this.flywheelY = 14.0;   // 飞轮中心高度 (抬高了)
+        this.crankRadius = 2.5;  // 曲柄半径
+        this.rodLength = 9.0;    // 连杆长度 (加长了)
+        
+        // 活塞参数
+        this.pistonHeight = 1.0; 
+        
+        // 4.1 飞轮
+        this.flywheel = new THREE.Mesh(new THREE.TorusGeometry( 3.5, 0.3, 16, 100 ), metalMat);
+        this.flywheel.position.set( 0, this.flywheelY, 0 );
+        // 辐条
+        this.flywheel.add( new THREE.Mesh( new THREE.BoxGeometry( 0.3, 6.5, 0.2 ), metalMat ));
+        const spoke2 = new THREE.Mesh( new THREE.BoxGeometry( 0.3, 6.5, 0.2 ), metalMat );
+        spoke2.rotation.z = Math.PI/2;
+        this.flywheel.add( spoke2 );
+        this.scene.add( this.flywheel );
+
+        // 4.2 曲柄销 (Visual Crank Pin)
+        // 这是一个视觉标记，作为飞轮的子物体旋转
+        const crankPinVisual = new THREE.Mesh( new THREE.CylinderGeometry( 0.2, 0.2, 1 ), rodMat );
+        crankPinVisual.rotation.x = Math.PI/2;
+        crankPinVisual.position.set( 0, this.crankRadius, 0.5 ); // 在飞轮上的局部位置
+        this.flywheel.add( crankPinVisual );
+
+        // 4.3 活塞 (Piston)
+        this.mainPiston = new THREE.Mesh( new THREE.CylinderGeometry( 1.9, 1.9, this.pistonHeight, 32 ), metalMat );
+        this.scene.add( this.mainPiston ); // 注意：现在直接放在场景中，通过世界坐标控制
+
+        // 活塞销 (Piston Pin) - 视觉装饰
+        const pistonPin = new THREE.Mesh( new THREE.CylinderGeometry( 0.25, 0.25, 1.6 ), rodMat );
+        pistonPin.rotation.z = Math.PI/2;
+        this.mainPiston.add( pistonPin ); // 跟随活塞
+
+        // 4.4 连杆 (Connecting Rod)
+        // 技巧：将几何体向下移动一半长度，这样 Mesh 的原点(0,0,0)就位于连杆的【顶部】
+        const rodGeo = new THREE.BoxGeometry( 0.4, this.rodLength, 0.2 );
+        rodGeo.translate( 0, -this.rodLength / 2, 0 ); 
+        this.rod = new THREE.Mesh( rodGeo, rodMat );
+        this.scene.add( this.rod );
+
+        this.scene.add( new THREE.AxesHelper( 10 ));
+        this.Draw();
+    }
+
+    Draw3d()
+    {
+        if( !this.renderer || !this.scene || !this.camera )
+        {
+            console.log("渲染器、场景或相机未准备好:", this.renderer, this.scene, this.camera);
+            return;
+        }
+
+        // --- 5. 动画与物理计算 ---
+
+        //let angle = 0;
+        //const speed = 0.02;
+        this.domPhase = document.getElementById('phase-name');
+        this.colorHot = new THREE.Color(0xff3333);
+        this.colorCold = new THREE.Color(0x3333ff);
+
+        // 辅助向量
+        const vCrankPos = new THREE.Vector3();
+        const vPistonPos = new THREE.Vector3();
+
+            // 1. 飞轮自转
+        this.flywheel.rotation.z = this.Angle;
+
+            // 2. 获取曲柄销的世界坐标
+            // 公式: Center + R * [ -sin(a), cos(a) ]  (注意相位和方向)
+            // 为了配合逆时针旋转且0度在最高点:
+            // x = -sin(angle) * r
+            // y = cos(angle) * r
+        const crankWorldX = -Math.sin( this.Angle ) * this.crankRadius;
+        const crankWorldY = this.flywheelY + Math.cos( this.Angle ) * this.crankRadius;
+            
+        vCrankPos.set( crankWorldX, crankWorldY, 0.5 ); // z=0.5 稍微靠前避免穿模
+
+            // 3. 解算活塞 Y 位置
+            // 连杆长度 L, 水平偏移 dx = crankWorldX
+            // 垂直跨度 dy_rod = sqrt(L^2 - dx^2)
+            // 活塞销位置 = 曲柄销Y - dy_rod
+        const dx = crankWorldX;
+        const dyRod = Math.sqrt( this.rodLength * this.rodLength - dx * dx );
+        const pistonY = crankWorldY - dyRod;
+
+        vPistonPos.set( 0, pistonY, 0.5 ); // 活塞销位置
+
+            // 4. 应用位置
+        this.mainPiston.position.set( 0, pistonY, 0 );
+            
+            // 5. 连杆定位与旋转
+            // 5.1 位置：连杆顶部直接设为曲柄销位置
+        this.rod.position.copy( vCrankPos );
+            // 5.2 旋转：连杆"看"向活塞销
+        this.rod.lookAt( vPistonPos );
+            // lookAt 默认是Z轴朝向目标，我们需要调整一下朝向逻辑
+            // BoxGeometry 默认长在Y轴。
+            // 简单修正：计算 2D 角度更直接
+        const rodAngle = Math.atan2( pistonY - crankWorldY, 0 - crankWorldX ) + Math.PI/2;
+        this.rod.rotation.set( 0, 0, rodAngle );
+
+            // --- B. 热力学状态机 ---
+            
+            // 计算气体区域高度 (活塞底面 到 气缸底座)
+            // 活塞中心在 pistonY, 底面在 pistonY - pistonHeight/2
+            // 气缸底座在 Y=0.2 (cap thickness)
+        const gasTop = pistonY - this.pistonHeight/2;
+        const gasBase = 0.2;
+        let gasH = gasTop - gasBase;
+        if ( gasH < 0 ) gasH = 0.01;
+
+        this.midChamber.gas.scale.y = gasH;
+            
+            // 循环逻辑 (0度=TDC, 180度=BDC)
+        let progress = 0;
+        const isoBase = 3; 
+
+            // 底部 1/4 空间检查:
+            // 最低点(BDC)时，pistonY = this.flywheelY - this.crankRadius - this.rodLength = 14 - 2.5 - 9 = 2.5
+            // 活塞底面 = 2.5 - 0.5 = 2.0. 
+            // 气缸总高8，2.0 确实是 1/4 左右。
+
+        if( this.Angle < Math.PI / 2 )
+        {
+            // [0-90] 等温膨胀
+            progress = this.Angle / ( Math.PI/2 );
+            //this.domPhase.innerText = "等温膨胀";
+            this.valves.left.scale.set( 0, 0, 0 );
+            //this.valves.right.material = this.valveClosedMat;
+            this.gasMidMat.color.copy( this.colorHot );
+        }
+        else if( this.Angle < Math.PI )
+        {
+            // [90-180] 绝热膨胀
+            progress = ( this.Angle - Math.PI / 2 ) / ( Math.PI / 2 );
+            //this.domPhase.innerText = "绝热膨胀";
+            this.valves.left.scale.set( 0.4, 1.2, 1.2 );
+            //this.valves.right.material = this.valveClosedMat;
+            this.gasMidMat.color.lerpColors( this.colorHot, this.colorCold, progress );
+        }
+        else if( this.Angle < Math.PI * 1.5 )
+        {
+            // [180-270] 等温压缩
+            progress = ( this.Angle - Math.PI ) / ( Math.PI / 2 );
+            //this.domPhase.innerText = "等温压缩";
+            //this.valves.left.material = this.valveClosedMat;
+            this.valves.right.scale.set( 0, 0, 0 );
+            this.gasMidMat.color.copy( this.colorCold );
+        }
+        else
+        {
+            // [270-360] 绝热压缩
+            progress = ( this.Angle - Math.PI * 1.5 ) / ( Math.PI / 2 );
+            //this.domPhase.innerText = "绝热压缩";
+            //this.valves.left.material = this.valveClosedMat;
+            this.valves.right.scale.set( 0.4, 1.2, 1.2 );
+            this.gasMidMat.color.lerpColors( this.colorCold, this.colorHot, progress );
+        }
+
+        this.isoPistons.left.position.x = -isoBase + Math.cos( this.Angle );
+        this.isoPistons.right.position.x = isoBase - Math.cos( this.Angle );
         
         this.renderer.render( this.scene, this.camera );
     }
@@ -1284,6 +1596,8 @@ new RotEngine( 'rotate2', 0 );
 new ReciEngine( 'reciprocate', 1 );
 new RingEngine( 'ring', 1 );
 new EmptyEngine( 'ring2', 1 );
+new ThermalSwitch( 'switch', 1 );
+
 </script>
 </body>
 </html>
