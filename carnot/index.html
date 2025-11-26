@@ -9,14 +9,85 @@
     .inline-svg { display: inline-block; vertical-align: middle;
             width: 1em;   /* 确保大小与文字相近 */
             height: 1em;  /* 确保大小与文字相近 */
-            /* 垂直对齐可能仍需微调，根据实际效果调整 translateY */
             transform: translateY(0.1em);
-            /* 如果线条看起来太粗或太细，可以在这里设置 stroke-width，例如：
-               stroke-width: 0.1; （如果想要线条细一点）
-               stroke-width: 0.5; （如果想要线条粗一点）
-            */
         }
 
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0 auto;
+        max-width: 1200px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
+    .tabs-container {
+        margin-top: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .tabs-nav {
+        display: flex;
+        flex-wrap: wrap;
+        background-color: #ecf0f1;
+        border-bottom: 2px solid #bdc3c7;
+    }
+    .tab-button {
+        padding: 12px 18px;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        font-size: 16px;
+        color: #7f8c8d;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+    .tab-button:hover {
+        background-color: #fff;
+        color: #3498db;
+    }
+    .tab-button.active {
+        background-color: #fff;
+        color: #2980b9;
+        border-bottom-color: #3498db;
+        font-weight: bold;
+    }
+    .tabs-content {
+        padding: 25px;
+    }
+    .tab-pane {
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+        animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .animation-layout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+    .animation-visual {
+        flex-shrink: 0;
+        position: relative;
+    }
+    .animation-description {
+        flex: 1;
+        min-width: 300px;
+    }
 </style>
 </head>
 <body>
@@ -24,25 +95,206 @@
 <p>本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
 <p>具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
 <p>正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
-<h2>原理</h2>
-<div id="rotate" class="container">
-    <div class="canvtext" style="top:10px; left:10px;"></div>
-    <div class="canvtext" style="top:10px; left:280px;"></div>
-    <div class="canvtext" style="top:370px; left:120px;"></div>
-    <canvas width="400" height="400"></canvas>
-    <div>
-        <span>旋转式热机</span>&emsp;
-        <button>Start</button>
+
+<div class="tabs-container">
+    <div class="tabs-nav">
+        <button class="tab-button active" data-target="panel-rotate">旋转式热机</button>
+        <button class="tab-button" data-target="panel-rotate2">旋转式热泵</button>
+        <button class="tab-button" data-target="panel-reciprocate">往复式热机</button>
+        <button class="tab-button" data-target="panel-ring">环管动能式热机</button>
+        <button class="tab-button" data-target="panel-ring2">空管式热机</button>
+        <button class="tab-button" data-target="panel-switch">导热切换</button>
+        <button class="tab-button" data-target="panel-video1">叉管旋转式(视频)</button>
+        <button class="tab-button" data-target="panel-video2">低温差满管(视频)</button>
+        <button class="tab-button" data-target="panel-video3">环管动能式(视频)</button>
     </div>
-    <div style="width:400px;">
-        <p>气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
-        <p>离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。</p>
-        <p>离开冷源后是<b>绝热压缩</b>过程。</p>
-        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。</p>
-        <p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
+
+    <div class="tabs-content">
+        <div id="panel-rotate" class="tab-pane active">
+            <h2>原理</h2>
+            <div id="rotate" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div class="canvtext" style="top:10px; left:10px;"></div>
+                        <div class="canvtext" style="top:10px; left:280px;"></div>
+                        <div class="canvtext" style="top:370px; left:120px;"></div>
+                        <canvas width="400" height="400"></canvas>
+                        <div>
+                            <span>旋转式热机</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p>气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
+                        <p>离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。</p>
+                        <p>离开冷源后是<b>绝热压缩</b>过程。</p>
+                        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。</p>
+                        <p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-rotate2" class="tab-pane">
+            <div id="rotate2" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div class="canvtext" style="top:10px; left:10px;"></div>
+                        <div class="canvtext" style="top:10px; left:280px;"></div>
+                        <div class="canvtext" style="top:370px; left:120px;"></div>
+                        <canvas width="400" height="400"></canvas>
+                        <div>
+                            <span>旋转式热泵</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p>气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。</p>
+                        <p>在左侧进入冷源，冷源的温度与降温后的气体相同，进入<b>等温膨胀</b>过程，从冷源吸收热量。在最高点离开冷源，开始<b>绝热压缩</b>过程，逐渐升温。</p>
+                        <p>在右侧进入热源，热源的温度与升温后的气体相同，开始<b>等温压缩</b>过程，向热源释放热量。</p>
+                        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合逆卡诺循环的定义。</p>
+                        <p>活塞在右侧时对气缸的旋转做功，在左侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此需要依赖外界做功才能维持运转。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-reciprocate" class="tab-pane">
+            <div id="reciprocate" class="container">
+                <div class="canvtext" style="top:10px; left:10px;">left</div>
+                <div class="canvtext" style="top:10px; left:480px;">right</div>
+                <canvas width="600" height="280"></canvas>
+                <div>
+                    <span>往复式热机</span>&emsp;
+                    <button>Start</button>
+                </div>
+                <div>
+                    <p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。</p>
+                    <p>在每一边的工质气体压缩至温度最高时加上与气体温度相等的热源，同时另一边膨胀到温度最低，加上与气体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。</p>
+                    <p>撤除热/冷源后两边分别为绝热膨胀/压缩过程，至运动到另一方向的极限位置后再反向加冷/热源，两边分别进入等温压缩/膨胀过程。</p>
+                    <p>撤除冷/热源后两边分别为绝热压缩/膨胀过程。在每个周期之内每一边的工质气体都经历卡诺循环的四个过程。</p>
+                    <p>通过气缸的运动对外做功。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-ring" class="tab-pane">
+            <div id="ring" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div class="canvtext" style="top:10px; left:10px;"></div>
+                        <div class="canvtext" style="top:10px; left:280px;"></div>
+                        <canvas width="400" height="400"></canvas>
+                        <div>
+                            <span>环管动能式热机</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p>气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。</p>
+                        <p>任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。</p>
+                        <p>环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="scale(-1, 1)">
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>，开口向左，切换后又变成<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。</p>
+                        <p>环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。</p>
+                        <p>每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。</p>
+                        <p>撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。</p>
+                        <p>绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。</p>
+                        <p>通过气缸的旋转对外做功。</p>
+                        <p>这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-ring2" class="tab-pane">
+            <div id="ring2" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:10px;">等温压缩</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:320px;">绝热膨胀</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:10px;">绝热压缩</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:320px;">等温膨胀</div>
+                        <canvas width="400" height="400"></canvas>
+                        <div>
+                            <span>空管式热机</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p>环形管里没有活塞，充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
+                        <p>环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。</p>
+                        <p>每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。</p>
+                        <p>离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。</p>
+                        <p>在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。</p>
+                        <p>离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。</p>
+                        <p>左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。也可以不设阀门，改为在环形管内加涡轮发电。</p>
+                        <p>由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-switch" class="tab-pane">
+            <div id="switch" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div class="canvtext" style="top:570px; left:210px;">left</div>
+                        <canvas width="600" height="600"></canvas>
+                        <div>
+                            <span>导热切换</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p>前面的各种卡诺热机都面临导热切换的问题。气缸时而导热，时而绝热，由于现实固体材料的比热容太大，导热切换会造成明显的损耗。</p>
+                        <p>这是一个高效的切换方案。气缸两侧各有一个固定腔。左侧为热腔，保持在高温；右侧为冷腔，保持在低温。</p>
+                        <p>气缸与两腔之间各有两条通道。前面的通道上有阀门。后面的通道内有一个活塞，用于保证三个腔的压强总是相等。</p>
+                        <p>当两个阀门都关闭时，气缸内气体处于绝热过程。当左阀门开启，气缸与热腔相连，处于等温膨胀；当右阀门开启，气缸与冷腔相连，处于等温压缩。</p>
+                        <p>飞轮有助于理解活塞的周期性运动。现实的热机如果这样做，活塞的气密性可能挑战较大。推荐的用法是作为旋转式或往复式气缸的一端，也可用于环管式。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-video1" class="tab-pane">
+            <h2>实物模型</h2>
+            <div>这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。</div>
+            <div>
+                <h3>叉管旋转式卡诺热机</h3>
+                <iframe data-src="https://embed.wave.video/tk7QOjRSttH0TcbS" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+            </div>
+        </div>
+
+        <div id="panel-video2" class="tab-pane">
+            <h3>低温差满管旋转式卡诺热机</h3>
+            <iframe data-src="https://embed.wave.video/iJUNKnerXzky7jQw" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+        </div>
+
+        <div id="panel-video3" class="tab-pane">
+            <h3>环管动能式卡诺热机</h3>
+            <iframe data-src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+        </div>
     </div>
 </div>
 
+<<<<<<< HEAD
 <div id="rotate2" class="container">
     <div class="canvtext" style="top:10px; left:10px;"></div>
     <div class="canvtext" style="top:10px; left:280px;"></div>
@@ -200,6 +452,8 @@
     <h3>环管动能式卡诺热机</h3>
     <iframe src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
 </div>
+=======
+>>>>>>> UI
 
 <script type="text/javascript" src="https://counter4.optistats.ovh/private/counter.js?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y&down=async" async></script>
 <noscript><a href="https://www.freecounterstat.com" title="web counter"><img src="https://counter4.optistats.ovh/private/freecounterstat.php?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y" border="0" title="web counter" alt="web counter"></a></noscript>
@@ -1595,12 +1849,69 @@ class ThermalSwitch extends Carnot
     }
 }
 
-new RotEngine( 'rotate', 1 );
-new RotEngine( 'rotate2', 0 );
-new ReciEngine( 'reciprocate', 1 );
-new RingEngine( 'ring', 1 );
-new EmptyEngine( 'ring2', 1 );
-new ThermalSwitch( 'switch', 1 );
+const engines = {
+    'rotate': new RotEngine( 'rotate', 1 ),
+    'rotate2': new RotEngine( 'rotate2', 0 ),
+    'reciprocate': new ReciEngine( 'reciprocate', 1 ),
+    'ring': new RingEngine( 'ring', 1 ),
+    'ring2': new EmptyEngine( 'ring2', 1 ),
+    'switch': new ThermalSwitch( 'switch', 1 )
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tabsNav = document.querySelector('.tabs-nav');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const iframes = document.querySelectorAll('.tab-pane iframe');
+
+    const switchTab = (targetId) => {
+        // Deactivate all tabs and panes
+        tabButtons.forEach(button => button.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+
+        // Stop all canvas animations
+        Object.values(engines).forEach(engine => {
+            if (engine.Run) {
+                engine.Stop();
+            }
+        });
+
+        // Unload all iframes
+        iframes.forEach(iframe => {
+            if (iframe.src) {
+                iframe.src = '';
+            }
+        });
+
+        // Activate the target tab and pane
+        const targetButton = document.querySelector(`.tab-button[data-target="${targetId}"]`);
+        const targetPane = document.getElementById(targetId);
+
+        if (targetButton && targetPane) {
+            targetButton.classList.add('active');
+            targetPane.classList.add('active');
+
+            // Load iframe if it exists in the active pane
+            const activeIframe = targetPane.querySelector('iframe');
+            if (activeIframe && activeIframe.dataset.src) {
+                activeIframe.src = activeIframe.dataset.src;
+            }
+        }
+    };
+
+    tabsNav.addEventListener('click', (event) => {
+        if (event.target.classList.contains('tab-button')) {
+            const targetId = event.target.dataset.target;
+            switchTab(targetId);
+        }
+    });
+
+    // Initialize the first tab
+    const firstTab = document.querySelector('.tab-button.active');
+    if (firstTab) {
+        switchTab(firstTab.dataset.target);
+    }
+});
 
 </script>
 </body>
