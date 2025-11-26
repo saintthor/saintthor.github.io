@@ -147,8 +147,10 @@
 </div>
 
 <div id="ring2" class="container">
-    <div class="canvtext" style="top:10px; left:10px;">left</div>
-    <div class="canvtext" style="top:10px; left:480px;">right</div>
+    <div style="position:absolute; padding:5px; z-index:10; top:10px; left:10px;">等温压缩</div>
+    <div style="position:absolute; padding:5px; z-index:10; top:10px; left:320px;">绝热膨胀</div>
+    <div style="position:absolute; padding:5px; z-index:10; top:370px; left:10px;">绝热压缩</div>
+    <div style="position:absolute; padding:5px; z-index:10; top:370px; left:320px;">等温膨胀</div>
     <canvas width="400" height="400"></canvas>
     <div>
         <span>空管式热机</span>&emsp;
@@ -168,8 +170,7 @@
 
 <hr>
 <div id="switch" class="container">
-    <div class="canvtext" style="top:10px; left:10px;">left</div>
-    <div class="canvtext" style="top:10px; left:480px;">right</div>
+    <div class="canvtext" style="top:570px; left:210px;">left</div>
     <canvas width="600" height="600"></canvas>
     <div>
         <span>导热切换</span>&emsp;
@@ -1100,7 +1101,7 @@ class RingEngine extends Carnot
 
         if( this.Run > 0 )
         {
-            const textDoms = Array.from(this.Div.querySelectorAll('.canvtext'));
+            const textDoms = Array.from(this.Div.querySelectorAll( '.canvtext' ));
             const HeatStr = heat ? '等温' : '绝热';
             if (textDoms.length >= 2) {
                 textDoms[0].innerText = '左侧：' + HeatStr + '压缩';
@@ -1336,7 +1337,7 @@ class ThermalSwitch extends Carnot
         const gasRightMat = new THREE.MeshBasicMaterial( { color: 0x3333ff, transparent: true, opacity: 0.5 } );
         this.gasMidMat = new THREE.MeshBasicMaterial( { color: 0xff3333, transparent: true, opacity: 0.6 } );
         this.valveOpenMat = new THREE.MeshBasicMaterial( { color: 0x00cc00 } );
-        const valveClosedMat = this.valveClosedMat = new THREE.MeshBasicMaterial( { color: 0x443399 } );
+        const valveClosedMat = this.valveClosedMat = new THREE.MeshBasicMaterial( { color: 0x884622 } );
         const isobaricPistonMat = new THREE.MeshStandardMaterial( { color: 0x000000 } );
 
         // --- 3. 几何体构建 ---
@@ -1398,7 +1399,7 @@ class ThermalSwitch extends Carnot
             let leftComp, rightComp;
             if( isValve )
             {
-                const valveGeo = new THREE.BoxGeometry( 0.3, 0.7, 0.7 );
+                const valveGeo = new THREE.BoxGeometry( 0.5, 0.8, 0.8 );
                 leftComp = new THREE.Mesh( valveGeo, valveClosedMat );
                 rightComp = new THREE.Mesh( valveGeo, valveClosedMat );
             }
@@ -1547,9 +1548,12 @@ class ThermalSwitch extends Carnot
             // 活塞底面 = 2.5 - 0.5 = 2.0. 
             // 气缸总高8，2.0 确实是 1/4 左右。
 
+        const TextDom = this.Div.querySelector( '.canvtext' );
+        TextDom.style.display = 'block';
+        
         if( this.Angle < Math.PI / 2 )
         {
-            // [0-90] 等温膨胀
+            TextDom.innerText = '等温压缩：气缸与冷腔连通';
             progress = this.Angle / ( Math.PI/2 );
             //this.domPhase.innerText = "等温膨胀";
             this.valves.left.scale.set( 0, 0, 0 );
@@ -1558,7 +1562,7 @@ class ThermalSwitch extends Carnot
         }
         else if( this.Angle < Math.PI )
         {
-            // [90-180] 绝热膨胀
+            TextDom.innerText = '绝热压缩：气缸与冷腔隔断';
             progress = ( this.Angle - Math.PI / 2 ) / ( Math.PI / 2 );
             //this.domPhase.innerText = "绝热膨胀";
             this.valves.left.scale.set( 0.4, 1.2, 1.2 );
@@ -1567,7 +1571,7 @@ class ThermalSwitch extends Carnot
         }
         else if( this.Angle < Math.PI * 1.5 )
         {
-            // [180-270] 等温压缩
+            TextDom.innerText = '等温膨胀：气缸与热腔连通';
             progress = ( this.Angle - Math.PI ) / ( Math.PI / 2 );
             //this.domPhase.innerText = "等温压缩";
             //this.valves.left.material = this.valveClosedMat;
@@ -1576,7 +1580,7 @@ class ThermalSwitch extends Carnot
         }
         else
         {
-            // [270-360] 绝热压缩
+            TextDom.innerText = '绝热膨胀：气缸与热腔隔断';
             progress = ( this.Angle - Math.PI * 1.5 ) / ( Math.PI / 2 );
             //this.domPhase.innerText = "绝热压缩";
             //this.valves.left.material = this.valveClosedMat;
