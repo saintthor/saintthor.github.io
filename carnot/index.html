@@ -290,16 +290,19 @@
                 <h3 data-lang-key="video1_title">叉管旋转式卡诺热机</h3>
                 <iframe data-src="https://embed.wave.video/tk7QOjRSttH0TcbS" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
             </div>
+            <div data-lang-key="video1_content"></div>
         </div>
 
         <div id="panel-video2" class="tab-pane">
             <h3 data-lang-key="video2_title">低温差满管旋转式卡诺热机</h3>
             <iframe data-src="https://embed.wave.video/iJUNKnerXzky7jQw" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+            <div data-lang-key="video2_content"></div>
         </div>
 
         <div id="panel-video3" class="tab-pane">
             <h3 data-lang-key="video3_title">环管动能式卡诺热机</h3>
             <iframe data-src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+            <div data-lang-key="video3_content"></div>
         </div>
     </div>
 </div>
@@ -395,8 +398,11 @@ const translations = {
         physical_models: "实物模型",
         model_intro: "这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。",
         video1_title: "叉管旋转式卡诺热机",
+        video1_content: "",
         video2_title: "低温差满管旋转式卡诺热机",
+        video2_content: "",
         video3_title: "环管动能式卡诺热机",
+        video3_content: "",
     },
     en: {
         title: "Carnot Engine/Heat Pump",
@@ -409,7 +415,7 @@ const translations = {
         tab_ring_engine: "Ring-Kinetic Engine",
         tab_empty_engine: "Empty-Tube Engine",
         tab_switch: "Thermal Switch",
-        tab_video1: "Fork-Tube Rotary Model",
+        tab_video1: "Cross-Tube Rotary Model",
         tab_video2: "Full-Tube Rotary Model",
         tab_video3: "Ring-Kinetic Model",
         principle: "Principle",
@@ -480,13 +486,19 @@ const translations = {
         switch_p5: "A flywheel helps to understand the periodic motion of the piston. If a real engine were built this way, the airtightness of the piston might be a major challenge. The recommended use is as one end of a rotary or reciprocating cylinder, and it can also be used in a ring-type engine.",
         physical_models: "Physical Models",
         model_intro: "These models use water as the piston, which has high airtightness and low resistance. They are suitable for low-temperature difference scenarios (around 5 degrees). To adapt to high-temperature difference industrial scenarios, the size of the turntable should be increased, and a high-density liquid should be used to approximate the Carnot cycle.",
-        video1_title: "Fork-Tube Rotary Carnot Engine",
+        video1_title: "Cross-Tube Rotary Carnot Engine",
+        video1_content: "The Carnot cycle-type rotary heat engine I just built completes one revolution in less than a minute. When water begins to flow from the bottom of each tube, it primarily forces water into the left-hand tube. The process of water rising due to heating of each can is a pressurization expansion, not a reversible process. Only after the water level stops rising does the water flow from bottom to left, causing rotation. This rotation gradually reduces the pressure below, making the depressurization expansion process closer to isothermal expansion. The left side is close to adiabatic compression.<br><br>After the left side rotates to the bottom, the bottom tube is nearly full, and the water level rise is very short. Therefore, this design is closer to the Carnot cycle and more efficient. Future improvements might include making the tube full in the upper half of the revolution as well, creating a larger pressure difference to accommodate temperature differences that are one or two degrees Celsius greater than the current conditions.<br><br>My initial concept for a rotary engine was this interconnected design at the intersection, but I abandoned it after experimenting last year because the four tubes at the intersection would cross-flow, introducing a large number of air bubbles into the water column. Air bubbles are a major challenge. This time, I used four small bottles to achieve gas-liquid separation. You can see that each tube extends to the edge of the turntable and connects to a small bottle, with another tube on each bottle connecting to an aluminum can. When water mixed with air bubbles enters the bottle from the left, the water settles inside, while the air is forced into the can. When water starts to flow out from the bottom, the spout in the bottle remains submerged, allowing water to flow out before air. A baffle inside the bottle prevents water from entering the air outlet.<br><br>These small bottles also serve a crucial purpose: providing a U-shaped structure. When water is forced outward by air pressure, the air always remains above the water, causing the water to bend and rise. This avoids relying on surface tension to maintain the water column, allowing for the use of tubes of any diameter, making it suitable for high-power industrial applications. There's a close-up of the small bottles at 14 minutes.<br><br>Another improvement is using a light bulb as a heat source, which is much more convenient than a candle. This 60W bulb is sufficient to drive its rotation. A 40W bulb would also work, though it would be slower. <br>......<br>14:00 Now let's look at a close-up of the small bottle. From the top, it's basically empty. Water begins to fill from the left side, entering through the spout at the bottom of the bottle, without touching the air vent on the side. Now, a large amount of water is added, moving downwards, with the partition still separating the water-filled area from the air vent. The process is the same from the right side upwards, with water gradually draining from one half of the bottle.",
         video2_title: "Low-Temperature Difference Full-Tube Rotary Carnot Engine",
-        video3_title: "Ring-Kinetic Carnot Engine"
+        video2_content: "This is a full-tube rotating Carnot engine. \"Full-tube\" means the tubes are always full of water. You won't see a lot of air bubbles moving around inside. As long as the water is always full, the shape of the tubes doesn't matter. Whether it's a cross tube, a ring tube, or any other shape, as long as the outlets of each bottle are interconnected and the tubes are full, the relative pressure inside the bottle is uniquely determined by its height.<br><br>The pressure is lowest at the highest point of rotation and highest at the lowest point; the pressure difference is the pressure of the water from top to bottom in the tube. The tube is about 40 centimeters long, corresponding to a pressure of about 4 kPa, twice as high as the previous cross tube engine, thus improving efficiency.<br><br>However, it doesn't seem to rotate very fast. Why is that? Because of the hot weather. Last month when we filmed the cross tube engine, the room temperature was around 23 degrees Celsius; now it's almost 30 degrees Celsius. The light bulb is struggling to keep up.<br><br>Now let's look at a close-up of the bottles. Each tube has a additional bottle attached, serving two purposes. First, it increases volume, ensuring the tubes are full when water is scarce and preventing water from entering the can when water is plentiful. Second, it directs the outlet towards the center, ensuring the outlet remains submerged even at the top, preventing air from entering the tubes.<br><br>Now, a white object is inserted into the can at the top; this is a temperature probe to measure the temperature inside. Opening it, we can see the temperature is currently 42.1 degrees Celsius. This is a close-up of the temperature probe. The temperature here is 39.9 degrees Celsius, gradually decreasing to a low of 39.3 degrees Celsius before starting to rise.<br><br>It rises to a high of 42.6 degrees Celsius, then gradually falls back.<br><br>This time, the lowest temperature is 39.9 degrees Celsius, higher than the previous cycle.<br><br>The highest temperature is 42.5 degrees Celsius.<br><br>This time, the lowest temperature is 40.1 degrees Celsius, slightly higher.<br><br>The highest temperature is again 42.5 degrees Celsius.<br><br>This time, the lowest temperature is 40.3 degrees Celsius, slightly higher.<br><br>The highest temperature is 42.3 degrees Celsius. Then it goes out. This probe automatically shuts off after ten minutes of operation. From the previous records, we can see that with each rotation, the highest temperature decreases slightly, while the lowest temperature increases significantly. The temperature difference decreases from over three degrees to two degrees. What is the reason? It is estimated that after heating begins, the air in each tank undergoes a process of heating and pressurization, causing the lowest temperature to gradually rise. As for why the maximum temperature decreased, it's likely that the rotation gradually increased, resulting in a shorter heating time.<br><br>The minimum temperatures during the first four rotations occurred at the following times from the start of the video: 4 minutes and 53 seconds for the first rotation, 7 minutes and 08 seconds for the second rotation, 9 minutes and 15 seconds for the third rotation, and 11 minutes and 18 seconds for the fourth rotation. Since the time intervals between these successive minimum temperature points decreased with each rotation, the observed increase in minimum temperature is likely partly attributable to the reduced time available for heat dissipation between these points.<br><br>Before having a temperature probe, I used a temperature gun to measure the outside of the container and estimated the temperature difference to be 5 degrees Celsius, which was likely the lowest temperature difference record for driving a heat engine online. I didn't expect it to be as low as 2 degrees Celsius.<br><br>Measuring the ambient temperature, the room temperature was slightly over 29 degrees Celsius.",
+        video3_title: "Ring-Kinetic Carnot Engine",
+        video3_content: "What we are seeing now is a Carnot heat engine with a loop kinetic energy source. I believe the loop heat engine should rotate faster because the water column moves in the same direction as the rotation, allowing us to utilize the water column's kinetic energy. This heat engine completes one rotation in approximately 70 seconds at a room temperature of 30 degrees Celsius.<br><br>At 7 minutes and 30 seconds, we will measure the temperature of the working gas in the tank.<br>......<br>7:30 This physical model is rather rudimentary. I didn't have an electrically controlled valve, so I used two check valves. The four valves at the connection between the straight pipe and the loop pipe were omitted. This allows water to enter the straight pipe, but it's not a major problem; adding two small bottles separates the liquid and gas, preventing gas from entering the tank.<br><br>The temperature probe is on and has recorded seven high and low temperature cycles. The values ​​are as follows. Due to lighting conditions, the lowest temperatures are often difficult to see; only the lowest visible temperatures are recorded. This is represented as a line graph. The average temperature increase is 1.51 degrees Celsius, and the average temperature decrease is 1.14 degrees Celsius, indicating an overall gradual temperature rise.<br><br>To date, all the Carnot engines conceived this year have been completed. The PCT patent application for this series of Carnot engines has been submitted; interested manufacturers are welcome to contact me. Suitable for industrial applications, toys, and educational tools. Patent investment is also welcome.",
     }
 };
 
-let currentLang = localStorage.getItem('lang') || 'zh';
+const Reg = new RegExp( "(.*)lang=([^&]*)(&|$)", "i" );
+const Lang = window.location.search.substr(1).match( Reg );
+console.log( Lang );
+let currentLang = ( Lang ? Lang[2] : '' ) || localStorage.getItem( 'lang' ) || 'zh';
 
 function setLanguage(lang) {
     currentLang = lang;
