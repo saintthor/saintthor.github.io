@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>卡诺热机/热泵</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 <style>
     .canvtext { position:absolute; display:none; color:white; background-color:rgba(0,0,0,0.5); padding:5px; z-index:10 }
     .container { position:relative; vertical-align:top; display:inline-block; margin-right:80px; border:solid 1px; padding:10px }
@@ -13,7 +14,7 @@
         }
 
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         line-height: 1.6;
         margin: 0 auto;
         max-width: 1200px;
@@ -88,30 +89,39 @@
         flex: 1;
         min-width: 300px;
     }
+    #lang-toggle {
+        margin-left: 15px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        font-family: inherit;
+    }
 </style>
 </head>
 <body>
-<h1>卡诺热机/热泵</h1>
-<p>本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
-<p>具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
-<p>正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
+<h1><span data-lang-key="title">卡诺热机/热泵</span><button id="lang-toggle">English</button></h1>
+<p data-lang-key="intro1">本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
+<p data-lang-key="intro2">具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
+<p data-lang-key="intro3">正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
 
 <div class="tabs-container">
     <div class="tabs-nav">
-        <button class="tab-button active" data-target="panel-rotate">旋转式热机</button>
-        <button class="tab-button" data-target="panel-rotate2">旋转式热泵</button>
-        <button class="tab-button" data-target="panel-reciprocate">往复式热机</button>
-        <button class="tab-button" data-target="panel-ring">环管动能式热机</button>
-        <button class="tab-button" data-target="panel-ring2">空管式热机</button>
-        <button class="tab-button" data-target="panel-switch">导热切换</button>
-        <button class="tab-button" data-target="panel-video1">叉管旋转式模型</button>
-        <button class="tab-button" data-target="panel-video2">满管旋转式模型</button>
-        <button class="tab-button" data-target="panel-video3">环管动能式模型</button>
+        <button class="tab-button active" data-target="panel-rotate" data-lang-key="tab_rotate_engine">旋转式热机</button>
+        <button class="tab-button" data-target="panel-rotate2" data-lang-key="tab_rotate_pump">旋转式热泵</button>
+        <button class="tab-button" data-target="panel-reciprocate" data-lang-key="tab_reciprocate_engine">往复式热机</button>
+        <button class="tab-button" data-target="panel-ring" data-lang-key="tab_ring_engine">环管动能式热机</button>
+        <button class="tab-button" data-target="panel-ring2" data-lang-key="tab_empty_engine">空管式热机</button>
+        <button class="tab-button" data-target="panel-switch" data-lang-key="tab_switch">导热切换</button>
+        <button class="tab-button" data-target="panel-video1" data-lang-key="tab_video1">叉管旋转式模型</button>
+        <button class="tab-button" data-target="panel-video2" data-lang-key="tab_video2">满管旋转式模型</button>
+        <button class="tab-button" data-target="panel-video3" data-lang-key="tab_video3">环管动能式模型</button>
     </div>
 
     <div class="tabs-content">
         <div id="panel-rotate" class="tab-pane active">
-            <h2>原理</h2>
+            <h2 data-lang-key="principle">原理</h2>
             <div id="rotate" class="container">
                 <div class="animation-layout">
                     <div class="animation-visual">
@@ -120,16 +130,16 @@
                         <div class="canvtext" style="top:370px; left:120px;"></div>
                         <canvas width="400" height="400"></canvas>
                         <div>
-                            <span>旋转式热机</span>&emsp;
+                            <span data-lang-key="rotate_engine">旋转式热机</span>&emsp;
                             <button>Start</button>
                         </div>
                     </div>
                     <div class="animation-description">
-                        <p>气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
-                        <p>离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。</p>
-                        <p>离开冷源后是<b>绝热压缩</b>过程。</p>
-                        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。</p>
-                        <p>活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
+                        <p data-lang-key="rotate_p1">气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。</p>
+                        <p data-lang-key="rotate_p2">离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。</p>
+                        <p data-lang-key="rotate_p3">离开冷源后是<b>绝热压缩</b>过程。</p>
+                        <p data-lang-key="rotate_p4">调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。</p>
+                        <p data-lang-key="rotate_p5">活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。</p>
                     </div>
                 </div>
             </div>
@@ -144,16 +154,16 @@
                         <div class="canvtext" style="top:370px; left:120px;"></div>
                         <canvas width="400" height="400"></canvas>
                         <div>
-                            <span>旋转式热泵</span>&emsp;
+                            <span data-lang-key="rotate_pump">旋转式热泵</span>&emsp;
                             <button>Start</button>
                         </div>
                     </div>
                     <div class="animation-description">
-                        <p>气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。</p>
-                        <p>在左侧进入冷源，冷源的温度与降温后的气体相同，进入<b>等温膨胀</b>过程，从冷源吸收热量。在最高点离开冷源，开始<b>绝热压缩</b>过程，逐渐升温。</p>
-                        <p>在右侧进入热源，热源的温度与升温后的气体相同，开始<b>等温压缩</b>过程，向热源释放热量。</p>
-                        <p>调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合逆卡诺循环的定义。</p>
-                        <p>活塞在右侧时对气缸的旋转做功，在左侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此需要依赖外界做功才能维持运转。</p>
+                        <p data-lang-key="rotate2_p1">气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。</p>
+                        <p data-lang-key="rotate2_p2">在左侧进入冷源，冷源的温度与降温后的气体相同，进入<b>等温膨胀</b>过程，从冷源吸收热量。在最高点离开冷源，开始<b>绝热压缩</b>过程，逐渐升温。</p>
+                        <p data-lang-key="rotate2_p3">在右侧进入热源，热源的温度与升温后的气体相同，开始<b>等温压缩</b>过程，向热源释放热量。</p>
+                        <p data-lang-key="rotate2_p4">调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合逆卡诺循环的定义。</p>
+                        <p data-lang-key="rotate2_p5">活塞在右侧时对气缸的旋转做功，在左侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此需要依赖外界做功才能维持运转。</p>
                     </div>
                 </div>
             </div>
@@ -165,15 +175,15 @@
                 <div class="canvtext" style="top:10px; left:480px;">right</div>
                 <canvas width="600" height="280"></canvas>
                 <div>
-                    <span>往复式热机</span>&emsp;
+                    <span data-lang-key="reciprocate_engine">往复式热机</span>&emsp;
                     <button>Start</button>
                 </div>
                 <div>
-                    <p>往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。</p>
-                    <p>在每一边的工质气体压缩至温度最高时加上与气体温度相等的热源，同时另一边膨胀到温度最低，加上与气体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。</p>
-                    <p>撤除热/冷源后两边分别为绝热膨胀/压缩过程，至运动到另一方向的极限位置后再反向加冷/热源，两边分别进入等温压缩/膨胀过程。</p>
-                    <p>撤除冷/热源后两边分别为绝热压缩/膨胀过程。在每个周期之内每一边的工质气体都经历卡诺循环的四个过程。</p>
-                    <p>通过气缸的运动对外做功。</p>
+                    <p data-lang-key="reciprocate_p1">往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。</p>
+                    <p data-lang-key="reciprocate_p2">在每一边的工质气体压缩至温度最高时加上与气体温度相等的热源，同时另一边膨胀到温度最低，加上与气体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。</p>
+                    <p data-lang-key="reciprocate_p3">撤除热/冷源后两边分别为绝热膨胀/压缩过程，至运动到另一方向的极限位置后再反向加冷/热源，两边分别进入等温压缩/膨胀过程。</p>
+                    <p data-lang-key="reciprocate_p4">撤除冷/热源后两边分别为绝热压缩/膨胀过程。在每个周期之内每一边的工质气体都经历卡诺循环的四个过程。</p>
+                    <p data-lang-key="reciprocate_p5">通过气缸的运动对外做功。</p>
                 </div>
             </div>
         </div>
@@ -186,20 +196,20 @@
                         <div class="canvtext" style="top:10px; left:270px;"></div>
                         <canvas width="400" height="400"></canvas>
                         <div>
-                            <span>环管动能式热机</span>&emsp;
+                            <span data-lang-key="ring_engine">环管动能式热机</span>&emsp;
                             <button>Start</button>
                         </div>
                     </div>
                     <div class="animation-description">
-                        <p>气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。</p>
-                        <p>任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style="font-size: 24px;">
+                        <p data-lang-key="ring_p1">气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。</p>
+                        <p data-lang-key="ring_p2">任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style="font-size: 24px;">
                         <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
                             <g>
                                 <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
                             </g>
                         </svg>
                         </span>。</p>
-                        <p>环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style="font-size: 24px;">
+                        <p data-lang-key="ring_p3">环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style="font-size: 24px;">
                         <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
                             <g transform="scale(-1, 1)">
                                 <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
@@ -212,12 +222,12 @@
                             </g>
                         </svg>
                         </span>。</p>
-                        <p>环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。</p>
-                        <p>每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。</p>
-                        <p>撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。</p>
-                        <p>绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。</p>
-                        <p>通过气缸的旋转对外做功。</p>
-                        <p>这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。</p>
+                        <p data-lang-key="ring_p4">环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。</p>
+                        <p data-lang-key="ring_p5">每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。</p>
+                        <p data-lang-key="ring_p6">撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。</p>
+                        <p data-lang-key="ring_p7">绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。</p>
+                        <p data-lang-key="ring_p8">通过气缸的旋转对外做功。</p>
+                        <p data-lang-key="ring_p9">这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。</p>
                     </div>
                 </div>
             </div>
@@ -227,25 +237,25 @@
             <div id="ring2" class="container">
                 <div class="animation-layout">
                     <div class="animation-visual">
-                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:10px;">等温压缩</div>
-                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:320px;">绝热膨胀</div>
-                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:10px;">绝热压缩</div>
-                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:320px;">等温膨胀</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:10px;" data-lang-key="isothermal_compression">等温压缩</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:10px; left:320px;" data-lang-key="adiabatic_expansion">绝热膨胀</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:10px;" data-lang-key="adiabatic_compression">绝热压缩</div>
+                        <div style="position:absolute; padding:5px; z-index:10; top:370px; left:320px;" data-lang-key="isothermal_expansion">等温膨胀</div>
                         <canvas width="400" height="400"></canvas>
                         <div>
-                            <span>空管式热机</span>&emsp;
+                            <span data-lang-key="empty_engine">空管式热机</span>&emsp;
                             <button>Start</button>
                         </div>
                     </div>
                     <div class="animation-description">
-                        <p>环形管里没有活塞，充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
-                        <p>环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。</p>
-                        <p>每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。</p>
-                        <p>离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。</p>
-                        <p>在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。</p>
-                        <p>离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。</p>
-                        <p>左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。也可以不设阀门，改为在环形管内加涡轮发电。</p>
-                        <p>由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。</p>
+                        <p data-lang-key="empty_p1">环形管里没有活塞，充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。</p>
+                        <p data-lang-key="empty_p2">环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。</p>
+                        <p data-lang-key="empty_p3">每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。</p>
+                        <p data-lang-key="empty_p4">离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。</p>
+                        <p data-lang-key="empty_p5">在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。</p>
+                        <p data-lang-key="empty_p6">离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。</p>
+                        <p data-lang-key="empty_p7">左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。也可以不设阀门，改为在环形管内加涡轮发电。</p>
+                        <p data-lang-key="empty_p8">由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。</p>
                     </div>
                 </div>
             </div>
@@ -258,37 +268,37 @@
                         <div class="canvtext" style="top:570px; left:210px;">left</div>
                         <canvas width="600" height="600"></canvas>
                         <div>
-                            <span>导热切换</span>&emsp;
+                            <span data-lang-key="switch">导热切换</span>&emsp;
                             <button>Start</button>
                         </div>
                     </div>
                     <div class="animation-description">
-                        <p>前面的各种卡诺热机都面临导热切换的问题。气缸时而导热，时而绝热，由于现实固体材料的比热容太大，导热切换会造成明显的损耗。</p>
-                        <p>这是一个高效的切换方案。气缸两侧各有一个固定腔。左侧为热腔，保持在高温；右侧为冷腔，保持在低温。</p>
-                        <p>气缸与两腔之间各有两条通道。前面两条通道上各有阀门。后面两条通道内各有一个活塞，用于保证三个腔的压强总是相等。</p>
-                        <p>当两个阀门都关闭时，气缸内气体处于绝热过程。当左阀门开启，气缸与热腔相连，处于等温膨胀；当右阀门开启，气缸与冷腔相连，处于等温压缩。</p>
-                        <p>飞轮有助于理解活塞的周期性运动。现实的热机如果这样做，活塞的气密性可能挑战较大。推荐的用法是作为旋转式或往复式气缸的一端，也可用于环管式。</p>
+                        <p data-lang-key="switch_p1">前面的各种卡诺热机都面临导热切换的问题。气缸时而导热，时而绝热，由于现实固体材料的比热容太大，导热切换会造成明显的损耗。</p>
+                        <p data-lang-key="switch_p2">这是一个高效的切换方案。气缸两侧各有一个固定腔。左侧为热腔，保持在高温；右侧为冷腔，保持在低温。</p>
+                        <p data-lang-key="switch_p3">气缸与两腔之间各有两条通道。前面两条通道上各有阀门。后面两条通道内各有一个活塞，用于保证三个腔的压强总是相等。</p>
+                        <p data-lang-key="switch_p4">当两个阀门都关闭时，气缸内气体处于绝热过程。当左阀门开启，气缸与热腔相连，处于等温膨胀；当右阀门开启，气缸与冷腔相连，处于等温压缩。</p>
+                        <p data-lang-key="switch_p5">飞轮有助于理解活塞的周期性运动。现实的热机如果这样做，活塞的气密性可能挑战较大。推荐的用法是作为旋转式或往复式气缸的一端，也可用于环管式。</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="panel-video1" class="tab-pane">
-            <h2>实物模型</h2>
-            <div>这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。</div>
+            <h2 data-lang-key="physical_models">实物模型</h2>
+            <div data-lang-key="model_intro">这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。</div>
             <div>
-                <h3>叉管旋转式卡诺热机</h3>
+                <h3 data-lang-key="video1_title">叉管旋转式卡诺热机</h3>
                 <iframe data-src="https://embed.wave.video/tk7QOjRSttH0TcbS" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
             </div>
         </div>
 
         <div id="panel-video2" class="tab-pane">
-            <h3>低温差满管旋转式卡诺热机</h3>
+            <h3 data-lang-key="video2_title">低温差满管旋转式卡诺热机</h3>
             <iframe data-src="https://embed.wave.video/iJUNKnerXzky7jQw" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
         </div>
 
         <div id="panel-video3" class="tab-pane">
-            <h3>环管动能式卡诺热机</h3>
+            <h3 data-lang-key="video3_title">环管动能式卡诺热机</h3>
             <iframe data-src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
         </div>
     </div>
@@ -301,6 +311,205 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
+const translations = {
+    zh: {
+        title: "卡诺热机/热泵",
+        intro1: "本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。",
+        intro2: "具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。",
+        intro3: "正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。",
+        tab_rotate_engine: "旋转式热机",
+        tab_rotate_pump: "旋转式热泵",
+        tab_reciprocate_engine: "往复式热机",
+        tab_ring_engine: "环管动能式热机",
+        tab_empty_engine: "空管式热机",
+        tab_switch: "导热切换",
+        tab_video1: "叉管旋转式模型",
+        tab_video2: "满管旋转式模型",
+        tab_video3: "环管动能式模型",
+        principle: "原理",
+        rotate_engine: "旋转式热机",
+        rotate_p1: "气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。",
+        rotate_p2: "离开热源后是<b>绝热膨胀</b>过程。降温至最高点，进入温度与低温相等的冷源，开始<b>等温压缩</b>过程。",
+        rotate_p3: "离开冷源后是<b>绝热压缩</b>过程。",
+        rotate_p4: "调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合卡诺循环的定义。",
+        rotate_p5: "活塞在左侧时对气缸的旋转做功，在右侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此在连续旋转中活塞对气缸做的净功是逆时针方向的，可以维持气缸旋转并对外做功。",
+        rotate_pump: "旋转式热泵",
+        rotate2_p1: "气缸在立面上受外力驱动旋转。活塞的重力压缩下方的气体，转到最下方时脱离热源，开始<b>绝热膨胀</b>过程，逐渐降温。",
+        rotate2_p2: "在左侧进入冷源，冷源的温度与降温后的气体相同，进入<b>等温膨胀</b>过程，从冷源吸收热量。在最高点离开冷源，开始<b>绝热压缩</b>过程，逐渐升温。",
+        rotate2_p3: "在右侧进入热源，热源的温度与升温后的气体相同，开始<b>等温压缩</b>过程，向热源释放热量。",
+        rotate2_p4: "调节冷热源的温度和长度令其分别与两个绝热过程末的温度相等。每一端的工质气体旋转一周经历上述四个可逆过程，符合逆卡诺循环的定义。",
+        rotate2_p5: "活塞在右侧时对气缸的旋转做功，在左侧时气缸对活塞做功。由于右侧温度高，活塞运动轨迹在左侧较多，且在左侧时更远离原点，因此需要依赖外界做功才能维持运转。",
+        reciprocate_engine: "往复式热机",
+        reciprocate_p1: "往复式的气缸能在左右方向上运动。当其内的活塞往复运动时，气缸会向相反方向运动，二者的和动量为零，振幅与二者的质量成反比。",
+        reciprocate_p2: "在每一边的工质气体压缩至温度最高时加上与气体温度相等的热源，同时另一边膨胀到温度最低，加上与气体温度相等的冷源，则两边分别进入等温膨胀/压缩过程。",
+        reciprocate_p3: "撤除热/冷源后两边分别为绝热膨胀/压缩过程，至运动到另一方向的极限位置后再反向加冷/热源，两边分别进入等温压缩/膨胀过程。",
+        reciprocate_p4: "撤除冷/热源后两边分别为绝热压缩/膨胀过程。在每个周期之内每一边的工质气体都经历卡诺循环的四个过程。",
+        reciprocate_p5: "通过气缸的运动对外做功。",
+        ring_engine: "环管动能式热机",
+        ring_p1: "气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。",
+        ring_p2: `任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。`,
+        ring_p3: `环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="scale(-1, 1)">
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>，开口向左，切换后又变成<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。`,
+        ring_p4: "环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。",
+        ring_p5: "每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。",
+        ring_p6: "撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。",
+        ring_p7: "绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。",
+        ring_p8: "通过气缸的旋转对外做功。",
+        ring_p9: "这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。",
+        empty_engine: "空管式热机",
+        isothermal_compression: "等温压缩",
+        adiabatic_expansion: "绝热膨胀",
+        adiabatic_compression: "绝热压缩",
+        isothermal_expansion: "等温膨胀",
+        empty_p1: "环形管里没有活塞，充满高压高密度工质气体，靠气体自重产生压强，令下方气体温度升高。",
+        empty_p2: "环形管内有十二个阀门。每个阀门在七点钟位置到六点钟位置之间封闭，其余位置开启。任一时刻至少有一个阀门是封闭的。",
+        empty_p3: "每次六点钟位置的阀门开启时，六点钟到七点钟区段的气体开始接触热源，热源与气体温度相等。此后这部分气体向上运动，压强减小而膨胀，同时从热源吸热，处于等温膨胀过程。",
+        empty_p4: "离开热源后继续上行并膨胀，处于绝热膨胀过程，降温。",
+        empty_p5: "在最上方接触与自身温度相等的冷源，此后向下运动，压强增大而压缩，向冷源放热，处于等温压缩过程。",
+        empty_p6: "离开冷源后继续下行并压缩，处于绝热压缩过程，升温。构成卡诺循环。",
+        empty_p7: "左半边温度低，故封闭的阀门左侧压强总是较大，推动环形管向逆时针方向旋转并对外做功。也可以不设阀门，改为在环形管内加涡轮发电。",
+        empty_p8: "由于气体的密度难以达到液体和固体的水平，只在尺寸大、温差小的条件下能依上述卡诺循环方式运行。不满足条件时以布雷顿循环运行。",
+        "switch": "导热切换",
+        switch_p1: "前面的各种卡诺热机都面临导热切换的问题。气缸时而导热，时而绝热，由于现实固体材料的比热容太大，导热切换会造成明显的损耗。",
+        switch_p2: "这是一个高效的切换方案。气缸两侧各有一个固定腔。左侧为热腔，保持在高温；右侧为冷腔，保持在低温。",
+        switch_p3: "气缸与两腔之间各有两条通道。前面两条通道上各有阀门。后面两条通道内各有一个活塞，用于保证三个腔的压强总是相等。",
+        switch_p4: "当两个阀门都关闭时，气缸内气体处于绝热过程。当左阀门开启，气缸与热腔相连，处于等温膨胀；当右阀门开启，气缸与冷腔相连，处于等温压缩。",
+        switch_p5: "飞轮有助于理解活塞的周期性运动。现实的热机如果这样做，活塞的气密性可能挑战较大。推荐的用法是作为旋转式或往复式气缸的一端，也可用于环管式。",
+        physical_models: "实物模型",
+        model_intro: "这些模型都是用水作活塞，气密性高，阻力小。适用于低温差（5度左右）的场景。若要适配于高温差的工业场景，应增大转盘尺寸，及换用高密度液体，才能近似卡诺循环。",
+        video1_title: "叉管旋转式卡诺热机",
+        video2_title: "低温差满管旋转式卡诺热机",
+        video3_title: "环管动能式卡诺热机",
+    },
+    en: {
+        title: "Carnot Engine/Heat Pump",
+        intro1: "I have invented the world's first Carnot engine/heat pump. Its working gas cycle is a true Carnot cycle: 1. Isothermal expansion, 2. Adiabatic expansion, 3. Isothermal compression, 4. Adiabatic compression.",
+        intro2: "It has advantages such as high heat-to-work conversion efficiency, simple structure, easy maintenance, flexible self-starting, suitability for various heat/cold sources, and the ability to output rotational power without a crankshaft. The working gas is not separated from the outside by a piston, effectively preventing leakage. It can replace Stirling engines/heat pumps in all applications and can replace other heat engines in power generation, industrial power, and large transportation vehicles.",
+        intro3: "Patent pending. Those interested in technical or patent cooperation, please contact: saintthor@gmail.com.",
+        tab_rotate_engine: "Rotary Engine",
+        tab_rotate_pump: "Rotary Heat Pump",
+        tab_reciprocate_engine: "Reciprocating Engine",
+        tab_ring_engine: "Ring-Kinetic Engine",
+        tab_empty_engine: "Empty-Tube Engine",
+        tab_switch: "Thermal Switch",
+        tab_video1: "Fork-Tube Rotary Model",
+        tab_video2: "Full-Tube Rotary Model",
+        tab_video3: "Ring-Kinetic Model",
+        principle: "Principle",
+        rotate_engine: "Rotary Heat Engine",
+        rotate_p1: "The cylinder rotates on a vertical plane. The gravity of the piston compresses the gas below, raising its temperature. At the lowest point, when the temperature is highest, it enters a heat source of the same high temperature, beginning the <b>isothermal expansion</b> process.",
+        rotate_p2: "After leaving the heat source, it undergoes an <b>adiabatic expansion</b> process. The temperature drops to its lowest at the highest point, where it enters a cold source of the same low temperature, beginning the <b>isothermal compression</b> process.",
+        rotate_p3: "After leaving the cold source, it undergoes an <b>adiabatic compression</b> process.",
+        rotate_p4: "By adjusting the temperature and length of the heat and cold sources to match the temperatures at the end of the two adiabatic processes, the working gas at each end undergoes the four reversible processes in one rotation, conforming to the definition of the Carnot cycle.",
+        rotate_p5: "The piston does work on the cylinder's rotation on the left side, while the cylinder does work on the piston on the right side. Since the temperature is higher on the right side, the piston's trajectory is more on the left side and further from the origin, so the net work done by the piston on the cylinder in continuous rotation is counter-clockwise, which can maintain the cylinder's rotation and do external work.",
+        rotate_pump: "Rotary Heat Pump",
+        rotate2_p1: "The cylinder is driven to rotate on a vertical plane by an external force. The gravity of the piston compresses the gas below. As it rotates to the bottom, it leaves the heat source and begins an <b>adiabatic expansion</b> process, gradually cooling down.",
+        rotate2_p2: "On the left side, it enters the cold source, whose temperature is the same as the cooled gas, and undergoes an <b>isothermal expansion</b> process, absorbing heat from the cold source. At the highest point, it leaves the cold source and begins an <b>adiabatic compression</b> process, gradually heating up.",
+        rotate2_p3: "On the right side, it enters the heat source, whose temperature is the same as the heated gas, and begins an <b>isothermal compression</b> process, releasing heat to the heat source.",
+        rotate2_p4: "By adjusting the temperature and length of the heat and cold sources to match the temperatures at the end of the two adiabatic processes, the working gas at each end undergoes the four reversible processes in one rotation, conforming to the definition of the inverse Carnot cycle.",
+        rotate2_p5: "The piston does work on the cylinder's rotation on the right side, while the cylinder does work on the piston on the left side. Since the temperature is higher on the right side, the piston's trajectory is more on the left side and further from the origin, thus requiring external work to maintain operation.",
+        reciprocate_engine: "Reciprocating Heat Engine",
+        reciprocate_p1: "The reciprocating cylinder can move left and right. When the piston inside it reciprocates, the cylinder moves in the opposite direction, keeping their total momentum zero. The amplitude is inversely proportional to their mass.",
+        reciprocate_p2: "When the working gas on one side is compressed to its highest temperature, a heat source of the same temperature is applied. Simultaneously, the other side expands to its lowest temperature, and a cold source of the same temperature is applied. Both sides then undergo isothermal expansion/compression processes.",
+        reciprocate_p3: "After removing the heat/cold sources, both sides undergo adiabatic expansion/compression until they reach the extreme position in the other direction. Then, the cold/heat sources are applied in reverse, and both sides undergo isothermal compression/expansion.",
+        reciprocate_p4: "After removing the cold/heat sources, both sides undergo adiabatic compression/expansion. Within each cycle, the working gas on each side experiences the four processes of the Carnot cycle.",
+        reciprocate_p5: "External work is done through the movement of the cylinder.",
+        ring_engine: "Ring-Kinetic Heat Engine",
+        ring_p1: "The cylinder is a ring-shaped tube with two valves, always one open and one closed. Two straight pipes also have a valve at each end. All valves are green for open and red for closed. The state of the valves on the straight pipes is always opposite to the nearest ring valve.",
+        ring_p2: `At any moment, the cylinder's path starts from a red valve on one straight pipe, passes through three green valves, makes a full circle, and reaches the red valve on the other straight pipe, shaped like <span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>.`,
+        ring_p3: `The ring tube rotates half a circle, and the valves switch simultaneously. Before each switch, the tube is shaped like <span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="scale(-1, 1)">
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>, opening to the left, and after the switch, it becomes <span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>.`,
+        ring_p4: "There is a high-density liquid column at the bottom of the ring tube. Since the tube is rotatable and light, the liquid column always stays at the bottom when there is no load. Different gas pressures on both sides of the liquid column drive the ring tube to rotate.",
+        ring_p5: "After each valve switch, a heat source is applied to the lower straight pipe and a cold source to the upper one. The gas on the right side of the liquid column (hot pipe) undergoes isothermal expansion, while the gas on the left side (cold pipe) undergoes isothermal compression.",
+        ring_p6: "After removing the heat and cold sources, the ring tube continues to rotate due to inertia. The gas on the right side undergoes adiabatic expansion, and the gas on the left side undergoes adiabatic compression. The use of inertia is similar to that in a reciprocating engine.",
+        ring_p7: "After the green ring valve leaves the liquid column area, the valves switch, the original compression end becomes the expansion end, and the original expansion end becomes the compression end, starting the next cycle.",
+        ring_p8: "External work is done through the rotation of the cylinder.",
+        ring_p9: "This engine can flexibly adapt to variable loads. The greater the load, the more the liquid column's position shifts to the left.",
+        empty_engine: "Empty-Tube Heat Engine",
+        isothermal_compression: "Isothermal Compression",
+        adiabatic_expansion: "Adiabatic Expansion",
+        adiabatic_compression: "Adiabatic Compression",
+        isothermal_expansion: "Isothermal Expansion",
+        empty_p1: "The ring tube has no piston and is filled with high-pressure, high-density working gas. The gas's own weight creates pressure, causing the gas at the bottom to heat up.",
+        empty_p2: "There are twelve valves in the ring tube. Each valve closes between the seven o'clock and six o'clock positions and opens otherwise. At any given time, at least one valve is closed.",
+        empty_p3: "Each time the valve at the six o'clock position opens, the gas in the six to seven o'clock section comes into contact with a heat source of the same temperature. This gas then moves upward, expands due to decreasing pressure, and absorbs heat from the source, undergoing an isothermal expansion process.",
+        empty_p4: "After leaving the heat source, it continues to rise and expand, undergoing an adiabatic expansion process and cooling down.",
+        empty_p5: "At the top, it comes into contact with a cold source of the same temperature. It then moves downward, is compressed by increasing pressure, and releases heat to the cold source, undergoing an isothermal compression process.",
+        empty_p6: "After leaving the cold source, it continues to descend and be compressed, undergoing an adiabatic compression process and heating up, thus completing the Carnot cycle.",
+        empty_p7: "The left half has a lower temperature, so the pressure on the left side of the closed valve is always greater, pushing the ring tube to rotate counter-clockwise and do external work. Alternatively, the valves can be omitted and a turbine added inside the ring tube to generate electricity.",
+        empty_p8: "Since the density of gas is difficult to match that of liquids and solids, it can only operate in the Carnot cycle mode under conditions of large size and small temperature differences. If these conditions are not met, it operates in the Brayton cycle.",
+        "switch": "Thermal Switch",
+        switch_p1: "All the previous Carnot engines face the problem of thermal switching. The cylinder is sometimes thermally conductive and sometimes adiabatic. Due to the large specific heat capacity of real solid materials, thermal switching causes significant losses.",
+        switch_p2: "This is an efficient switching solution. There is a fixed chamber on each side of the cylinder. The left side is a hot chamber, kept at a high temperature; the right side is a cold chamber, kept at a low temperature.",
+        switch_p3: "There are two channels between the cylinder and each chamber. The front two channels have valves. The rear two channels each have a piston to ensure that the pressure in the three chambers is always equal.",
+        switch_p4: "When both valves are closed, the gas in the cylinder is in an adiabatic process. When the left valve is open, the cylinder is connected to the hot chamber for isothermal expansion; when the right valve is open, the cylinder is connected to the cold chamber for isothermal compression.",
+        switch_p5: "A flywheel helps to understand the periodic motion of the piston. If a real engine were built this way, the airtightness of the piston might be a major challenge. The recommended use is as one end of a rotary or reciprocating cylinder, and it can also be used in a ring-type engine.",
+        physical_models: "Physical Models",
+        model_intro: "These models use water as the piston, which has high airtightness and low resistance. They are suitable for low-temperature difference scenarios (around 5 degrees). To adapt to high-temperature difference industrial scenarios, the size of the turntable should be increased, and a high-density liquid should be used to approximate the Carnot cycle.",
+        video1_title: "Fork-Tube Rotary Carnot Engine",
+        video2_title: "Low-Temperature Difference Full-Tube Rotary Carnot Engine",
+        video3_title: "Ring-Kinetic Carnot Engine"
+    }
+};
+
+let currentLang = localStorage.getItem('lang') || 'zh';
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    const elements = document.querySelectorAll('[data-lang-key]');
+    elements.forEach(el => {
+        const key = el.getAttribute('data-lang-key');
+        if (translations[lang] && translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+    document.documentElement.lang = lang;
+    document.title = translations[lang].title;
+    document.getElementById('lang-toggle').innerText = lang === 'zh' ? 'English' : '中文';
+}
+
+document.getElementById('lang-toggle').addEventListener('click', () => {
+    const newLang = currentLang === 'zh' ? 'en' : 'zh';
+    setLanguage(newLang);
+});
+
+// Initial language setup
+setLanguage(currentLang);
 
 class Carnot
 {
@@ -529,13 +738,15 @@ class ReciEngine extends Carnot
         {
             const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
             const Quadrant = Math.floor( this.Angle / Math.PI * 2 ) % 4;
-            const Stages = [['绝热压缩', '绝热膨胀'], ['等温膨胀', '等温压缩'], ['绝热膨胀', '绝热压缩'], ['等温压缩', '等温膨胀']][Quadrant];
+            const stagesZh = [['绝热压缩', '绝热膨胀'], ['等温膨胀', '等温压缩'], ['绝热膨胀', '绝热压缩'], ['等温压缩', '等温膨胀']];
+            const stagesEn = [['Adiabatic Comp.', 'Adiabatic Exp.'], ['Isothermal Exp.', 'Isothermal Comp.'], ['Adiabatic Exp.', 'Adiabatic Comp.'], ['Isothermal Comp.', 'Isothermal Exp.']];
+            const stages = currentLang === 'zh' ? stagesZh[Quadrant] : stagesEn[Quadrant];
 
             this.HotSrc.position.x = [50, -6, 50, 6][Quadrant];
             this.ColdSrc.position.x = [50, 9, 50, -9][Quadrant];
 
-            TextDoms[0].innerText = '左侧：' + Stages[0];
-            TextDoms[1].innerText = '右侧：' + Stages[1];
+            TextDoms[0].innerText = (currentLang === 'zh' ? '左侧：' : 'Left: ') + stages[0];
+            TextDoms[1].innerText = (currentLang === 'zh' ? '右侧：' : 'Right: ') + stages[1];
             TextDoms.forEach( t => t.style.display = 'block' );
         }
 
@@ -722,20 +933,19 @@ class RotEngine extends Carnot
         if( this.Run > 0 )
         {
             const TextDoms = Array.from( this.Div.querySelectorAll( '.canvtext' ));
-            const stage = Sin * Cos > 0 ? '等温' : '绝热';
+            const stage = Sin * Cos > 0 ? (currentLang === 'zh' ? '等温' : 'Isothermal') : (currentLang === 'zh' ? '绝热' : 'Adiabatic');
+            const action1 = this.IsEngine ? (currentLang === 'zh' ? '压缩' : 'Comp.') : (currentLang === 'zh' ? '膨胀' : 'Exp.');
+            const action2 = this.IsEngine ? (currentLang === 'zh' ? '膨胀' : 'Exp.') : (currentLang === 'zh' ? '压缩' : 'Comp.');
 
-            TextDoms[0].innerText = '左侧：' + stage + ( this.IsEngine ? '压缩' : '膨胀' );
-            TextDoms[1].innerText = '右侧：' + stage + ( this.IsEngine ? '膨胀' : '压缩' );
+            TextDoms[0].innerText = (currentLang === 'zh' ? '左侧：' : 'Left: ') + stage + action1;
+            TextDoms[1].innerText = (currentLang === 'zh' ? '右侧：' : 'Right: ') + stage + action2;
 
-            if( Offset * Sin > 0 )
-            {
-                TextDoms[2].innerText = ['气缸对活塞做功', '活塞对气缸做功'][this.IsEngine];
+            if (Offset * Sin > 0) {
+                TextDoms[2].innerText = this.IsEngine ? (currentLang === 'zh' ? '气缸对活塞做功' : 'Cylinder does work on piston') : (currentLang === 'zh' ? '活塞对气缸做功' : 'Piston does work on cylinder');
                 TextDoms[2].style.left = '80px';
                 this.DiffAngle += 0.0001;
-            }
-            else
-            {
-                TextDoms[2].innerText = ['活塞对气缸做功', '气缸对活塞做功'][this.IsEngine];
+            } else {
+                TextDoms[2].innerText = this.IsEngine ? (currentLang === 'zh' ? '活塞对气缸做功' : 'Piston does work on cylinder') : (currentLang === 'zh' ? '气缸对活塞做功' : 'Cylinder does work on piston');
                 TextDoms[2].style.left = '210px';
                 this.DiffAngle += -0.0001;
             }
@@ -1195,10 +1405,10 @@ class RingEngine extends Carnot
         if( this.Run > 0 )
         {
             const textDoms = Array.from(this.Div.querySelectorAll( '.canvtext' ));
-            const HeatStr = heat ? '等温' : '绝热';
+            const heatStr = heat ? (currentLang === 'zh' ? '等温' : 'Isothermal') : (currentLang === 'zh' ? '绝热' : 'Adiabatic');
             if (textDoms.length >= 2) {
-                textDoms[0].innerText = '左侧：' + HeatStr + '压缩';
-                textDoms[1].innerText = '右侧：' + HeatStr + '膨胀';
+                textDoms[0].innerText = (currentLang === 'zh' ? '左侧：' : 'Left: ') + heatStr + (currentLang === 'zh' ? '压缩' : 'Comp.');
+                textDoms[1].innerText = (currentLang === 'zh' ? '右侧：' : 'Right: ') + heatStr + (currentLang === 'zh' ? '膨胀' : 'Exp.');
                 textDoms.forEach(t => t.style.display = 'block');
             }
         }
@@ -1644,39 +1854,45 @@ class ThermalSwitch extends Carnot
         const TextDom = this.Div.querySelector( '.canvtext' );
         TextDom.style.display = 'block';
         
+        const phasesZh = [
+            '等温压缩：气缸与冷腔连通',
+            '绝热压缩：气缸与冷腔隔断',
+            '等温膨胀：气缸与热腔连通',
+            '绝热膨胀：气缸与热腔隔断'
+        ];
+        const phasesEn = [
+            'Isothermal Compression: Cylinder connected to cold chamber',
+            'Adiabatic Compression: Cylinder isolated from cold chamber',
+            'Isothermal Expansion: Cylinder connected to hot chamber',
+            'Adiabatic Expansion: Cylinder isolated from hot chamber'
+        ];
+        const phases = currentLang === 'zh' ? phasesZh : phasesEn;
+
         if( this.Angle < Math.PI / 2 )
         {
-            TextDom.innerText = '等温压缩：气缸与冷腔连通';
+            TextDom.innerText = phases[0];
             progress = this.Angle / ( Math.PI/2 );
-            //this.domPhase.innerText = "等温膨胀";
             this.valves.left.scale.set( 0, 0, 0 );
-            //this.valves.right.material = this.valveClosedMat;
             this.gasMidMat.color.copy( this.colorHot );
         }
         else if( this.Angle < Math.PI )
         {
-            TextDom.innerText = '绝热压缩：气缸与冷腔隔断';
+            TextDom.innerText = phases[1];
             progress = ( this.Angle - Math.PI / 2 ) / ( Math.PI / 2 );
-            //this.domPhase.innerText = "绝热膨胀";
             this.valves.left.scale.set( 0.4, 1.2, 1.2 );
-            //this.valves.right.material = this.valveClosedMat;
             this.gasMidMat.color.lerpColors( this.colorHot, this.colorCold, progress );
         }
         else if( this.Angle < Math.PI * 1.5 )
         {
-            TextDom.innerText = '等温膨胀：气缸与热腔连通';
+            TextDom.innerText = phases[2];
             progress = ( this.Angle - Math.PI ) / ( Math.PI / 2 );
-            //this.domPhase.innerText = "等温压缩";
-            //this.valves.left.material = this.valveClosedMat;
             this.valves.right.scale.set( 0, 0, 0 );
             this.gasMidMat.color.copy( this.colorCold );
         }
         else
         {
-            TextDom.innerText = '绝热膨胀：气缸与热腔隔断';
+            TextDom.innerText = phases[3];
             progress = ( this.Angle - Math.PI * 1.5 ) / ( Math.PI / 2 );
-            //this.domPhase.innerText = "绝热压缩";
-            //this.valves.left.material = this.valveClosedMat;
             this.valves.right.scale.set( 0.4, 1.2, 1.2 );
             this.gasMidMat.color.lerpColors( this.colorCold, this.colorHot, progress );
         }
