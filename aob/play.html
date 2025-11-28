@@ -8,6 +8,7 @@
     <script src="user.js"></script>
     <script src="blockchain.js"></script>
     <title>原子物权链演示</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         :root {
             --primary: #4a6fa5;
@@ -21,7 +22,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Noto Sans SC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--secondary);
             color: var(--text);
             line-height: 1.6;
@@ -338,7 +339,6 @@
             opacity: 0;
         }
 
-        /* Alert for crypto unavailable */
         #alert_crypto {
             background-color: #fee2e2;
             color: #dc2626;
@@ -349,7 +349,6 @@
             box-shadow: var(--card-shadow);
         }
 
-        /* Warning message */
         p[style*="color:red"] {
             background-color: #fee2e2;
             color: #dc2626 !important;
@@ -359,7 +358,6 @@
             margin: 12px 0;
         }
 
-        /* Responsive design */
         @media (max-width: 992px) {
             #main {
                 grid-template-columns: 1fr;
@@ -402,81 +400,87 @@
 
 <div id="main">
     <div class="left">
-        <h2>原子物权链功能演示</h2>
+        <h2>{{ I18N.SubTitle }}</h2>
         <transition name="fade">
             <div v-show="Chains.length>0">
-                <p>在操作面板中可以看到用户及每个用户拥有的链。新建的链只有根区块。</p>
+                <p>{{ I18N.P1 }}</p>
 
                 <div class="act">
-                    <h3 style="margin-top: 0;">传送设定</h3>
-                    现在，令[<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser?SelUser.Name:'某个发送者' }}</span>]向
-                    [<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain?SelChain.Name:'某条链' }}</span>]上的
-                    [<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId?SelBlockId:'某个区块' }}</span>]之后添加区块，以将此链送给
-                    [<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget?SelTarget.Name:'某个接收者' }}</span>]。
+                    <h3 style="margin-top: 0;">{{ I18N.H3_1 }}</h3>
+                    <p>
+                        {{ I18N.P2_1 }}
+                        [<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser ? SelUser.Name : I18N.P2_Sender }}</span>]
+                        {{ I18N.P2_2 }}
+                        [<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain ? SelChain.Name : I18N.P2_Chain }}</span>]
+                        {{ I18N.P2_3 }}
+                        [<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId ? SelBlockId : I18N.P2_Block }}</span>]
+                        {{ I18N.P2_4 }}
+                        [<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget ? SelTarget.Name : I18N.P2_Receiver }}</span>]。
+                    </p>
                 </div>
 
                 <div style="background-color: white; border-radius: 8px; padding: 16px; margin: 16px 0; box-shadow: var(--card-shadow);">
-                    <h3>操作方法</h3>
-                    <p>按照下面的步骤，在右侧操作面板上设定上框中所需的四个变量：</p>
+                    <h3>{{ I18N.H3_2 }}</h3>
+                    <p>{{ I18N.P3 }}</p>
                     <ol>
-                        <li>点击用户名，以选择执行发送操作的用户。</li>
-                        <li>点击区块链，以选择执行此操作的链。选中后可见此链上的所有区块。</li>
-                        <li>点击选择上级区块，新区块将加在所选区块之后。</li>
-                        <li>再次点击一个用户名，以选择接收此链的用户。</li>
+                        <li>{{ I18N.L1_1 }}</li>
+                        <li>{{ I18N.L1_2 }}</li>
+                        <li>{{ I18N.L1_3 }}</li>
+                        <li>{{ I18N.L1_4 }}</li>
                     </ol>
 
                     <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 16px;">
-                        <h4 style="margin-top: 0;">传送规则</h4>
+                        <h4 style="margin-top: 0;">{{ I18N.H4_1 }}</h4>
                         <ol>
-                            <li>只能把新区块加在区块链最末的区块之后；</li>
-                            <li>发送者必须是新区块所跟随的区块记载的转移事件中的接收者。</li>
+                            <li>{{ I18N.L2_1 }}</li>
+                            <li>{{ I18N.L2_2 }}</li>
                         </ol>
-                        <p>若违反上述原则，发送者可能会受到忽略和鄙视，<b>甚至被全网拉黑</b>。</p>
+                        <p><span v-html="I18N.P4"></span></p>
                     </div>
                 </div>
 
-                <p v-show="Warning" style="color:red; font-size:0.9em;">警告：<br>{{ Warning }}
-                <br>如果坚持实施此项操作，再点一次传送按钮。</p>
+                <p v-show="Warning" style="color:red; font-size:0.9em;">{{ I18N.Warning }}<br>{{ Warning }}
+                <br>{{ I18N.P5 }}</p>
 
                 <div style="margin: 20px 0;">
-                    <button @click="SubmitAct" :disabled="!(SelUser&&SelChain&&SelBlockId&&SelTarget)">传送区块链</button>
-                    <button @click="CancelAct" style="background-color: #888;">取消</button>
+                    <button @click="SubmitAct" :disabled="!(SelUser&&SelChain&&SelBlockId&&SelTarget)">{{ I18N.Submit }}</button>
+                    <button @click="CancelAct" style="background-color: #888;">{{ I18N.Cancel }}</button>
                 </div>
                 <hr>
             </div>
         </transition>
         <div>
-            <p>本页为原子物权链演示页。原子物权链是全球惟一真正去中心化的技术，并能实现前所未有的安全与可扩展性。请先阅读<a target="_blank" href="index.html">文档</a>。</p>
+            <p><span v-html="I18N.P6"></span></p>
 
             <div style="margin-bottom: 20px;">
-                <a target="_blank" href="play_en.html" style="margin-right: 28px" class="link-button">English version</a>
-                <a target="_blank" href="https://github.com/saintthor/decentralization" class="link-button">代码</a>
+                <a :href="I18N.Href" style="margin-right: 28px" class="link-button">{{ I18N.SwitchLang }}</a>
+                <a target="_blank" href="https://github.com/saintthor/decentralization" class="link-button">{{ I18N.Code }}</a>
             </div>
 
-            <p>原子物权链是高度去中心化的区块链技术，基本运行模式是令若干条私有区块链能在人群之中互相转送。设定每条链代表不同的对象，即可实现不同的业务。</p>
+            <p>{{ I18N.P7 }}</p>
 
             <div style="margin: 24px 0;">
-                <label for="userNum">首先创建用户，数量为</label>
-                <input type="number" id="userNum" v-model="UserNum" max="6" min="3" style="width:60px;"/> 个。
-                <button :disabled="Users.length!==0" @click="InitUsers">创建</button>
+                <label for="userNum">{{ I18N.CreateUsers1 }}</label>
+                <input type="number" id="userNum" v-model="UserNum" max="6" min="3" style="width:60px;"/>{{ I18N.CreateUsers2 }}
+                <button :disabled="Users.length!==0" @click="InitUsers">{{ I18N.Create }}</button>
             </div>
 
             <div style="margin: 24px 0;">
-                <label for="chainNum">接着创建区块链，数量为</label>
-                <input type="number" id="chainNum" v-model="ChainNum" max="10" min="3" style="width:60px;"/> 条。
-                <button :disabled="Chains.length!==0" @click="InitChains">创建</button>
+                <label for="chainNum">{{ I18N.CreateChains1 }}</label>
+                <input type="number" id="chainNum" v-model="ChainNum" max="10" min="3" style="width:60px;"/>{{ I18N.CreateChains2 }}
+                <button :disabled="Chains.length!==0" @click="InitChains">{{ I18N.Create }}</button>
             </div>
         </div>
     </div>
 
     <div class="panel">
-        <div class="title">操作面板</div>
+        <div class="title">{{ I18N.Panel }}</div>
 
-        <h3 style="margin-top: 0;">用户</h3>
+        <h3 style="margin-top: 0;">{{ I18N.Users }}</h3>
         <div class="players-container" :class="{'three-users': Users.length === 3}">
             <div class="user" v-for="user in Users" :class="{ 'selected-sender': SelUser&&SelUser.Id===user.Id, 'selected-receiver': SelTarget&&SelTarget.Id===user.Id }">
-                <div v-show="SelUser&&SelUser.Id===user.Id" class="selchar" title="sender">发</div>
-                <div v-show="SelTarget&&SelTarget.Id===user.Id" class="selchar" title="receiver">收</div>
+                <div v-show="SelUser&&SelUser.Id===user.Id" class="selchar" title="sender">{{ I18N.Sender }}</div>
+                <div v-show="SelTarget&&SelTarget.Id===user.Id" class="selchar" title="receiver">{{ I18N.Receiver }}</div>
                 <div @click="SelectUser(user)">
                     <div class="username">{{ user.Name }}</div>
                     <div class="userid" :title="user.Id">{{ user.Id.slice( 0, 9 ) + '...' }}</div>
@@ -485,12 +489,12 @@
         </div>
 
         <div class="chains-section" v-if="Users.length > 0">
-            <h3>每个用户的区块链</h3>
+            <h3>{{ I18N.UserChains }}</h3>
 
             <div v-if="SelUser && Array.from(SelUser.OwnChains.values()).length > 0" class="user-chains highlighted">
                 <div style="margin-bottom: 8px; font-weight: bold; display: flex; align-items: center;">
                     <div style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); margin-right: 8px;"></div>
-                    {{ SelUser.Name }}&ensp;有：
+                    {{ SelUser.Name }}{{ I18N.Owns }}
                 </div>
 
                 <div class="chains-container">
@@ -501,8 +505,8 @@
                         <div class="chainname">{{ chain.Name }}</div>
                         <div class="chainid">
                             {{ chain.Id.slice( 0, 12 ) + '...' }}
-                            <v-branch :branch="SelUser.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
-                            v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-chain>
+                            <v-branch :i18n="I18N" :branch="SelUser.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
+                            v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-branch>
                         </div>
                     </div>
                 </div>
@@ -513,7 +517,7 @@
                  v-if="Array.from(user.OwnChains.values()).length > 0 && (!SelUser || user.Id !== SelUser.Id)">
                 <div style="margin-bottom: 8px; font-weight: bold; display: flex; align-items: center;">
                     <div style="width: 12px; height: 12px; border-radius: 50%; background-color: var(--primary); margin-right: 8px;"></div>
-                    {{ user.Name }}&ensp;有：
+                    {{ user.Name }}{{ I18N.Owns }}
                 </div>
 
                 <div class="chains-container">
@@ -524,8 +528,8 @@
                         <div class="chainname">{{ chain.Name }}</div>
                         <div class="chainid">
                             {{ chain.Id.slice( 0, 12 ) + '...' }}
-                            <v-branch :branch="user.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
-                            v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-chain>
+                            <v-branch :i18n="I18N" :branch="user.GetChainBranch(chain.Id)" @selblk-msg="SelectBlock"
+                            v-if="ShowBranch&&SelChain&&SelChain.Id===chain.Id"></v-branch>
                         </div>
                     </div>
                 </div>
@@ -534,7 +538,7 @@
     </div>
 
     <div class="logs">
-        <div class="title">事件记录</div>
+        <div class="title">{{ I18N.Logs }}</div>
         <div class="logarea" ref="LogArea">
             <div class="log" v-for="ln in Logs">{{ ln }}</div>
         </div>
@@ -560,27 +564,162 @@ function Xor( ab0, ab1 )
 
 function *RandSel( data, n )
 {
+    let d = [...data];
     for( ; n-- > 0; )
     {
-        yield data.splice( Math.floor( Math.random() * data.length ), 1 )[0];
+        yield d.splice( Math.floor( Math.random() * d.length ), 1 )[0];
     }
 }
 
+const I18NDict = {
+    cn: {
+        Title: '原子物权链演示',
+        SubTitle: '原子物权链功能演示',
+        P1: '在操作面板中可以看到用户及每个用户拥有的链。新建的链只有根区块。',
+        H3_1: '传送设定',
+        P2_1: '现在，令',
+        P2_Sender: '某个发送者',
+        P2_2: '向',
+        P2_Chain: '某条链',
+        P2_3: '上的',
+        P2_Block: '某个区块',
+        P2_4: '之后添加区块，以将此链送给',
+        P2_Receiver: '某个接收者',
+        H3_2: '操作方法',
+        P3: '按照下面的步骤，在右侧操作面板上设定上框中所需的四个变量：',
+        L1_1: '点击用户名，以选择执行发送操作的用户。',
+        L1_2: '点击区块链，以选择执行此操作的链。选中后可见此链上的所有区块。',
+        L1_3: '点击选择上级区块，新区块将加在所选区块之后。',
+        L1_4: '再次点击一个用户名，以选择接收此链的用户。',
+        H4_1: '传送规则',
+        L2_1: '只能把新区块加在区块链最末的区块之后；',
+        L2_2: '发送者必须是新区块所跟随的区块记载的转移事件中的接收者。',
+        P4: '若违反上述原则，发送者可能会受到忽略和鄙视，<b>甚至被全网拉黑</b>。',
+        Warning: '警告：',
+        P5: '如果坚持实施此项操作，再点一次传送按钮。',
+        Submit: '传送区块链',
+        Cancel: '取消',
+        P6: '本页为原子物权链演示页。原子物权链是全球惟一真正去中心化的技术，并能实现前所未有的安全与可扩展性。请先阅读<a target="_blank" href="index.html">文档</a>。',
+        SwitchLang: 'English version',
+        Href: 'play.html?lang=en',
+        Code: '代码',
+        P7: '原子物权链是高度去中心化的区块链技术，基本运行模式是令若干条私有区块链能在人群之中互相转送。设定每条链代表不同的对象，即可实现不同的业务。',
+        CreateUsers1: '首先创建用户，数量为',
+        CreateUsers2: '个。',
+        Create: '创建',
+        CreateChains1: '接着创建区块链，数量为',
+        CreateChains2: '条。',
+        Panel: '操作面板',
+        Users: '用户',
+        Sender: '发',
+        Receiver: '收',
+        UserChains: '每个用户的区块链',
+        Owns: '有：',
+        Logs: '事件记录',
+        UserNames: ['孙悟空', '猪八戒', '观音', '如来', '太上老君', '玉帝', '王母', '镇元子', '沙僧', '龙王', '阎王', '李天王', '哪吒', '唐僧'],
+        ChainNames: ['金箍棒', '九齿钉耙', '玉净瓶', '金刚琢', '金铙', '七星剑', '二气瓶', '锦襕袈裟', '定风珠',
+                                        '人参果', '芭蕉扇', '紫金铃', '紫金葫芦', '幌金绳'],
+        BranchTitle: '链中区块',
+        Close: '关闭',
+        LogInitUsers: (n) => `开始创建${n}名初始用户。`,
+        LogUsersCreated: (n) => `创建用户${n}名。`,
+        LogInitChains: (n) => `开始创建${n}条区块链。`,
+        LogChainCreated: (owner, chain) => `为${owner}创建链：${chain}。`,
+        LogSameUser: '操作者与接收者不能是同一人。',
+        LogSelectSender: (name) => `本次操作者为${name}`,
+        LogSelectReceiver: (sender, receiver) => `${sender}选定接收者为${receiver}`,
+        LogSelectChain: (user, chain) => `${user}选定要操作的链为${chain}`,
+        LogSelectBlock: (user, block) => `${user}选定区块为${block}`,
+        LogAddBlock: (user, block) => `${user}添加新区块并广播：${block}`,
+        WarnNoRight: '目标用户无权向目标区块后添加区块。',
+        WarnNotTail: '目标区块不在链尾，在此添加属于严重违规。',
+        WarnNotOnChain: (id) => `目标区块没有连接到目标链上：${id}`,
+        LogBadBlock: (user, block) => `${user}：区块数据与前不符：${block}`,
+        LogBlacklisted: (user) => `${user}：区块添加者在黑名单中，区块无效。`,
+        LogDoubleSpending: (user) => `${user}：发现区块添加者实施双花攻击，犯了天条，已拉黑。`,
+        LogVerifyFailed: (user, block) => `${user}：接收区块验证失败：${block}`,
+        LogPrevNotFound: (user, block) => `${user}：缺少上级区块：${block}`,
+    },
+    en: {
+        Title: 'Playground for Atomic Ownership Blockchains',
+        SubTitle: 'Atomic Ownership Blockchains Playground',
+        P1: 'Now you see the players and blockchains in the right panel. There is only one block in each blockchain. Each user can transfer one of their blockchains to another by adding a block.',
+        H3_1: 'Transfer Action',
+        P2_1: 'Let us make',
+        P2_Sender: 'some sender',
+        P2_2: 'add a new block on',
+        P2_Chain: 'some blockchain',
+        P2_3: 'following',
+        P2_Block: 'some block',
+        P2_4: 'to transfer the blockchain to',
+        P2_Receiver: 'some receiver',
+        H3_2: 'Instructions',
+        P3: 'Follow these steps to select all the four variables in the transfer action above:',
+        L1_1: 'Click a player on the panel to select the sender.',
+        L1_2: 'Select a blockchain to be transferred on the panel. Then you will see the block list.',
+        L1_3: 'Select a target block in the block list of the selected blockchain, which the new block will follow.',
+        L1_4: 'Click another player to select the receiver.',
+        H4_1: 'Rules for Legal Transfers:',
+        L2_1: 'The target block must be the last one on the blockchain.',
+        L2_2: 'The sender must be the receiver of the transfer written in the target block. That means the sender must own the blockchain.',
+        P4: 'Otherwise, the transfer may be ignored, the sender may be belittled <b>or even blocked.</b>',
+        Warning: 'Illegal：',
+        P5: 'If you insist on adding the block, please click OK again.',
+        Submit: 'Submit Transfer',
+        Cancel: 'Cancel',
+        P6: 'This page is a playground for Atomic Ownership Blockchains, which is the only REAL decentralized technology in the world. You may have read the <a target="_blank" href="https://saintthor.medium.com/">document</a>.',
+        SwitchLang: '中文版',
+        Href: 'play.html?lang=cn',
+        Code: 'Code on GitHub',
+        P7: 'There are many private blockchains. Each is an NFT and can be transferred from one player to another by adding a block. Set different object for each blockchain to make a business.',
+        CreateUsers1: 'First, create ',
+        CreateUsers2: ' players.',
+        Create: 'Create',
+        CreateChains1: 'Then, create ',
+        CreateChains2: ' blockchains, each for one object.',
+        Panel: 'Players & Blockchains',
+        Users: 'Players',
+        Sender: 'S',
+        Receiver: 'R',
+        UserChains: 'Blockchains by Owner',
+        Owns: "'s Chains",
+        Logs: 'Activity Log',
+        UserNames: ['Zeus', 'Erebus', 'Hera', 'Nyx', 'Cupid', 'Apollo'],
+        ChainNames: ['Aegis', 'Argo', 'Golden Fleece', 'Sword of Damocles', 'Pandora\'s Box',
+                                        'Staff of Hermes', 'Cornucopia', 'Apollo\'s Bow', 'Trident', 'Caduceus'],
+        BranchTitle: 'Block list',
+        Close: 'Close',
+        LogInitUsers: (n) => `Creating ${n} players.`,
+        LogUsersCreated: (n) => `${n} players created.`,
+        LogInitChains: (n) => `Creating ${n} blockchains.`,
+        LogChainCreated: (owner, chain) => `Creating ${chain} for ${owner}.`,
+        LogSameUser: 'The sender and the receiver can not be same.',
+        LogSelectSender: (name) => `The sender is ${name}`,
+        LogSelectReceiver: (sender, receiver) => `${sender} selected ${receiver} as the receiver`,
+        LogSelectChain: (user, chain) => `${user} selected ${chain} to transfer`,
+        LogSelectBlock: (user, block) => `${user} selected ${block} as the target block`,
+        LogAddBlock: (user, block) => `${user} broadcast the new block: ${block}`,
+        WarnNoRight: 'The sender have no right to add a new block following the target block.',
+        WarnNotTail: 'The sender has added a block following the target block before. Adding another block here is a serious violation.',
+        WarnNotOnChain: (id) => `The target block is not on the blockchain: ${id}`,
+        LogBadBlock: (user, block) => `${user}: Bad block data: ${block}`,
+        LogBlacklisted: (user) => `${user}: The sender is already blocked. Ignore.`,
+        LogDoubleSpending: (user) => `${user}: Double spending attack! Block the sender.`,
+        LogVerifyFailed: (user, block) => `${user}: Verify failed: ${block}`,
+        LogPrevNotFound: (user, block) => `${user}: The previous block is not found: ${block}`,
+    },
+};
+
 Vue.component( 'v-branch', {
-    props: ['branch'],
-    template: '<div v-show="Show" class="chainview"><div>链中区块</div><div @click="" v-for="block in Branch">\
-            <div class="block" :style="{\'color\':block.Index==SelIdx?\'#339\':\'#666\'}" @click.stop="SelectBlock(block)"><span class="blockidx">{{ block.Index }}\
-            </span>{{ block.Id.slice( 0, 25 ) + "..." }}</div></div>\
-            &ensp;<span class="closebtn" title="关闭" @click.stop="Close">⇧</span></div>',
+    props: ['branch', 'i18n'],
+    template: `<div v-show="Show" class="chainview"><div>{{ i18n.BranchTitle }}</div><div @click="" v-for="block in Branch">
+            <div class="block" :style="{'color':block.Index==SelIdx?'#339':'#666'}" @click.stop="SelectBlock(block)"><span class="blockidx">{{ block.Index }}
+            </span>{{ block.Id.slice( 0, 25 ) + "..." }}</div></div>
+            &ensp;<span class="closebtn" :title="i18n.Close" @click.stop="Close">⇧</span></div>`,
     data: function()
     {
-        //console.log( this.branch, 'ssss' );
         return { Branch: this.branch, Show: 1, SelIdx: -1 };
     },
-
-    //watch: {
-        //msgs: function( val ){ this.Msgs = val.slice( 0, 8 ) },
-    //},
 
     methods: {
         Close: function()
@@ -598,11 +737,11 @@ Vue.component( 'v-branch', {
 let V = new Vue( {
     el: '#main',
     data: { UserNum: 3, ChainNum: 5, Peers: [], Users:[], Chains: [], Logs: [], SelUser: '', SelChain: '',
-            SelBlockId: '', SelTarget: '', ShowBranch: true, Warning: '', },
+            SelBlockId: '', SelTarget: '', ShowBranch: true, Warning: '', Lang: 'cn', I18N:I18NDict.cn },
     methods: {
         InitUsers: async function()
         {
-            this.Log( '开始创建' + this.UserNum + '名初始用户。' );
+            this.Log( this.I18N.LogInitUsers(this.UserNum) );
             let Peers = this.Peers;
             let Num = this.UserNum;
             for( let i = this.UserNum; i-- > 0; )
@@ -610,20 +749,14 @@ let V = new Vue( {
                 this.Peers.push( new Peer( 'peer' + i ));
             }
             this.Peers.forEach( p => p.AddNeighbors( ...this.Peers ));
-            //let DefaultNames = RandSel( ['黄药师', '欧阳锋', '段智兴', '洪七公', '王重阳', '林朝英'], this.UserNum );
             this.Users = await Promise.all( Array.from( new Array( Number( this.UserNum ))).map( _ => new User()));
-            let NameIter = RandSel( ['孙悟空', '猪八戒', '观音', '如来', '太上老君', '玉帝', '王母', '镇元子', '沙僧', '龙王', '阎王', '李天王', '哪吒', '唐僧'], this.UserNum );
+            let NameIter = RandSel( this.I18N.UserNames, this.UserNum );
             this.Users.forEach(( u, i ) =>
             {
                 Peers[Math.floor( Math.random() * Num )].AddUser( u );
                 u.Name = NameIter.next().value;
             } );
-            //let TestU = await new User();
-            //let Encrypted = await TestU.Export( 'fake password' );
-            //let NewU = await User.Import( 'fake password', Encrypted );
-            //NewU.Name = '裘千仞';
-            //this.Users.push( NewU );
-            this.Logs.push( '创建用户' + this.UserNum + '名。' );
+            this.Logs.push( this.I18N.LogUsersCreated(this.UserNum) );
         },
 
         GetUser: function( userId )
@@ -633,44 +766,41 @@ let V = new Vue( {
 
         InitChains: async function()
         {
-            this.Log( '开始创建' + this.ChainNum + '条区块链。' );
-            let NameIter = RandSel( ['金箍棒', '九齿钉耙', '玉净瓶', '金刚琢', '金铙', '七星剑', '二气瓶', '锦襕袈裟', '定风珠',
-                                        '人参果', '芭蕉扇', '紫金铃', '紫金葫芦', '幌金绳'], this.ChainNum );
+            this.Log( this.I18N.LogInitChains(this.ChainNum) );
+            let NameIter = RandSel( this.I18N.ChainNames, this.ChainNum );
             this.Chains = await Promise.all( Array.from( new Array( Number( this.ChainNum ))).map( async _ =>
             {
                 let Owner = this.Users[Math.floor( Math.random() * this.UserNum )];
                 let Chain = await new BlockChain( NameIter.next().value, Owner.Id );
                 await this.Broadcast( Chain.FirstBlock.Copy());
-                this.Logs.push( '为' + Owner.Name + '创建链：' + Chain.Name + '。' );
+                this.Logs.push( this.I18N.LogChainCreated( Owner.Name, Chain.Name ) );
                 return Chain;
             } ));
-            //this.$forceUpdate();
         },
 
         SelectUser: function( user )
         {
             if( !this.SelUser )
             {
-                if( this.SelTarget.Id == user.Id )
+                if( this.SelTarget && this.SelTarget.Id == user.Id )
                 {
-                    this.Log( '操作者与接收者不能是同一人。' );
+                    this.Log( this.I18N.LogSameUser );
                     return;
                 }
                 this.SelUser = user;
-                this.Log( '本次操作者为' + user.Name );
+                this.Log( this.I18N.LogSelectSender(user.Name) );
             }
             else
             {
                 if( this.SelUser.Id == user.Id )
                 {
-                    this.Log( '操作者与接收者不能是同一人。' );
+                    this.Log( this.I18N.LogSameUser );
                     return;
                 }
                 this.SelTarget = user;
-                this.Log( this.SelUser.Name + '选定接收者为' + user.Name );
+                this.Log( this.I18N.LogSelectReceiver(this.SelUser.Name, user.Name) );
             }
             this.Warning = '';
-            //this.$forceUpdate();
         },
 
         SelectChain: function( chain )
@@ -678,27 +808,15 @@ let V = new Vue( {
             this.SelChain = chain;
             this.SelBlockId = null;
             this.Warning = '';
-            this.Log(( this.SelUser.Name || '' ) + '选定要操作的链为' + chain.Name );
+            this.Log( this.I18N.LogSelectChain( this.SelUser.Name || '', chain.Name ) );
         },
 
         SelectBlock: function( blockId )
         {
-            console.log( 'SelectBlock', blockId );
             this.SelBlockId = blockId;
             this.Warning = '';
-            this.Log(( this.SelUser.Name || '' ) + '选定区块为' + blockId );
+            this.Log( this.I18N.LogSelectBlock( this.SelUser.Name || '', blockId ) );
         },
-
-        //CloseBranch: function()
-        //{
-            //this.ShowBranch = false;
-        //},
-
-        //GetSelUserName: function()
-        //{
-            //let User = this.GetUser( this.SelUser );
-            //return User ? User.Name : "";
-        //},
 
         CancelAct: function()
         {
@@ -711,37 +829,38 @@ let V = new Vue( {
             let SelBlock = this.SelUser.GetBlock( this.SelBlockId );
             if( !SelBlock )
             {
-                console( 'SubmitAct error', SelBlock, this.SelBlockId );
                 return;
             }
             if( !this.Warning && !this.ChkSubmit( SelBlock ))
             {
                 return;
             }
-            console.log( 'submit' );
             let data = 'transfer\n' + this.SelTarget.Id;
             let NewBlock = await this.SelUser.CreateBlock( SelBlock.Index, data, SelBlock.Id );
-            this.Log(( this.SelUser.Name || '' ) + '添加新区块并广播：' + NewBlock.Id );
+            this.Log( this.I18N.LogAddBlock( this.SelUser.Name || '', NewBlock.Id ) );
             let Infos = ( await Promise.all( [...this.SelUser.Peers.values()].map( p => p.Broadcast( NewBlock.Copy())))
                         ).reduce(( x, y ) => x.concat( y ));
-            console.log( 'Broadcast Infos', Infos );
             this.ChkLogInfos( Infos );
             this.SelUser = this.SelChain = this.SelBlockId = this.SelTarget = '';
             this.Warning = '';
-            this.$refs.LogArea.scrollTop = this.$refs.LogArea.scrollHeight - this.$refs.LogArea.clientHeight;
+            this.$refs.LogArea.scrollTop = this.getScrollHeight();
+        },
+
+        getScrollHeight: function() {
+            return this.$refs.LogArea.scrollHeight - this.$refs.LogArea.clientHeight;
         },
 
         ChkSubmit: function( block )
         {
             if( block.OwnerId != this.SelUser.Id )
             {
-                this.Warning = '目标用户无权向目标区块后添加区块。';
+                this.Warning = this.I18N.WarnNoRight;
                 return false;
             }
 
             if( !this.SelUser.ChkTail( block ))
             {
-                this.Warning = '目标区块不在链尾，在此添加属于严重违规。';
+                this.Warning = this.I18N.WarnNotTail;
                 return false;
             }
 
@@ -749,7 +868,7 @@ let V = new Vue( {
             {
                 if( idx >= 0 && idx != block.Index + 1 )
                 {
-                    this.Warning = '目标区块没有连接到目标链上：' + idx;
+                    this.Warning = this.I18N.WarnNotOnChain(idx);
                     return false;
                 }
                 idx = block.Index
@@ -757,13 +876,12 @@ let V = new Vue( {
                 {
                     break
                 }
-                console.log( block );
                 block = this.SelUser.GetBlock( block.PrevId );
             }
 
             if( block.Index != 0 || block.Id != this.SelChain.Id )
             {
-                this.Warning = '目标区块没有连接到目标链上：' + block.Index;
+                this.Warning = this.I18N.WarnNotOnChain(block.Index);
                 return false;
             }
             return true;
@@ -771,37 +889,32 @@ let V = new Vue( {
 
         Broadcast: async function( block )
         {
-            //console.log( 'V.Broadcast in', block, { ...block } );
             let Infos = ( await Promise.all( this.Peers.map( p => p.Receive( { ...block } )))).reduce(( x, y ) => x.concat( y ));
-            console.log( Infos );
             this.ChkLogInfos( Infos );
         },
 
         ChkLogInfos: function( infos )
         {
-            console.log( 'ChkLogInfos', infos );
             for( let info of infos )
             {
                 let [uid, bid, e] = info;
                 let u = this.GetUser( uid );
-                console.log( e, typeof e );
                 switch( e )
                 {
                     case 'bad block data.':
-                        this.Logs.push( u.Name + '：区块数据与前不符：' + bid );
+                        this.Logs.push( this.I18N.LogBadBlock(u.Name, bid) );
                         break;
                     case 'sender in blacklist.':
-                        this.Logs.push( u.Name + '：区块添加者在黑名单中，区块无效。' );
+                        this.Logs.push( this.I18N.LogBlacklisted(u.Name) );
                         break;
                     case 'double spending.':
-                        this.Logs.push( u.Name + '：发现区块添加者实施双花攻击，犯了天条，已拉黑。' );
+                        this.Logs.push( this.I18N.LogDoubleSpending(u.Name) );
                         break;
                     case 'verify failed.':
-                        console.log( '????' );
-                        this.Logs.push( u.Name + '：接收区块验证失败：' + bid );
+                        this.Logs.push( this.I18N.LogVerifyFailed(u.Name, bid) );
                         break;
                     case 'previous block not found.':
-                        this.Logs.push( u.Name + '：缺少上级区块：' + bid );
+                        this.Logs.push( this.I18N.LogPrevNotFound(u.Name, bid) );
                         break;
                 }
             }
@@ -811,6 +924,14 @@ let V = new Vue( {
         {
             let TimeStr = new Date().Format();
             this.Logs.push( TimeStr + '  ' + s );
+        },
+
+        SwitchLang: function( lang )
+        {
+            this.Lang = lang;
+            this.I18N = I18NDict[lang];
+            localStorage.setItem( 'lang', lang );
+            document.title = this.I18N.Title;
         },
     },
 
@@ -822,6 +943,14 @@ let V = new Vue( {
             [...document.body.getElementsByTagName( 'div' )].filter( div => div.id == 'alert_crypto' ).forEach(
                                                                     div => document.body.removeChild( div ))
         }
+
+        const urlParams = new URLSearchParams( window.location.search );
+        let lang = urlParams.get( 'lang' );
+        if( !lang )
+        {
+            lang = localStorage.getItem( 'lang' ) || 'cn';
+        }
+        this.SwitchLang( lang );
     },
 } );
 
