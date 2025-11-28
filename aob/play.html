@@ -7,7 +7,8 @@
     <script src="peer.js"></script>
     <script src="user.js"></script>
     <script src="blockchain.js"></script>
-    <title>{{ I18N.Title }}</title>
+
+    <title>原子物权链演示</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         :root {
@@ -407,7 +408,16 @@
 
                 <div class="act">
                     <h3 style="margin-top: 0;">{{ I18N.H3_1 }}</h3>
-                    <span v-html="I18N.P2"></span>
+                    <p>
+                        {{ I18N.P2_1 }}
+                        [<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser ? SelUser.Name : I18N.P2_Sender }}</span>]
+                        {{ I18N.P2_2 }}
+                        [<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain ? SelChain.Name : I18N.P2_Chain }}</span>]
+                        {{ I18N.P2_3 }}
+                        [<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId ? SelBlockId : I18N.P2_Block }}</span>]
+                        {{ I18N.P2_4 }}
+                        [<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget ? SelTarget.Name : I18N.P2_Receiver }}</span>]。
+                    </p>
                 </div>
 
                 <div style="background-color: white; border-radius: 8px; padding: 16px; margin: 16px 0; box-shadow: var(--card-shadow);">
@@ -568,10 +578,14 @@ const I18NDict = {
         SubTitle: '原子物权链功能演示',
         P1: '在操作面板中可以看到用户及每个用户拥有的链。新建的链只有根区块。',
         H3_1: '传送设定',
-        P2: `现在，令[<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser?SelUser.Name:'某个发送者' }}</span>]向
-[<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain?SelChain.Name:'某条链' }}</span>]上的
-[<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId?SelBlockId:'某个区块' }}</span>]之后添加区块，以将此链送给
-[<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget?SelTarget.Name:'某个接收者' }}</span>]。`,
+        P2_1: '现在，令',
+        P2_Sender: '某个发送者',
+        P2_2: '向',
+        P2_Chain: '某条链',
+        P2_3: '上的',
+        P2_Block: '某个区块',
+        P2_4: '之后添加区块，以将此链送给',
+        P2_Receiver: '某个接收者',
         H3_2: '操作方法',
         P3: '按照下面的步骤，在右侧操作面板上设定上框中所需的四个变量：',
         L1_1: '点击用户名，以选择执行发送操作的用户。',
@@ -632,10 +646,14 @@ const I18NDict = {
         SubTitle: 'Atomic Ownership Blockchains Playground',
         P1: 'Now you see the players and blockchains in the right panel. There is only one block in each blockchain. Each user can transfer one of their blockchains to another by adding a block.',
         H3_1: 'Transfer Action',
-        P2: `Let us make [<span :style="{color:SelUser?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelUser?SelUser.Name:'some sender' }}</span>] add a new block on
-[<span :style="{color:SelChain?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelChain?SelChain.Name:'some blockchain' }}</span>] following
-[<span :style="{color:SelBlockId?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelBlockId?SelBlockId:'some block' }}</span>] to transfer the blockchain to
-[<span :style="{color:SelTarget?'#3a5a8c':'#dc2626', fontWeight: 'bold'}">{{ SelTarget?SelTarget.Name:'some receiver' }}</span>].`,
+        P2_1: 'Let us make',
+        P2_Sender: 'some sender',
+        P2_2: 'add a new block on',
+        P2_Chain: 'some blockchain',
+        P2_3: 'following',
+        P2_Block: 'some block',
+        P2_4: 'to transfer the blockchain to',
+        P2_Receiver: 'some receiver',
         H3_2: 'Instructions',
         P3: 'Follow these steps to select all the four variables in the transfer action above:',
         L1_1: 'Click a player on the panel to select the sender.',
@@ -914,6 +932,7 @@ let V = new Vue( {
             this.Lang = lang;
             this.I18N = I18NDict[lang];
             localStorage.setItem( 'lang', lang );
+            document.title = this.I18N.Title;
         },
     },
 
