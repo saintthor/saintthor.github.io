@@ -50,6 +50,12 @@
         <div class="mt-4 text-slate-500 text-sm">Loading Physics & Visualization Modules</div>
     </div>
 
+    <div style="position:absolute; padding: 32px">
+        <p>这是运行在太空轨道上的 AI 服务器，接收太阳能，通过卡诺热机发电支持 AI 模块工作。在太空低温环境下，热机的效率远高于光伏板，散热量低得多，而且能利用 AI 模块产生的热量。</p>
+        <p>主体是中央的气缸。上方有两块接光板，构成热腔。下方有两块散热板，构成冷腔。左侧为 AI 模块。</p>
+        <p>接光板接收日照产生高温。当通向气缸的管道连通（绿色）时，热量可以传到气缸里。同时另一端与散热板接通，可以释放热量。两边压强的交替改变推动主活塞往复运动。</p>
+        <p>主活塞带有磁铁，穿过线圈时即可发电。在活塞走到右侧，左边工质气体处于绝热膨胀而降温时，AI 模块与气缸接通，将热量释放到气缸，推动活塞右行。当活塞回身向左，左侧气体进入绝热压缩之前，AI 模块与气缸断开，此后的气缸的升温不会影响 AI 模块。</p>
+    </div>
     <!-- 3D Canvas -->
     <div id="canvas-container"></div>
 
@@ -58,33 +64,6 @@
         
         <!-- Top Row -->
         <div class="flex justify-end items-start w-full">
-            <!-- Chat Interface (Top Right) -->
-            <div id="chat-panel" class="panel p-0 rounded-lg w-72 flex flex-col origin-top-right transform scale-90 transition-all">
-                <div class="p-2 border-b border-slate-200 bg-slate-50 flex justify-between items-center cursor-pointer" id="chat-header">
-                    <span class="font-bold text-xs">Gemini Engineer</span>
-                    <button id="chat-toggle" class="text-slate-500 hover:text-slate-800 focus:outline-none">
-                        <!-- Default Icon: Expand (since hidden by default) -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                    </button>
-                </div>
-                <!-- Hidden by default -->
-                <div id="chat-content" class="flex flex-col h-[300px] transition-all hidden">
-                    <div id="chat-history" class="flex-1 overflow-y-auto p-2 space-y-2 bg-white text-xs">
-                        <div class="flex items-start gap-2">
-                            <div class="bg-blue-100 p-2 rounded-lg rounded-tl-none text-slate-800">
-                                System ready. Th=600K, Tc=50K. How can I assist with the design?
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-2 border-t border-slate-200 bg-slate-50 flex gap-2">
-                        <input type="text" id="chat-input" placeholder="Ask AI..." 
-                               class="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
-                        <button id="send-btn" class="btn-primary rounded px-2 py-1 text-xs font-bold">
-                            SEND
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Bottom Row -->
