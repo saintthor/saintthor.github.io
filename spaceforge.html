@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Carnot AI Server Designer v0.9.30</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #f8fafc; color: #1e293b; }
+        #canvas-container { width: 100vw; height: 100vh; display: block; }
+        .panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+            transition: opacity 0.3s;
+            pointer-events: auto; /* Allow clicks on panel */
+        }
+        .panel:hover { opacity: 1; }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { background-color: #2563eb; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Tooltip */
+        #tooltip {
+            position: fixed;
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            white-space: nowrap;
+            transform: translate(10px, 10px);
+        }
+
+        /* Utility */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="fixed inset-0 bg-white z-50 flex items-center justify-center flex-col">
+        <div class="text-2xl font-bold text-slate-800 animate-pulse">INITIALIZING v0.9.30...</div>
+        <div class="mt-4 text-slate-500 text-sm">Loading Physics & Visualization Modules</div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip"></div>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay -->
+    <div class="absolute top-0 left-0 w-full h-full pointer-events-none p-2 flex flex-col justify-between">
+        
+        <!-- Top Row -->
+        <div class="flex justify-end items-start w-full">
+            <!-- Chat Interface (Top Right) -->
+            <div id="chat-panel" class="panel p-0 rounded-lg w-72 flex flex-col origin-top-right transform scale-90 transition-all">
+                <div class="p-2 border-b border-slate-200 bg-slate-50 flex justify-between items-center cursor-pointer" id="chat-header">
+                    <span class="font-bold text-xs">Gemini Engineer</span>
+                    <button id="chat-toggle" class="text-slate-500 hover:text-slate-800 focus:outline-none">
+                        <!-- Default Icon: Expand (since hidden by default) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                    </button>
+                </div>
+                <!-- Hidden by default -->
+                <div id="chat-content" class="flex flex-col h-[300px] transition-all hidden">
+                    <div id="chat-history" class="flex-1 overflow-y-auto p-2 space-y-2 bg-white text-xs">
+                        <div class="flex items-start gap-2">
+                            <div class="bg-blue-100 p-2 rounded-lg rounded-tl-none text-slate-800">
+                                System ready. Th=600K, Tc=50K. How can I assist with the design?
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-2 border-t border-slate-200 bg-slate-50 flex gap-2">
+                        <input type="text" id="chat-input" placeholder="Ask AI..." 
+                               class="flex-1 bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
+                        <button id="send-btn" class="btn-primary rounded px-2 py-1 text-xs font-bold">
+                            SEND
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="flex justify-between items-end w-full">
+            <!-- Control Panel (Bottom Left) -->
+            <div class="panel p-3 rounded-lg w-64 origin-bottom-left transform scale-90">
+                <h3 class="font-bold text-xs mb-2 text-slate-700">Controls</h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span>Sun Temp</span>
+                            <span id="temp-hot-val">600 K</span>
+                        </div>
+                        <input type="range" id="slider-hot" min="300" max="750" value="600" 
+                               class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span>Space Temp</span>
+                            <span id="temp-cold-val">50 K</span>
+                        </div>
+                        <input type="range" id="slider-cold" min="20" max="200" value="50" 
+                               class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-1">
+                            <span>Speed</span>
+                            <span id="speed-val">1.0x</span>
+                        </div>
+                        <input type="range" id="slider-speed" min="0.1" max="3.0" step="0.1" value="1.0" 
+                               class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Stats (Bottom Right) -->
+            <div class="panel p-3 rounded-lg w-64 origin-bottom-right transform scale-90">
+                <h1 class="text-lg font-bold mb-1 text-slate-800 leading-tight">Solar Carnot Server</h1>
+                <div class="text-[10px] text-slate-500 mb-2">Space Infrastructure v0.9.30</div>
+                
+                <div class="space-y-2 font-mono text-xs">
+                    <div class="flex justify-between border-b border-slate-200 pb-1">
+                        <span>Phase (L / R)</span>
+                        <span id="phase-val" class="font-bold text-xs text-right">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Velocity</span>
+                        <span id="velocity-val" class="font-bold">0.0 m/s</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Power</span>
+                        <span id="power-val" class="font-bold text-green-600">0.0 kW</span>
+                    </div>
+                    <div class="flex justify-between pt-1 border-t border-slate-200">
+                        <span>Efficiency</span>
+                        <span id="efficiency-val" class="font-bold">--%</span>
+                    </div>
+                </div>
+
+                <!-- Mini Legend -->
+                <div class="mt-3 pt-2 border-t border-slate-200 grid grid-cols-2 gap-2 text-[10px]">
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div>Hot Gas</div>
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div>Cold Gas</div>
+                    <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div>Valve Open</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Physics Engine ---
+        class PhysicsEngine {
+            constructor() {
+                this.time = 0;
+                this.speed = 1.0;
+                this.sourceTemp = 600;
+                this.sinkTemp = 50;
+                
+                this.state = {
+                    pistonPos: 0, // -2.4 to 2.4
+                    cyclePos: 0,  // 0 to 4 (Phase)
+                    velocity: 0,
+                    power: 0,
+                    
+                    // Valves
+                    vLeftHot: false,
+                    vLeftCold: false,
+                    vRightHot: false,
+                    vRightCold: false,
+                    vAI: false, // AI Connection
+                    
+                    // Phases for UI
+                    phaseHTML: 'Initialization',
+                    
+                    // Visual Colors
+                    colorL: 0, // 0=Blue/Green, 1=Red
+                    colorR: 0
+                };
+            }
+
+            update(dt) {
+                this.time += dt * this.speed;
+                const cycleT = (this.time % 4); // 0 to 4
+                this.state.cyclePos = cycleT;
+
+                // Piston Position: Cosine wave
+                // Pos = -2.4 * cos(wt)
+                const normPos = -Math.cos(cycleT * Math.PI / 2); 
+                this.state.pistonPos = normPos * 2.4;
+                
+                // Velocity is proportional to sine of cycle * speed
+                this.state.velocity = Math.abs(Math.sin(cycleT * Math.PI / 2)) * this.speed * 5.0;
+
+                // Power Calculation
+                const efficiency = 1 - (this.sinkTemp / this.sourceTemp);
+                const deltaT = this.sourceTemp - this.sinkTemp;
+                this.state.power = deltaT * this.speed * efficiency * 0.05;
+
+                // 4 Phases Logic
+                if (cycleT < 1.0) {
+                    // Phase 1: Expansion (Left Heating, Right Cooling)
+                    this.state.phaseHTML = '<span class="text-red-600">L:Iso-Exp</span> / <span class="text-blue-600">R:Iso-Comp</span>';
+                    this.state.vLeftHot = true; this.state.vLeftCold = false;
+                    this.state.vRightHot = false; this.state.vRightCold = true;
+                    this.state.colorL = 1.0; // Red
+                    this.state.colorR = 0.0; // Blue
+                } 
+                else if (cycleT < 2.0) {
+                    // Phase 2: Adiabatic Expansion
+                    this.state.phaseHTML = 'L:Adia-Exp / R:Adia-Comp';
+                    this.state.vLeftHot = false; this.state.vLeftCold = false;
+                    this.state.vRightHot = false; this.state.vRightCold = false;
+                    const p = cycleT - 1.0;
+                    this.state.colorL = 1.0 - p; // Red -> Blue
+                    this.state.colorR = p;       // Blue -> Red
+                }
+                else if (cycleT < 3.0) {
+                    // Phase 3: Isothermal Compression (Left Cooling, Right Heating)
+                    this.state.phaseHTML = '<span class="text-blue-600">L:Iso-Comp</span> / <span class="text-red-600">R:Iso-Exp</span>';
+                    this.state.vLeftHot = false; this.state.vLeftCold = true;
+                    this.state.vRightHot = true; this.state.vRightCold = false;
+                    this.state.colorL = 0.0; // Blue
+                    this.state.colorR = 1.0; // Red
+                }
+                else {
+                    // Phase 4: Adiabatic Compression
+                    this.state.phaseHTML = 'L:Adia-Comp / R:Adia-Exp';
+                    this.state.vLeftHot = false; this.state.vLeftCold = false;
+                    this.state.vRightHot = false; this.state.vRightCold = false;
+                    const p = cycleT - 3.0;
+                    this.state.colorL = p;       // Blue -> Red
+                    this.state.colorR = 1.0 - p; // Red -> Blue
+                }
+
+                // AI Valve: Open from 1.2 to 2.8
+                this.state.vAI = (cycleT > 1.2 && cycleT < 2.8);
+
+                return this.state;
+            }
+        }
+
+        // --- Visualization ---
+        class EngineVisualizer {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.tooltip = document.getElementById('tooltip');
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                this.mouseClient = { x: 0, y: 0 };
+                
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0xf1f5f9);
+                this.scene.fog = new THREE.Fog(0xf1f5f9, 10, 50);
+
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+                this.camera.position.set(0, 5, 16);
+
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.container.appendChild(this.renderer.domElement);
+
+                // Initialize OrbitControls
+                this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+                this.controls.enableDamping = true;
+                this.controls.dampingFactor = 0.05;
+                this.controls.maxDistance = 30;
+                this.controls.minDistance = 5;
+
+                this.physics = new PhysicsEngine();
+                
+                this.initLights();
+                this.initMeshes();
+                this.animate();
+
+                window.addEventListener('resize', () => this.onResize());
+                document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+            }
+
+            onMouseMove(event) {
+                // Calculate mouse position in normalized device coordinates (-1 to +1) for raycasting
+                this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // Store client coordinates for tooltip positioning
+                this.mouseClient.x = event.clientX;
+                this.mouseClient.y = event.clientY;
+            }
+
+            checkTooltip() {
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+
+                let bestTooltip = null;
+
+                // Iterate through intersections to find priority objects
+                // We check all hits to see if we are hitting something inside the glass cylinder
+                for (let i = 0; i < intersects.length; i++) {
+                    let obj = intersects[i].object;
+                    let text = null;
+                    
+                    // Traverse up hierarchy
+                    while (obj) {
+                        if (obj.userData && obj.userData.tooltip) {
+                            text = obj.userData.tooltip;
+                            break;
+                        }
+                        obj = obj.parent;
+                    }
+
+                    if (text) {
+                        // High Priority: Magnets, Piston, Coil, AI (Internal or specific)
+                        // If we hit one of these, we immediately choose it.
+                        if (text.includes("Magnet") || text.includes("Piston") || text.includes("Coil") || text.includes("AI")) {
+                            bestTooltip = text;
+                            break; 
+                        }
+                        
+                        // Medium Priority: Pipes, Chambers (External)
+                        if (text.includes("Chamber") || text.includes("Pipe")) {
+                            // If we already have a high priority item, ignore. Otherwise, take this.
+                            // Actually, if we hit a pipe, it's usually front-most anyway.
+                            if (!bestTooltip) bestTooltip = text;
+                        }
+                        
+                        // Low Priority: Cylinder (Outer Shell)
+                        // Only show cylinder if we haven't found anything better yet.
+                        if (text.includes("Cylinder")) {
+                            if (!bestTooltip) bestTooltip = text;
+                        }
+                    }
+                }
+
+                if (bestTooltip) {
+                    this.tooltip.innerText = bestTooltip;
+                    this.tooltip.style.left = (this.mouseClient.x + 15) + 'px';
+                    this.tooltip.style.top = (this.mouseClient.y + 15) + 'px';
+                    this.tooltip.style.display = 'block';
+                } else {
+                    this.tooltip.style.display = 'none';
+                }
+            }
+
+            initLights() {
+                const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+                this.scene.add(ambient);
+
+                // Top-down Directional Light for Vertical Shadows
+                const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                sunLight.position.set(0, 20, 0); // Vertical
+                sunLight.castShadow = true;
+                sunLight.shadow.camera.left = -10;
+                sunLight.shadow.camera.right = 10;
+                sunLight.shadow.camera.top = 10;
+                sunLight.shadow.camera.bottom = -10;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                this.scene.add(sunLight);
+                
+                // Add Hemisphere Light to illuminate shadowed areas (Cold Plates)
+                // Sky Color: White, Ground Color: Slate, Intensity: 0.6
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x64748b, 0.6);
+                this.scene.add(hemiLight);
+
+                this.addSunArrows();
+            }
+
+            addSunArrows() {
+                const arrowColor = 0xffff00;
+                const arrowLen = 1.5;
+                const positions = [-5, -2, 2, 5]; // Above Hot Plates
+                const yPos = 5.0; 
+                
+                positions.forEach(x => {
+                    const arrowHelper = new THREE.ArrowHelper(
+                        new THREE.Vector3(0, -1, 0),
+                        new THREE.Vector3(x, yPos, 0),
+                        arrowLen,
+                        arrowColor,
+                        0.5,
+                        0.3
+                    );
+                    this.scene.add(arrowHelper);
+                });
+            }
+
+            createMagnetTexture(text, width, height) {
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#1e293b'; 
+                ctx.fillRect(0, 0, width, height);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${width/1.2}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, width/2, height/2);
+                
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            createBlackLayer(x, y, width, depth) {
+                const layer = new THREE.Mesh(
+                    new THREE.BoxGeometry(width, 0.05, depth),
+                    new THREE.MeshStandardMaterial({ color: 0x111111 })
+                );
+                layer.position.set(x, y, 0);
+                this.scene.add(layer);
+            }
+
+            createPlate(x, y, width, depth, color) {
+                const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
+                const boxH = 0.32; 
+                
+                const plate = new THREE.Mesh(new THREE.BoxGeometry(width, boxH, depth), mat);
+                plate.position.set(x, y, 0);
+                plate.castShadow = true;
+                plate.receiveShadow = true;
+                this.scene.add(plate);
+
+                const isTop = y > 0;
+                
+                // Tooltip
+                plate.userData.tooltip = isTop ? "Hot Chamber" : "Cold Chamber";
+
+                // Black Layers
+                if (isTop) {
+                    // Hot Plate: Black on Top
+                    const topY = y + boxH/2 + 0.025;
+                    this.createBlackLayer(x, topY, width, depth);
+                } else {
+                    // Cold Plate: Black on Bottom
+                    const botY = y - boxH/2 - 0.025;
+                    this.createBlackLayer(x, botY, width, depth);
+                }
+
+                const surfaceY = isTop ? (y - boxH/2) : (y + boxH/2);
+                const innerY = isTop ? 0.5 : -0.5;
+                const pipeLen = Math.abs(surfaceY - innerY); 
+                const pipeY = (surfaceY + innerY) / 2;
+
+                const pipeHex = 0x334155; // Dark Grey 0x334155
+                
+                // --- 1. Main Gas Pipe (Vent Pipe) ---
+                // Swapped position with Equalizer: Vent is now at z = 1.2 (Front)
+                const pipeMat = new THREE.MeshStandardMaterial({ color: pipeHex });
+                const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.175, pipeLen), pipeMat);
+                pipe.position.set(x, pipeY, 1.2); 
+                pipe.userData.baseColor = pipeHex;
+                pipe.userData.tooltip = "Vent Pipe";
+                this.scene.add(pipe);
+
+                // --- 2. Equalizer Pipe Assembly ---
+                // Swapped position with Vent: Equalizer is now at z = -1.2 (Back)
+                const cylOuterY = isTop ? 1.6 : -1.6;
+                const housingY = (surfaceY + cylOuterY) / 2; 
+                const gapSize = Math.abs(surfaceY - cylOuterY);
+                const housingLen = gapSize * 0.8; 
+
+                const housingMat = new THREE.MeshPhongMaterial({ 
+                    color: 0xffffff, transparent: true, opacity: 0.3, side: THREE.DoubleSide 
+                });
+                
+                const housingGeo = new THREE.CylinderGeometry(0.6, 0.6, housingLen, 16);
+                const housing = new THREE.Mesh(housingGeo, housingMat);
+                housing.position.set(x, housingY, -1.2);
+                housing.userData.tooltip = "Equalizer Pipe";
+                this.scene.add(housing);
+
+                const housingOuterY = isTop ? (housingY + housingLen/2) : (housingY - housingLen/2);
+                const upperDist = Math.abs(surfaceY - housingOuterY);
+                const seg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.175, upperDist), housingMat);
+                seg1.position.set(x, (surfaceY + housingOuterY)/2, -1.2);
+                seg1.userData.tooltip = "Equalizer Pipe";
+                this.scene.add(seg1);
+
+                const housingInnerY = isTop ? (housingY - housingLen/2) : (housingY + housingLen/2);
+                const lowerDist = Math.abs(innerY - housingInnerY);
+                const seg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.175, 0.175, lowerDist), housingMat);
+                seg2.position.set(x, (innerY + housingInnerY)/2, -1.2);
+                seg2.userData.tooltip = "Equalizer Pipe";
+                this.scene.add(seg2);
+
+                const pistonGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.15, 16);
+                const pistonMat = new THREE.MeshStandardMaterial({ color: 0x1e293b }); 
+                const eqPiston = new THREE.Mesh(pistonGeo, pistonMat);
+                eqPiston.position.set(x, housingY, -1.2);
+                this.scene.add(eqPiston);
+
+                return { plate, pipe, eqPiston, housingLen, housingY, isTop, isLeft: x < 0 };
+            }
+
+            initMeshes() {
+                // Glass Cylinder
+                const glassMat = new THREE.MeshPhongMaterial({ 
+                    color: 0xffffff, 
+                    transparent: true, 
+                    opacity: 0.15, 
+                    shininess: 100,
+                    depthWrite: false, 
+                    side: THREE.DoubleSide
+                });
+                const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 8.0, 32), glassMat);
+                cylinder.rotation.z = Math.PI / 2;
+                cylinder.receiveShadow = true;
+                cylinder.userData.tooltip = "Gas Cylinder";
+                this.scene.add(cylinder);
+
+                // Piston
+                this.pistonGroup = new THREE.Group();
+                const pistonMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.3, metalness: 0.8 });
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 1.5, 32), pistonMat);
+                body.rotation.z = Math.PI / 2;
+                body.userData.tooltip = "Main Piston";
+                this.pistonGroup.add(body);
+
+                // Magnets - Slate-800
+                const magGeo = new THREE.BoxGeometry(0.4, 1.8, 0.8);
+                const matGrey = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+                
+                const texN = this.createMagnetTexture("N", 128, 256);
+                const matN = new THREE.MeshStandardMaterial({ map: texN });
+
+                const texS = this.createMagnetTexture("S", 128, 256);
+                const matS = new THREE.MeshStandardMaterial({ map: texS });
+
+                const magL = new THREE.Mesh(magGeo, [matGrey, matGrey, matGrey, matGrey, matN, matN]);
+                magL.position.x = -0.95; 
+                magL.userData.tooltip = "Magnet";
+                this.pistonGroup.add(magL);
+
+                const magR = new THREE.Mesh(magGeo, [matGrey, matGrey, matGrey, matGrey, matS, matS]);
+                magR.position.x = 0.95;
+                magR.userData.tooltip = "Magnet";
+                this.pistonGroup.add(magR);
+
+                this.scene.add(this.pistonGroup);
+
+                // Gas Volumes
+                const gasGeo = new THREE.CylinderGeometry(1.52, 1.52, 1, 32);
+                
+                const gasLMat = new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff, 
+                    emissive: 0xff0000,
+                    emissiveIntensity: 0.8,
+                    transparent: true, 
+                    opacity: 0.6,
+                    depthWrite: false
+                });
+                this.gasL = new THREE.Mesh(gasGeo, gasLMat);
+                this.gasL.rotation.z = Math.PI / 2;
+                this.scene.add(this.gasL);
+
+                const gasRMat = new THREE.MeshStandardMaterial({ 
+                    color: 0xffffff,
+                    emissive: 0x0000ff,
+                    emissiveIntensity: 0.8,
+                    transparent: true, 
+                    opacity: 0.6,
+                    depthWrite: false
+                });
+                this.gasR = new THREE.Mesh(gasGeo, gasRMat);
+                this.gasR.rotation.z = Math.PI / 2;
+                this.scene.add(this.gasR);
+
+                // Valves & Plates
+                // Cold Plates: Lighter Blue 0x2563eb
+                // Hot Plates: Red 0xef4444
+                this.valves = {};
+                this.valves.leftHot = this.createPlate(-3.5, 3.0, 6.5, 6.0, 0xef4444); 
+                this.valves.rightHot = this.createPlate(3.5, 3.0, 6.5, 6.0, 0xef4444);
+                this.valves.leftCold = this.createPlate(-3.5, -3.0, 4.0, 3.0, 0x2563eb);
+                this.valves.rightCold = this.createPlate(3.5, -3.0, 4.0, 3.0, 0x2563eb);
+
+                // AI Unit
+                const aiMat = new THREE.MeshStandardMaterial({ color: 0x2f4f4f, roughness: 0.4, metalness: 0.7 });
+                const aiBox = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.0, 2.0), aiMat);
+                aiBox.position.set(-5.0, 0, 0);
+                aiBox.userData.tooltip = "AI Module";
+                this.scene.add(aiBox);
+
+                const aiPipeMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
+                const aiPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.0), aiPipeMat);
+                aiPipe.rotation.z = Math.PI / 2;
+                aiPipe.position.set(-4.5, 0, 0); 
+                aiPipe.userData.baseColor = 0x64748b;
+                this.scene.add(aiPipe);
+                this.valves.ai = { valve: null, pipe: aiPipe }; 
+
+                // Helix Coil
+                const curve = new THREE.CatmullRomCurve3([]);
+                const turns = 10; 
+                const length = 3.2; 
+                for (let i = 0; i <= 100; i++) {
+                    const t = i / 100;
+                    const angle = t * Math.PI * 2 * turns;
+                    const x = (t - 0.5) * length;
+                    curve.points.push(new THREE.Vector3(x, Math.cos(angle)*1.7, Math.sin(angle)*1.7));
+                }
+                const coilGeo = new THREE.TubeGeometry(curve, 200, 0.05, 8, false);
+                const coilMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.8, roughness: 0.2 });
+                const coilMesh = new THREE.Mesh(coilGeo, coilMat);
+                coilMesh.userData.tooltip = "Coil";
+                this.scene.add(coilMesh);
+
+                // Wires
+                const wireLPath = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(-1.6, 1.7, 0),
+                    new THREE.Vector3(-1.62, 1.68, -0.1),
+                    new THREE.Vector3(-2.0, 2.2, 0),
+                    new THREE.Vector3(-4.5, 2.0, 0),
+                    new THREE.Vector3(-5.0, 1.0, 0) 
+                ]);
+                const wireLGeo = new THREE.TubeGeometry(wireLPath, 32, 0.05, 8, false);
+                this.scene.add(new THREE.Mesh(wireLGeo, coilMat));
+
+                const wireRPath = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(1.6, 1.7, 0),
+                    new THREE.Vector3(1.62, 1.68, 0.1),
+                    new THREE.Vector3(2.0, 2.3, 0),
+                    new THREE.Vector3(0, 2.3, 0),
+                    new THREE.Vector3(-4.5, 2.3, 0),
+                    new THREE.Vector3(-5.0, 1.0, 0)
+                ]);
+                const wireRGeo = new THREE.TubeGeometry(wireRPath, 64, 0.05, 8, false);
+                this.scene.add(new THREE.Mesh(wireRGeo, coilMat));
+            }
+
+            setV(obj, isOpen) {
+                if (!obj || !obj.pipe) return;
+                
+                const green = 0x22c55e;
+                const closedColor = 0x808080; // Grey
+                
+                const color = isOpen ? green : closedColor;
+                const emissive = isOpen ? green : closedColor; 
+                const intensity = isOpen ? 0.6 : 0.4;
+                
+                obj.pipe.material.color.setHex(color);
+                obj.pipe.material.emissive.setHex(emissive);
+                obj.pipe.material.emissiveIntensity = intensity;
+            }
+
+            updateColor(mesh, ratio) {
+                const c1 = new THREE.Color(0x3b82f6);
+                const c2 = new THREE.Color(0xef4444);
+                mesh.material.emissive.lerpColors(c1, c2, ratio);
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                const dt = 0.016;
+                const state = this.physics.update(dt);
+
+                this.pistonGroup.position.x = state.pistonPos;
+                this.controls.update();
+
+                this.checkTooltip();
+
+                // Gas Dynamics
+                const pistonLeftFace = state.pistonPos - 0.75; 
+                const lenL = Math.max(0.01, pistonLeftFace - (-4.0));
+                this.gasL.scale.y = lenL;
+                this.gasL.position.x = -4.0 + (lenL / 2);
+
+                const pistonRightFace = state.pistonPos + 0.75;
+                const lenR = Math.max(0.01, 4.0 - pistonRightFace);
+                this.gasR.scale.y = lenR;
+                this.gasR.position.x = 4.0 - (lenR / 2);
+
+                // Colors
+                this.updateColor(this.gasL, state.colorL);
+                this.updateColor(this.gasR, state.colorR);
+
+                // Valves
+                this.setV(this.valves.leftHot, state.vLeftHot);
+                this.setV(this.valves.leftCold, state.vLeftCold);
+                this.setV(this.valves.rightHot, state.vRightHot);
+                this.setV(this.valves.rightCold, state.vRightCold);
+                this.setV(this.valves.ai, state.vAI);
+
+                // Equalizer Pistons
+                const eqRange = 0.25; 
+                const normPos = state.pistonPos / 2.4; 
+                const leftEqPos = -normPos * eqRange;
+                const rightEqPos = normPos * eqRange;
+
+                this.valves.leftHot.eqPiston.position.y = this.valves.leftHot.housingY + (leftEqPos);
+                this.valves.leftCold.eqPiston.position.y = this.valves.leftCold.housingY - (leftEqPos);
+                this.valves.rightHot.eqPiston.position.y = this.valves.rightHot.housingY + (rightEqPos);
+                this.valves.rightCold.eqPiston.position.y = this.valves.rightCold.housingY - (rightEqPos);
+
+                this.renderer.render(this.scene, this.camera);
+                this.updateUI(state);
+            }
+
+            updateUI(state) {
+                document.getElementById('phase-val').innerHTML = state.phaseHTML;
+                document.getElementById('velocity-val').innerText = `${state.velocity.toFixed(1)} m/s`;
+                document.getElementById('power-val').innerText = `${state.power.toFixed(1)} kW`;
+                const eff = (1 - (this.physics.sinkTemp / this.physics.sourceTemp)) * 100;
+                document.getElementById('efficiency-val').innerText = `${eff.toFixed(1)}%`;
+            }
+
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const visualizer = new EngineVisualizer('canvas-container');
+            document.getElementById('loading').style.display = 'none';
+
+            // Events
+            ['slider-hot', 'slider-cold', 'slider-speed'].forEach(id => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', (e) => {
+                    const val = parseFloat(e.target.value);
+                    if (id.includes('hot')) {
+                        visualizer.physics.sourceTemp = val;
+                        document.getElementById('temp-hot-val').innerText = `${val} K`;
+                    } else if (id.includes('cold')) {
+                        visualizer.physics.sinkTemp = val;
+                        document.getElementById('temp-cold-val').innerText = `${val} K`;
+                    } else {
+                        visualizer.physics.speed = val;
+                        document.getElementById('speed-val').innerText = `${val}x`;
+                    }
+                });
+            });
+
+            // Chat Toggle
+            const chatHeader = document.getElementById('chat-header');
+            const chatToggleBtn = document.getElementById('chat-toggle');
+            const chatContent = document.getElementById('chat-content');
+            
+            function toggleChat() {
+                chatContent.classList.toggle('hidden');
+                // Change icon
+                const isHidden = chatContent.classList.contains('hidden');
+                chatToggleBtn.innerHTML = isHidden 
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+            }
+
+            chatHeader.addEventListener('click', toggleChat);
+
+            // Chat Send
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+            const history = document.getElementById('chat-history');
+
+            async function sendMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                history.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white p-2 rounded text-xs max-w-[90%]">${text}</div></div>`;
+                chatInput.value = '';
+                history.scrollTop = history.scrollHeight;
+
+                try {
+                    const { GoogleGenAI } = await import('https://esm.run/@google/genai');
+                    const apiKey = (typeof process !== "undefined" && process.env && process.env.API_KEY) ? process.env.API_KEY : '';
+                    
+                    if (!apiKey) {
+                        history.innerHTML += `<div class="flex items-start gap-2"><div class="bg-red-100 p-2 rounded text-xs text-red-800">Error: API Key missing. Please configure process.env.API_KEY environment variable.</div></div>`;
+                        history.scrollTop = history.scrollHeight;
+                        return;
+                    }
+
+                    const ai = new GoogleGenAI({ apiKey });
+                    const response = await ai.models.generateContent({
+                        model: "gemini-2.5-flash",
+                        contents: `Context: Solar Carnot Engine Space Server. Th=${visualizer.physics.sourceTemp}K, Tc=${visualizer.physics.sinkTemp}K. User: ${text}`
+                    });
+                    history.innerHTML += `<div class="flex items-start gap-2"><div class="bg-blue-100 p-2 rounded text-xs text-slate-800 max-w-[90%]">${response.text}</div></div>`;
+                } catch (e) {
+                    history.innerHTML += `<div class="flex items-start gap-2"><div class="bg-red-100 p-2 rounded text-xs text-red-800">Error: ${e.message}</div></div>`;
+                }
+                history.scrollTop = history.scrollHeight;
+            }
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+        });
+
+        setTimeout(() => {
+            const loader = document.getElementById('loading');
+            if (loader) loader.style.display = 'none';
+        }, 3000);
+    </script>
+</body>
+</html>
