@@ -374,8 +374,12 @@
         const r2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
         const r0 = (n) => Math.round(n);
 
-        var currentLang = localStorage.getItem('aob_lang') || 'zh';
-        var mqttClient;
+        // Language Initialization (URL Support)
+        const urlParams = new URLSearchParams(window.location.search);
+        var currentLang = urlParams.get('lang') || localStorage.getItem('aob_lang') || 'zh';
+        if (currentLang !== 'zh' && currentLang !== 'en') currentLang = 'zh';
+
+        var mqttClients = []; // Replaced single mqttClient with array for triple-broker redundancy
         var superUser = null;
         var appInstanceId = localStorage.getItem('aob_instance_id') || Math.random().toString(36).substr(2, 4).toUpperCase();
         localStorage.setItem('aob_instance_id', appInstanceId);
@@ -393,14 +397,13 @@
             instanceId: appInstanceId
         };
 
-        // Track D3 Nodes and Links to maintain physical state
-        let vizNodes = [];
-        let vizLinks = [];
-
         const CONFIG = {
             NODE_COUNT: 30, ACCOUNT_COUNT: 10, BANKNOTE_COUNT: 100,
-            //MQTT_BROKER: 'ws://test.mosquitto.org:8080',    // ws not for https. wss://8081 works under VPN
-            MQTT_BROKER: 'wss://broker.emqx.io:8084/mqtt', 
+            BROKERS: [
+                'wss://broker.emqx.io:8084/mqtt',
+                'wss://test.mosquitto.org:8081',
+                'ws://test.mosquitto.org:8080'
+            ],
             TOPIC_MESH: 'aob/v25/global_mesh', TOPIC_DISCOVERY: 'aob/v25/discovery', TOPIC_P2P: 'aob/v25/p2p',
             DEFINITION_TEXT: "This is the CBDC of Dorothea. Define each blockchain as a prop bill, with the data structure of its genesis block as: H\\nS\\nK, where: H is the SHA256 hash of this document (Base64); K is the public key of the system user (Base64), fixed at [SysPubKey]; S is the serial number, with the following correspondence to the banknote's denomination:\\n1-20 1\\n21-40 5\\n41-60 10\\n61-80 20\\n81-100 50"
         };
@@ -425,13 +428,27 @@
             if (titleEl) titleEl.innerText = t('title');
             const langToggleEl = document.getElementById('lang-toggle-text');
             if (langToggleEl) langToggleEl.innerText = t('lang_toggle');
+            
             const s = document.getElementById('mqtt-status');
-            if (s && mqttClient) {
-                s.innerText = mqttClient.connected ? t('broker_online') : t('broker_connecting');
-                s.className = mqttClient.connected ? "px-4 py-2 bg-green-50 text-green-600 text-[10px] font-black rounded-full uppercase border border-green-100" : "px-4 py-2 bg-amber-50 text-amber-600 text-[10px] font-black rounded-full uppercase border border-amber-100";
+            const connectedCount = mqttClients.filter(c => c.connected).length;
+            if (s) {
+                if (connectedCount > 0) {
+                    s.innerText = `${t('broker_online')} (${connectedCount}/${mqttClients.length})`;
+                    s.className = "px-4 py-2 bg-green-50 text-green-600 text-[10px] font-black rounded-full uppercase border border-green-100";
+                } else {
+                    s.innerText = t('broker_connecting');
+                    s.className = "px-4 py-2 bg-amber-50 text-amber-600 text-[10px] font-black rounded-full uppercase border border-amber-100";
+                }
             }
             document.querySelectorAll('[data-t]').forEach(el => el.innerText = t(el.getAttribute('data-t')));
             if (window.lucide) lucide.createIcons();
+        }
+
+        // Multi-broker publish helper
+        function multiPublish(topic, message) {
+            mqttClients.forEach(client => {
+                if (client.connected) client.publish(topic, message);
+            });
         }
 
         async function saveFullState() {
@@ -449,7 +466,7 @@
                 readyFlags: simulationState.readyFlags,
                 instanceId: simulationState.instanceId
             };
-            setLocal('aob_lab_v13', data);
+            setLocal('aob_lab_v13_redundant', data);
         }
 
         async function getHash(text) { const hb = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return btoa(String.fromCharCode(...new Uint8Array(hb))); }
@@ -460,18 +477,16 @@
             if (simulationState.step >= 1) {
                 const locals = simulationState.nodes.filter(n => n.instance === appInstanceId);
                 if (locals.length > 0) {
-                    const subset = locals.sort(() => 0.5 - Math.random()).slice(0, 3);
-                    subset.forEach(n => {
-                        mqttClient.publish(CONFIG.TOPIC_DISCOVERY, JSON.stringify({ 
-                            type: 'HELLO', id: n.id, instance: appInstanceId, neighbors: n.neighbors 
-                        }));
-                    });
+                    const n = locals[Math.floor(Math.random() * locals.length)];
+                    multiPublish(CONFIG.TOPIC_DISCOVERY, JSON.stringify({ 
+                        type: 'HELLO', id: n.id, instance: appInstanceId, neighbors: n.neighbors 
+                    }));
                 }
             }
         }
 
         window.initNetwork = async function() {
-            const saved = getLocal('aob_lab_v13');
+            const saved = getLocal('aob_lab_v13_redundant');
             if (saved && saved.nodes && saved.nodes.length > 0) {
                 simulationState.nodes = saved.nodes.map(n => ({ ...n, ledger: {}, seenIds: new Set(), logs: n.logs || [] }));
                 simulationState.instanceId = saved.instanceId;
@@ -490,16 +505,15 @@
                 });
                 simulationState.nodes = locals;
             }
-            simulationState.nodes.filter(n => n.instance === appInstanceId).forEach(n => mqttClient.subscribe(`${CONFIG.TOPIC_P2P}/${n.id}`));
             initNetworkViz();
             simulationState.readyFlags = [t('ready_net')];
             simulationState.step = 1; updateStepUI(); window.switchTab('nodes');
-            startDiscovery();
+            startDiscovery(); setInterval(startDiscovery, 15000);
             await saveFullState();
         };
 
         window.initAccounts = async function() {
-            const saved = getLocal('aob_lab_v13');
+            const saved = getLocal('aob_lab_v13_redundant');
             simulationState.remoteUsers = []; 
             if (saved && saved.users && saved.users.length > 0) {
                 simulationState.superUserPub = saved.superUserPub;
@@ -537,8 +551,8 @@
                 const sig = await signData(payData, superUser.keyPair.privateKey);
                 const payment = { id: sig, type: 'PAYMENT', data: payData, author: superUser.pub, target: target.pub, chainRootId: gId, sig };
                 await updateGlobalState(genesis); await updateGlobalState(payment);
-                mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block: genesis }));
-                mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block: payment }));
+                multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block: genesis }));
+                multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block: payment }));
             }
             simulationState.readyFlags.push(t('ready_assets'));
             simulationState.step = 3; updateStepUI(); window.switchTab('chains');
@@ -576,9 +590,7 @@
             if (!simulationState.speedyChannels.find(x => x.id === cId)) {
                 const block = { id: cId, type: 'SPEEDY_CHANNEL_ROOT', data: rootData, author: u1.pub, chainRootId: cId };
                 await updateGlobalState(block);
-                mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
-                // FIX: Removed explicit mortgage logic here to prevent doubling. 
-                // All mortgages are now reactive in updateGlobalState(rootBlock).
+                multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
             }
             return cId;
         }
@@ -586,6 +598,7 @@
         async function updateGlobalState(block) {
             if (simulationState.processedIds.has(block.id)) return;
             simulationState.processedIds.add(block.id);
+            
             simulationState.nodes.filter(n => n.instance === appInstanceId).forEach(n => {
                 n.seenIds.add(block.id);
                 const entry = `${t('log_sync')} Type:${block.type}\\nID:${block.id.slice(0,16)}...\\n${t('log_author')}:${block.author.slice(0,8)}...\\n${t('log_content')}: ${block.data}`;
@@ -630,7 +643,7 @@
                 simulationState.speedyChannels.push(chan);
                 addUserIfRemote(l[2]); addUserIfRemote(l[4]);
                 
-                // Reactive Auto-mortgage logic for any local participant detected in a new channel root
+                // Reactive Auto-mortgage logic
                 chan.participants.forEach(async p => {
                     const localMe = simulationState.users.find(u => u.pub === p.pub);
                     if (localMe) {
@@ -642,7 +655,7 @@
                                 const sig = await signData(mData, localMe.keyPair.privateKey);
                                 const mBlock = { id: sig, type: 'MORTGAGE', data: mData, author: p.pub, target: chanId, chainRootId: myAssets[0].genesisId, sig };
                                 await updateGlobalState(mBlock);
-                                mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block: mBlock }));
+                                multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block: mBlock }));
                             }
                         }
                     }
@@ -668,7 +681,7 @@
                         const logEntry = `[${msg.type}] From:${msg.originator}\\n${t('log_content')}: ${msg.content || 'P2P Broadcast'}\\n${t('log_msg_id')}: ${msg.mId}`;
                         n.logs.unshift({ time: new Date().toLocaleTimeString(), type: msg.type, data: logEntry });
                         if(n.logs.length > 50) n.logs.pop();
-                        if (msg.hop < 4) mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ relay: { ...msg, fromNode: n.id, hop: msg.hop + 1 } }));
+                        if (msg.hop < 4) multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ relay: { ...msg, fromNode: n.id, hop: msg.hop + 1 } }));
                     }
                 }
             });
@@ -676,7 +689,7 @@
 
         function relayToNeighbors(node, payload) {
             node.neighbors.forEach(nbId => {
-                if (mqttClient && mqttClient.connected) mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ relay: { ...payload, fromNode: node.id, hop: 0 } }));
+                multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ relay: { ...payload, fromNode: node.id, hop: 0 } }));
             });
         }
 
@@ -860,7 +873,7 @@
             const data = `PREV:${c.blocks[c.blocks.length-1].id}\\nTYPE:PAYMENT\\nTARGET:${target}\\nTS:${Date.now()}`;
             const sig = await signData(data, owner.keyPair.privateKey);
             const block = { id: sig, type: 'PAYMENT', data, author: c.currentOwner, target, chainRootId: chainId, sig };
-            await updateGlobalState(block); mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
+            await updateGlobalState(block); multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
             window.closeOverlay(); await saveFullState();
         };
 
@@ -948,7 +961,7 @@
             
             user.balance = r2(user.balance - chain.denomination);
             await updateGlobalState(block);
-            mqttClient.publish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
+            multiPublish(CONFIG.TOPIC_MESH, JSON.stringify({ block }));
             window.refreshChannelUI(chanId);
             await saveFullState();
         };
@@ -963,7 +976,7 @@
             
             const msgId = Math.random().toString(36).substr(2, 9);
             simulationState.processedIds.add(msgId);
-            mqttClient.publish(`${CONFIG.TOPIC_P2P}/${receiver.node}`, JSON.stringify({ type: 'SPEEDY_CHANNEL_UPDATE', msgId: msgId, channelId: id, senderPub: sender.pub, amount: amt }));
+            multiPublish(`${CONFIG.TOPIC_P2P}/${receiver.node}`, JSON.stringify({ type: 'SPEEDY_CHANNEL_UPDATE', msgId: msgId, channelId: id, senderPub: sender.pub, amount: amt }));
             window.refreshChannelUI(id); await saveFullState();
         };
 
@@ -1022,7 +1035,7 @@
                 c.history.push({ from: sender.fp, to: receiver.fp, amount: amt, time: Date.now(), cascade: true });
                 const msgId = Math.random().toString(36).substr(2, 9);
                 simulationState.processedIds.add(msgId);
-                mqttClient.publish(`${CONFIG.TOPIC_P2P}/${receiver.node}`, JSON.stringify({ type: 'SPEEDY_CHANNEL_UPDATE', msgId: msgId, channelId: cid, senderPub: curPub, amount: amt }));
+                multiPublish(`${CONFIG.TOPIC_P2P}/${receiver.node}`, JSON.stringify({ type: 'SPEEDY_CHANNEL_UPDATE', msgId: msgId, channelId: cid, senderPub: curPub, amount: amt }));
                 curPub = receiver.pub;
             });
             cascadeSession.active = false; window.closeOverlay(); await saveFullState();
@@ -1049,7 +1062,6 @@
             simulationState.nodes.forEach(n => { 
                 n.neighbors.forEach(nbid => { 
                     if (simulationState.nodes.some(x => x.id === nbid)) {
-                        // Avoid duplicates in visual links
                         const linkId = [n.id, nbid].sort().join('-');
                         if (!links.some(l => l.linkId === linkId)) {
                             links.push({ source: n.id, target: nbid, linkId }); 
@@ -1090,73 +1102,93 @@
             if(window.lucide) lucide.createIcons();
         };
 
-        mqttClient = mqtt.connect(CONFIG.MQTT_BROKER, { clientId: 'aob_v25_' + appInstanceId, clean: true });
-        mqttClient.on('connect', () => { 
-            mqttClient.subscribe(CONFIG.TOPIC_MESH); mqttClient.subscribe(CONFIG.TOPIC_DISCOVERY); 
-            const s = document.getElementById('mqtt-status');
-            if(s) {
-                s.innerText = t('broker_online');
-                s.className = "px-4 py-2 bg-green-50 text-green-600 text-[10px] font-black rounded-full uppercase border border-green-100";
-            }
-            setInterval(startDiscovery, 10000);
-        });
-        mqttClient.on('message', (t_name, p) => {
-            try {
-                const d = JSON.parse(p.toString());
-                if (t_name === CONFIG.TOPIC_MESH) { if (d.relay) handleIncomingRelay(d.relay); else if (d.block) updateGlobalState(d.block); }
-                else if (t_name === CONFIG.TOPIC_DISCOVERY) {
-                    if (d.instance === appInstanceId) return;
-                    let rNode = simulationState.nodes.find(x => x.id === d.id);
-                    if (!rNode) { 
-                        rNode = { id: d.id, instance: d.instance, neighbors: d.neighbors || [], logs: [], seenIds: new Set(), ledger: {} }; 
-                        simulationState.nodes.push(rNode); 
-                        mqttClient.subscribe(`${CONFIG.TOPIC_P2P}/${rNode.id}`); 
-                    } else if (d.neighbors) {
-                        d.neighbors.forEach(nb => { if(!rNode.neighbors.includes(nb)) rNode.neighbors.push(nb); });
-                    }
+        // Redundant MQTT Connection Logic
+        const isHttps = window.location.protocol === 'https:';
+        // 如果页面不是 https 的，只连前两个
+        const filteredBrokers = !isHttps ? CONFIG.BROKERS.slice(0, 2) : CONFIG.BROKERS;
 
-                    if (d.type === 'HELLO') {
-                        const locals = simulationState.nodes.filter(n => n.instance === appInstanceId && n.neighbors.length < 8);
-                        if(locals[0]) {
-                            const subset = locals.sort(() => 0.5 - Math.random()).slice(0, 2);
-                            subset.forEach(ln => {
-                                if(!ln.neighbors.includes(d.id)) { 
-                                    ln.neighbors.push(d.id); 
-                                    if(!rNode.neighbors.includes(ln.id)) rNode.neighbors.push(ln.id);
-                                    mqttClient.publish(CONFIG.TOPIC_DISCOVERY, JSON.stringify({ 
-                                        type: 'HELLO_BACK', id: ln.id, targetId: d.id, instance: appInstanceId, neighbors: ln.neighbors 
-                                    })); 
-                                }
-                            });
-                        }
-                    } else if (d.type === 'HELLO_BACK') {
-                        const ln = simulationState.nodes.find(n => n.id === d.targetId && n.instance === appInstanceId);
-                        if (ln && !ln.neighbors.includes(d.id)) {
-                             ln.neighbors.push(d.id);
-                             if (!rNode.neighbors.includes(ln.id)) rNode.neighbors.push(ln.id);
-                        }
+        filteredBrokers.forEach((url, index) => {
+            const client = mqtt.connect(url, { 
+                clientId: `aob_v25_${appInstanceId}_${index}_${Math.random().toString(36).substr(2,4)}`, 
+                clean: true 
+            });
+            
+            client.on('connect', () => { 
+                client.subscribe(CONFIG.TOPIC_MESH);
+                client.subscribe(CONFIG.TOPIC_DISCOVERY);
+                client.subscribe(`${CONFIG.TOPIC_P2P}/#`);
+                updateLanguageContent();
+            });
+
+            client.on('message', (t_name, p) => {
+                try {
+                    const d = JSON.parse(p.toString());
+                    // Standard Deduplication via global processedIds
+                    if (t_name === CONFIG.TOPIC_MESH) { 
+                        if (d.relay) handleIncomingRelay(d.relay); 
+                        else if (d.block) updateGlobalState(d.block); 
                     }
-                    if(simulation) updateNetworkViz();
-                } else if (t_name.startsWith(CONFIG.TOPIC_P2P)) {
-                    if (d.type === 'SPEEDY_CHANNEL_UPDATE') {
-                        const c = simulationState.speedyChannels.find(x => x.id === d.channelId);
-                        if (c && !simulationState.processedIds.has(d.msgId)) {
-                            simulationState.processedIds.add(d.msgId);
-                            const sIdx = c.participants.findIndex(p => p.pub === d.senderPub);
-                            if (sIdx !== -1) {
-                                const receiverIdx = sIdx === 0 ? 1 : 0;
-                                c.participants[sIdx].balance = r2(c.participants[sIdx].balance - d.amount);
-                                c.participants[receiverIdx].balance = r2(c.participants[receiverIdx].balance + d.amount);
-                                c.history.push({ from: c.participants[sIdx].fp, to: c.participants[receiverIdx].fp, amount: d.amount, time: Date.now() });
-                                window.renderAll(); if (currentOpenedChannelId === d.channelId) window.refreshChannelUI(d.channelId);
+                    else if (t_name === CONFIG.TOPIC_DISCOVERY) {
+                        if (d.instance === appInstanceId) return;
+                        let rNode = simulationState.nodes.find(x => x.id === d.id);
+                        if (!rNode) { 
+                            rNode = { id: d.id, instance: d.instance, neighbors: d.neighbors || [], logs: [], seenIds: new Set(), ledger: {} }; 
+                            simulationState.nodes.push(rNode); 
+                            // Individual subscription for P2P traffic for this remote node
+                            // Note: we've already subscribed to # in multi-broker init, so this is for local routing
+                        } else if (d.neighbors) {
+                            d.neighbors.forEach(nb => { if(!rNode.neighbors.includes(nb)) rNode.neighbors.push(nb); });
+                        }
+
+                        if (d.type === 'HELLO') {
+                            const locals = simulationState.nodes.filter(n => n.instance === appInstanceId && n.neighbors.length < 8);
+                            if(locals[0]) {
+                                const subset = locals.sort(() => 0.5 - Math.random()).slice(0, 2);
+                                subset.forEach(ln => {
+                                    if(!ln.neighbors.includes(d.id)) { 
+                                        ln.neighbors.push(d.id); 
+                                        if(!rNode.neighbors.includes(ln.id)) rNode.neighbors.push(ln.id);
+                                        multiPublish(CONFIG.TOPIC_DISCOVERY, JSON.stringify({ 
+                                            type: 'HELLO_BACK', id: ln.id, targetId: d.id, instance: appInstanceId, neighbors: ln.neighbors 
+                                        })); 
+                                    }
+                                });
+                            }
+                        } else if (d.type === 'HELLO_BACK') {
+                            const ln = simulationState.nodes.find(n => n.id === d.targetId && n.instance === appInstanceId);
+                            if (ln && !ln.neighbors.includes(d.id)) {
+                                 ln.neighbors.push(d.id);
+                                 if (!rNode.neighbors.includes(ln.id)) rNode.neighbors.push(ln.id);
+                            }
+                        }
+                        if(simulation) updateNetworkViz();
+                    } else if (t_name.startsWith(CONFIG.TOPIC_P2P)) {
+                        if (d.type === 'SPEEDY_CHANNEL_UPDATE') {
+                            const c = simulationState.speedyChannels.find(x => x.id === d.channelId);
+                            if (c && !simulationState.processedIds.has(d.msgId)) {
+                                simulationState.processedIds.add(d.msgId);
+                                const sIdx = c.participants.findIndex(p => p.pub === d.senderPub);
+                                if (sIdx !== -1) {
+                                    const receiverIdx = sIdx === 0 ? 1 : 0;
+                                    c.participants[sIdx].balance = r2(c.participants[sIdx].balance - d.amount);
+                                    c.participants[receiverIdx].balance = r2(c.participants[receiverIdx].balance + d.amount);
+                                    c.history.push({ from: c.participants[sIdx].fp, to: c.participants[receiverIdx].fp, amount: d.amount, time: Date.now() });
+                                    window.renderAll(); if (currentOpenedChannelId === d.channelId) window.refreshChannelUI(d.channelId);
+                                }
                             }
                         }
                     }
-                }
-            } catch (e) {}
+                } catch (e) {}
+            });
+            
+            mqttClients.push(client);
         });
 
-        window.onload = function() { updateLanguageContent(); window.updateStepUI(); window.renderAll(); };
+        window.onload = function() { 
+            updateLanguageContent(); 
+            window.updateStepUI(); 
+            window.renderAll(); 
+        };
     </script>
 </body>
 </html>
