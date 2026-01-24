@@ -463,6 +463,7 @@ const Reg = new RegExp( "(.*)lang=([^&]*)(&|$)", "i" );
 const Lang = window.location.search.substr(1).match( Reg );
 console.log( Lang );
 let currentLang = ( Lang ? Lang[2] : '' ) || localStorage.getItem( 'lang' ) || 'zh';
+console.log( currentLang );
 
 function setLanguage(lang) {
     currentLang = lang;
