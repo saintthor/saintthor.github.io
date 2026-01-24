@@ -399,7 +399,7 @@
 
         const CONFIG = {
             NODE_COUNT: 30, ACCOUNT_COUNT: 10, BANKNOTE_COUNT: 100,
-            MQTT_BROKER: 'ws://test.mosquitto.org:8080', 
+            MQTT_BROKER: 'wss://test.mosquitto.org:8081', 
             TOPIC_MESH: 'aob/v25/global_mesh', TOPIC_DISCOVERY: 'aob/v25/discovery', TOPIC_P2P: 'aob/v25/p2p',
             DEFINITION_TEXT: "This is the CBDC of Dorothea. Define each blockchain as a prop bill, with the data structure of its genesis block as: H\\nS\\nK, where: H is the SHA256 hash of this document (Base64); K is the public key of the system user (Base64), fixed at [SysPubKey]; S is the serial number, with the following correspondence to the banknote's denomination:\\n1-20 1\\n21-40 5\\n41-60 10\\n61-80 20\\n81-100 50"
         };
