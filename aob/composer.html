@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作曲家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #f6f2eb;
+  --surface:    #ffffff;
+  --surface2:   #ede9e1;
+  --border:     #d8d2c6;
+  --border2:    #bfb9ad;
+  --accent:     #b86e18;
+  --accent-dim: rgba(184,110,24,0.12);
+  --accent2:    #c43820;
+  --accent3:    #1a8c72;
+  --text:       #26211a;
+  --text-muted: #9a9288;
+  --active:     #287a3c;
+  --grid:       rgba(184,110,24,0.065);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+/* ─── Header ─── */
+header { text-align: center; margin-bottom: 44px; }
+
+.title {
+  font-family: 'Bebas Neue', cursive;
+  font-size: 88px;
+  letter-spacing: 20px;
+  color: var(--accent);
+  text-shadow: 3px 3px 0 rgba(184,110,24,0.12);
+  line-height: 1;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 6px;
+  margin-top: 10px;
+  text-transform: uppercase;
+}
+
+.version-badge {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  padding: 3px 10px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-top: 12px;
+  border-radius: 2px;
+}
+
+/* ─── Panel ─── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
+  border-radius: 4px 4px 0 0;
+}
+
+.panel-label {
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── Textarea ─── */
+textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 22px;
+  line-height: 1.9;
+  padding: 16px 18px;
+  resize: vertical;
+  min-height: 90px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  letter-spacing: 1px;
+  caret-color: var(--accent);
+}
+
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(184,110,24,0.12);
+  background: #fff;
+}
+
+textarea::placeholder {
+  color: var(--text-muted);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+/* ─── Syntax help ─── */
+.syntax-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.syntax-item {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.syntax-item code {
+  color: var(--accent3);
+  background: rgba(26,140,114,0.09);
+  padding: 2px 7px;
+  border-radius: 2px;
+  font-size: 13px;
+  font-family: 'Share Tech Mono', monospace;
+  border: 1px solid rgba(26,140,114,0.2);
+}
+
+/* ─── Controls grid ─── */
+.controls-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 580px) {
+  .controls-row { grid-template-columns: 1fr; }
+  .title { font-size: 56px; letter-spacing: 12px; }
+}
+
+.ctrl-group > label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 10px 36px 10px 14px;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M0 0l5 7 5-7z' fill='%23b86e18'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.2s;
+}
+
+select:focus { border-color: var(--accent); }
+select option { background: #f6f2eb; }
+
+.range-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border2);
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(184,110,24,0.4);
+  transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  background: var(--accent);
+  border-radius: 50%; border: none; cursor: pointer;
+}
+
+.range-value {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ─── Playback buttons ─── */
+.playback-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.btn {
+  padding: 14px 24px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  border: 1px solid;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+
+.btn-play {
+  flex: 1;
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-play:hover { background: rgba(184,110,24,0.2); box-shadow: 0 2px 10px rgba(184,110,24,0.18); }
+.btn-play.active { background: var(--accent); color: #fff; box-shadow: 0 2px 14px rgba(184,110,24,0.35); }
+
+.btn-stop {
+  flex: 0 0 100px;
+  background: rgba(196,56,32,0.07);
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.btn-stop:hover { background: rgba(196,56,32,0.14); }
+
+.status-line {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  min-height: 16px;
+  text-align: right;
+}
+.status-line.error   { color: #c93a20; }
+.status-line.playing { color: var(--active); }
+
+/* ─── Legato badge ─── */
+.legato-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 8px;
+  letter-spacing: 2px;
+  background: rgba(26,140,114,0.12);
+  color: var(--accent3);
+  border: 1px solid rgba(26,140,114,0.25);
+  padding: 1px 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* ─── Oscilloscope ─── */
+#oscilloscope {
+  width: 100%;
+  height: 72px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+/* ─── Note Visualizer ─── */
+.viz-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.viz-scroll::-webkit-scrollbar { height: 4px; }
+.viz-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+#visualizer {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 68px;
+  min-width: max-content;
+  padding-bottom: 1px;
+}
+
+.note-block {
+  border-radius: 2px 2px 0 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 3px;
+  font-size: 9px;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: default;
+  opacity: 0.38;
+  transition: opacity 0.08s, box-shadow 0.08s;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.note-block.active {
+  opacity: 1 !important;
+  box-shadow: 0 0 8px rgba(184,110,24,0.4), 0 -3px 8px rgba(184,110,24,0.18);
+  z-index: 2;
+  position: relative;
+}
+
+.note-block.is-pause {
+  background: var(--surface2) !important;
+  border: 1px dashed var(--border2) !important;
+  color: var(--border2) !important;
+}
+
+/* ─── Progress ─── */
+.progress-bar {
+  height: 2px;
+  background: var(--border);
+  margin-top: 12px;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent3));
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* ─── Reference ─── */
+.note-reference {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.note-ref-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30px;
+  padding: 6px 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.note-ref-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.note-ref-item.playing-preview {
+  border-color: var(--active);
+  background: rgba(40,122,60,0.1);
+}
+
+.note-ref-letter {
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.note-ref-freq {
+  font-size: 7px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* ─── Presets ─── */
+.presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.preset-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.12s;
+  text-transform: uppercase;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent3);
+  color: var(--accent3);
+  background: rgba(26,140,114,0.08);
+}
+
+/* ─── Export ─── */
+.export-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.exp-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 7px 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: -1px;
+}
+
+.exp-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.exp-tab:hover:not(.active) { color: var(--text); }
+
+.exp-pane { display: none; }
+.exp-pane.active { display: block; }
+
+.export-output {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  padding: 14px 16px;
+  resize: vertical;
+  min-height: 80px;
+  border-radius: 3px;
+  outline: none;
+  letter-spacing: 0.5px;
+  white-space: pre;
+  overflow: auto;
+}
+
+.export-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 7px 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.13s;
+}
+
+.btn-sm:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-sm.copied {
+  border-color: var(--active);
+  color: var(--active);
+  background: rgba(40,122,60,0.08);
+}
+
+.export-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+.export-note a {
+  color: var(--accent3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.approx-warn {
+  font-size: 10px;
+  color: #9a7030;
+  background: rgba(184,110,24,0.07);
+  border: 1px solid rgba(184,110,24,0.18);
+  border-radius: 3px;
+  padding: 6px 12px;
+  margin-top: 10px;
+}
+
+.note-sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.note-sheet-table th {
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 4px 10px 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.note-sheet-table td {
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.note-sheet-table tr:last-child td { border-bottom: none; }
+
+.note-sheet-table td.nt-letter { color: var(--accent); font-weight: bold; width: 40px; }
+.note-sheet-table td.nt-name   { color: var(--accent3); width: 80px; }
+.note-sheet-table td.nt-dur    { color: var(--text-muted); }
+.note-sheet-table td.nt-pause  { color: var(--text-muted); font-style: italic; }
+
+.nst-scroll { max-height: 220px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="title">COMPOSER</div>
+    <div class="subtitle">字符驱动作曲家</div>
+    <div class="version-badge">SERVERLESS · WEB AUDIO API · NO INSTALL</div>
+  </header>
+
+  <!-- Input -->
+  <div class="panel">
+    <div class="panel-label">输入乐谱字符串</div>
+    <textarea id="scoreInput" rows="3" placeholder="输入字符，例如：aabcde_edcba …"></textarea>
+    <div class="syntax-row">
+      <div class="syntax-item"><code>a – z</code> 音高由低到高（26级）</div>
+      <div class="syntax-item"><code>_</code> 休止符</div>
+      <div class="syntax-item"><code>a[2]</code> 延长 2 倍时值</div>
+      <div class="syntax-item"><code>aa</code> 重复字母延长</div>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" onclick="loadPreset('twinkle')">小星星</button>
+      <button class="preset-btn" onclick="loadPreset('scale')">音阶上行</button>
+      <button class="preset-btn" onclick="loadPreset('ode')">欢乐颂</button>
+      <button class="preset-btn" onclick="loadPreset('blues')">蓝调</button>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-row">
+    <div class="panel ctrl-group">
+      <label>音色 / 乐器
+        <span class="legato-badge" id="legatoBadge" style="display:none">连奏</span>
+      </label>
+      <select id="instrumentSelect" onchange="onInstChange()">
+        <option value="piano">🎹  钢琴  Piano</option>
+        <option value="flute">🎵  长笛  Flute</option>
+        <option value="violin">🎻  小提琴  Violin</option>
+        <option value="guitar">🎸  吉他  Guitar</option>
+        <option value="synth">⚡  合成器  Synth</option>
+        <option value="organ">🎹  管风琴  Organ</option>
+        <option value="bells">🔔  钟琴  Bells</option>
+      </select>
+    </div>
+    <div class="panel ctrl-group">
+      <label>速度 BPM</label>
+      <div class="range-wrap">
+        <input type="range" id="bpmRange" min="40" max="240" value="120">
+        <div class="range-value" id="bpmValue">120 BPM</div>
+      </div>
+    </div>
+    <div class="panel ctrl-group">
+      <label>音量</label>
+      <div class="range-wrap">
+        <input type="range" id="volumeRange" min="0" max="100" value="70">
+        <div class="range-value" id="volumeValue">70 %</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playback -->
+  <div class="playback-row">
+    <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶  播放</button>
+    <div class="status-line" id="statusLine"></div>
+  </div>
+
+  <!-- Visualizer -->
+  <div class="panel">
+    <div class="panel-label">波形 &amp; 音符可视化</div>
+    <canvas id="oscilloscope"></canvas>
+    <div class="viz-scroll">
+      <div id="visualizer"></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- Reference -->
+  <div class="panel">
+    <div class="panel-label">音符参考 · 点击试音</div>
+    <div class="note-reference" id="noteReference"></div>
+  </div>
+
+  <!-- Export -->
+  <div class="panel">
+    <div class="panel-label">导出标准曲谱</div>
+    <div class="export-tabs">
+      <button class="exp-tab active" onclick="switchTab('abc')">ABC 记谱</button>
+      <button class="exp-tab" onclick="switchTab('sheet')">音符明细</button>
+      <button class="exp-tab" onclick="switchTab('lilypond')">LilyPond</button>
+    </div>
+    <div class="exp-pane active" id="pane-abc">
+      <div class="export-output" id="out-abc">（请先点击"生成曲谱"）</div>
+      <div class="export-actions">
+        <button class="btn-sm" onclick="generateExport()">↻  生成曲谱</button>
+        <button class="btn-sm" id="copy-abc" onclick="copyOutput('out-abc','copy-abc')">⎘  复制</button>
+        <a class="btn-sm" href="https://abc.rectanglered.com/" target="_blank" style="text-decoration:none;display:inline-block">↗  在线播放器</a>
+      </div>
+      <div class="export-note">
+        可粘贴到 <a href="https://abc.rectanglered.com/" target="_blank">abc.rectanglered.com</a>、
+        <a href="https://www.abcjs.net/abcjs-editor.html" target="_blank">abcjs 编辑器</a>、
+        <a href="https://musescore.org" target="_blank">MuseScore</a>（导入 ABC）等平台播放或编辑。
+      </div>
+      <div class="approx-warn">⚠ 本系统音高为等比数列，与十二平均律不完全对应，导出时取最近标准音高，最大偏差约半个半音。</div>
+    </div>
+    <div class="exp-pane" id="pane-sheet">
+      <div class="nst-scroll">
+        <table class="note-sheet-table">
+          <thead><tr><th>#</th><th>输入</th><th>标准音高</th><th>频率 Hz</th><th>时值（拍）</th></tr></thead>
+          <tbody id="sheetTbody"><tr><td colspan="5" style="color:var(--text-muted);padding:12px 10px">请先点击"生成"</td></tr></tbody>
+        </table>
+      </div>
+      <div class="export-actions">
+        <button class="btn-sm" onclick="generateExport()">↻  生成</button>
+        <button class="btn-sm" id="copy-sheet" onclick="copySheetAsText()">⎘  复制文本</button>
+      </div>
+    </div>
+    <div class="exp-pane" id="pane-lilypond">
+      <div class="export-output" id="out-lilypond">（请先点击"生成曲谱"）</div>
+      <div class="export-actions">
+        <button class="btn-sm" onclick="generateExport()">↻  生成曲谱</button>
+        <button class="btn-sm" id="copy-lily" onclick="copyOutput('out-lilypond','copy-lily')">⎘  复制</button>
+        <a class="btn-sm" href="https://www.hacklily.org/" target="_blank" style="text-decoration:none;display:inline-block">↗  HackLily 在线</a>
+      </div>
+      <div class="export-note">
+        可在 <a href="https://www.hacklily.org/" target="_blank">HackLily.org</a> 直接粘贴编译，生成含五线谱的 PDF / MIDI。
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// FREQUENCY TABLE  –  geometric series, 2 octaves
+// a = C4 (261.63 Hz)  →  z = C6 (~1046 Hz)
+// ratio per step = 4^(1/25)
+// ═══════════════════════════════════════════════════════════
+const BASE_FREQ = 261.63;
+const RATIO     = Math.pow(4, 1 / 25);
+function getFreq(letter) {
+  return BASE_FREQ * Math.pow(RATIO, letter.charCodeAt(0) - 97);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PARSER
+// ═══════════════════════════════════════════════════════════
+function parseScore(raw) {
+  const tokens = [];
+  const str    = raw.toLowerCase().replace(/\s+/g, '');
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (ch === '_') {
+      tokens.push({ type: 'pause', duration: 1, label: '_' });
+      i++;
+    } else if (ch >= 'a' && ch <= 'z') {
+      let duration = 1;
+      if (str[i + 1] === '[') {
+        const end = str.indexOf(']', i + 2);
+        if (end !== -1) {
+          const n = parseFloat(str.slice(i + 2, end));
+          if (!isNaN(n) && n > 0) duration = n;
+          i = end + 1;
+        } else { i++; }
+      } else { i++; }
+      tokens.push({ type: 'note', letter: ch, freq: getFreq(ch), duration, label: ch });
+    } else { i++; }
+  }
+  return tokens;
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUDIO CONTEXT
+// ═══════════════════════════════════════════════════════════
+let audioCtx = null, masterGain = null, analyser = null;
+let scheduledNodes = [];   // all nodes started, for cleanup
+let isPlaying     = false;
+let stopTimeoutId = null;
+let vizAnimId     = null;
+let oscAnimId     = null;
+
+function getCtx() {
+  if (!audioCtx) {
+    audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    analyser   = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+  }
+  return audioCtx;
+}
+
+function trackNode(n) { scheduledNodes.push(n); return n; }
+
+// ═══════════════════════════════════════════════════════════
+// LEGATO INSTRUMENTS  (one shared oscillator voice per piece)
+// Instruments: flute, violin, organ
+// ═══════════════════════════════════════════════════════════
+const LEGATO_INSTS = new Set(['flute', 'violin', 'organ']);
+
+function scheduleLegato(inst, ctx, tokens, beat, startT) {
+  const masterG = ctx.createGain();
+  masterG.connect(masterGain);
+  masterG.gain.setValueAtTime(0, startT);
+
+  // ── Build voice ────────────────────────────────────────
+  if (inst === 'flute') {
+    const o1  = trackNode(ctx.createOscillator()); o1.type = 'sine';
+    const o2  = trackNode(ctx.createOscillator()); o2.type = 'sine';
+    const o2g = ctx.createGain(); o2g.gain.value = 0.10;
+    o1.connect(masterG);
+    o2.connect(o2g); o2g.connect(masterG);
+
+    // Vibrato
+    const lfo  = trackNode(ctx.createOscillator()); lfo.frequency.value = 5.5;
+    const lfoG = ctx.createGain(); lfoG.gain.value = 7;
+    lfo.connect(lfoG); lfoG.connect(o1.frequency);
+
+    // Breath noise
+    const sr   = ctx.sampleRate;
+    const nBuf = ctx.createBuffer(1, Math.floor(sr * 0.04), sr);
+    const nDat = nBuf.getChannelData(0);
+    for (let x = 0; x < nDat.length; x++) nDat[x] = Math.random() * 2 - 1;
+    const ns   = trackNode(ctx.createBufferSource()); ns.buffer = nBuf; ns.loop = true;
+    const nFlt = ctx.createBiquadFilter(); nFlt.type = 'bandpass'; nFlt.Q.value = 10;
+    const nGn  = ctx.createGain(); nGn.gain.value = 0.022;
+    ns.connect(nFlt); nFlt.connect(nGn); nGn.connect(masterG);
+
+    // Schedule frequencies
+    let cur = startT;
+    tokens.forEach(tok => {
+      if (tok.type === 'note') {
+        o1.frequency.setValueAtTime(tok.freq,       cur);
+        o2.frequency.setValueAtTime(tok.freq * 2,   cur);
+        nFlt.frequency.setValueAtTime(tok.freq,     cur);
+      }
+      cur += tok.duration * beat;
+    });
+
+    const totalDur = cur - startT;
+    [o1, o2, lfo, ns].forEach(n => { n.start(startT); n.stop(startT + totalDur + 0.3); });
+
+  } else if (inst === 'violin') {
+    const o   = trackNode(ctx.createOscillator()); o.type = 'sawtooth';
+    const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 1.5;
+    o.connect(flt); flt.connect(masterG);
+
+    const lfo  = trackNode(ctx.createOscillator()); lfo.frequency.value = 6;
+    const lfoG = ctx.createGain(); lfoG.gain.value = 9;
+    lfo.connect(lfoG); lfoG.connect(o.frequency);
+
+    let cur = startT;
+    tokens.forEach(tok => {
+      if (tok.type === 'note') {
+        o.frequency.setValueAtTime(tok.freq,       cur);
+        flt.frequency.setValueAtTime(tok.freq * 6, cur);
+      }
+      cur += tok.duration * beat;
+    });
+
+    const totalDur = cur - startT;
+    [o, lfo].forEach(n => { n.start(startT); n.stop(startT + totalDur + 0.3); });
+
+  } else if (inst === 'organ') {
+    const partials = [[1,0.55],[2,0.38],[3,0.22],[4,0.12],[6,0.05]];
+    const oscList  = partials.map(([h, v]) => {
+      const o  = trackNode(ctx.createOscillator()); o.type = 'sine';
+      const og = ctx.createGain(); og.gain.value = v;
+      o.connect(og); og.connect(masterG);
+      return { o, h };
+    });
+
+    let cur = startT;
+    tokens.forEach(tok => {
+      if (tok.type === 'note')
+        oscList.forEach(({o, h}) => o.frequency.setValueAtTime(tok.freq * h, cur));
+      cur += tok.duration * beat;
+    });
+
+    const totalDur = cur - startT;
+    oscList.forEach(({o}) => { o.start(startT); o.stop(startT + totalDur + 0.3); });
+  }
+
+  // ── Gain envelope (attack on run-start, release on run-end) ─
+  const params = {
+    flute:  { vol: 0.68, att: 0.08, rel: 0.07 },
+    violin: { vol: 0.60, att: 0.14, rel: 0.10 },
+    organ:  { vol: 0.62, att: 0.02, rel: 0.02 },
+  }[inst];
+
+  let cur = startT;
+  for (let i = 0; i < tokens.length; i++) {
+    const tok  = tokens[i];
+    const dur  = tok.duration * beat;
+    const prev = tokens[i - 1];
+    const next = tokens[i + 1];
+
+    if (tok.type === 'note') {
+      const fromSilence = !prev || prev.type === 'pause';
+      const toSilence   = !next || next.type === 'pause';
+
+      if (fromSilence) {
+        masterG.gain.setValueAtTime(0, cur);
+        masterG.gain.linearRampToValueAtTime(params.vol, cur + params.att);
+      } else {
+        masterG.gain.setValueAtTime(params.vol, cur);
+      }
+
+      if (toSilence) {
+        masterG.gain.setValueAtTime(params.vol, cur + dur - params.rel);
+        masterG.gain.linearRampToValueAtTime(0, cur + dur);
+      }
+    }
+    cur += dur;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// STACCATO INSTRUMENTS  (new oscillator per note)
+// ═══════════════════════════════════════════════════════════
+const INST = {
+
+  piano(ctx, freq, t, dur) {
+    const g = ctx.createGain(); g.connect(masterGain);
+    [[1,0.70],[2,0.18],[3,0.08],[4,0.03],[0.5,0.05]].forEach(([h, v]) => {
+      const o = trackNode(ctx.createOscillator()); o.type = 'triangle';
+      o.frequency.value = freq * h;
+      const hg = ctx.createGain(); hg.gain.value = v;
+      o.connect(hg); hg.connect(g);
+      o.start(t); o.stop(t + dur + 0.8);
+    });
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.85, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.38, t + 0.28);
+    g.gain.setValueAtTime(0.38, t + dur - 0.06);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur + 0.5);
+  },
+
+  // Guitar: noise burst through bandpass + harmonic triangle tones with fast decay
+  guitar(ctx, freq, t, dur) {
+    const g = ctx.createGain(); g.connect(masterGain);
+    g.gain.value = 0.70;
+
+    // Noise burst → resonant bandpass (pluck transient)
+    const sr   = ctx.sampleRate;
+    const nBuf = ctx.createBuffer(1, Math.floor(sr * 0.04), sr);
+    const nDat = nBuf.getChannelData(0);
+    for (let x = 0; x < nDat.length; x++) nDat[x] = Math.random() * 2 - 1;
+    const nSrc = trackNode(ctx.createBufferSource()); nSrc.buffer = nBuf;
+    const nFlt = ctx.createBiquadFilter();
+    nFlt.type = 'bandpass'; nFlt.frequency.value = freq; nFlt.Q.value = 22;
+    const nGn  = ctx.createGain();
+    nGn.gain.setValueAtTime(0.7, t);
+    nGn.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    nSrc.connect(nFlt); nFlt.connect(nGn); nGn.connect(g);
+    nSrc.start(t); nSrc.stop(t + 0.04);
+
+    // Harmonic tones – each partial decays at its own rate
+    [[1, 0.52, 1.9], [2, 0.24, 1.5], [3, 0.10, 1.1], [4, 0.05, 0.8], [5, 0.02, 0.55]]
+      .forEach(([h, v, decay]) => {
+        const o  = trackNode(ctx.createOscillator()); o.type = 'triangle';
+        o.frequency.value = freq * h;
+        const hg = ctx.createGain();
+        hg.gain.setValueAtTime(v, t);
+        hg.gain.exponentialRampToValueAtTime(0.001, t + decay);
+        o.connect(hg); hg.connect(g);
+        o.start(t); o.stop(t + decay + 0.05);
+      });
+  },
+
+  synth(ctx, freq, t, dur) {
+    const g = ctx.createGain(); g.connect(masterGain);
+    const o = trackNode(ctx.createOscillator()); o.type = 'sawtooth';
+    o.frequency.value = freq;
+    const flt = ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 6;
+    flt.frequency.setValueAtTime(freq * 10, t);
+    flt.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.25);
+    o.connect(flt); flt.connect(g);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.55, t + 0.012);
+    g.gain.setValueAtTime(0.55, t + dur - 0.05);
+    g.gain.linearRampToValueAtTime(0, t + dur + 0.06);
+    o.start(t); o.stop(t + dur + 0.12);
+  },
+
+  bells(ctx, freq, t, dur) {
+    const g = ctx.createGain(); g.connect(masterGain);
+    [[1,0.80],[2.76,0.38],[5.4,0.14],[8.93,0.05]].forEach(([h, v]) => {
+      const o = trackNode(ctx.createOscillator()); o.type = 'sine';
+      o.frequency.value = freq * h;
+      const hg = ctx.createGain(); hg.gain.value = v;
+      o.connect(hg); hg.connect(g);
+      o.start(t); o.stop(t + dur + 2.6);
+    });
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.88, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur + 2.6);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// PLAYBACK
+// ═══════════════════════════════════════════════════════════
+function togglePlay() {
+  if (isPlaying) stopPlay(); else startPlay();
+}
+
+function startPlay() {
+  const raw = document.getElementById('scoreInput').value.trim();
+  if (!raw) { setStatus('请先输入乐谱字符串', 'error'); return; }
+  const tokens = parseScore(raw);
+  if (!tokens.length) { setStatus('未识别到有效音符', 'error'); return; }
+
+  const ctx  = getCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  clearScheduled();
+
+  const bpm    = +document.getElementById('bpmRange').value;
+  const vol    = document.getElementById('volumeRange').value / 100;
+  const inst   = document.getElementById('instrumentSelect').value;
+  const beat   = 60 / bpm;
+  const startT = ctx.currentTime + 0.08;
+
+  masterGain.gain.value = vol;
+  isPlaying = true;
+  document.getElementById('playBtn').classList.add('active');
+  document.getElementById('playBtn').textContent = '⏸  暂停';
+
+  if (LEGATO_INSTS.has(inst)) {
+    scheduleLegato(inst, ctx, tokens, beat, startT);
+  } else {
+    let cursor = startT;
+    tokens.forEach(tok => {
+      const dur = tok.duration * beat;
+      if (tok.type === 'note') INST[inst](ctx, tok.freq, cursor, dur * 0.90);
+      cursor += dur;
+    });
+  }
+
+  const totalDur = tokens.reduce((s, t) => s + t.duration * beat, 0);
+  stopTimeoutId  = setTimeout(() => stopPlay(), (totalDur + 0.8) * 1000);
+
+  buildVisualizer(tokens);
+  animateViz(tokens, beat, startT, totalDur);
+  drawOscilloscope();
+
+  const noteCount = tokens.filter(t => t.type === 'note').length;
+  const modeTag   = LEGATO_INSTS.has(inst) ? ' · 连奏' : '';
+  setStatus(`▶ 正在播放 · ${noteCount} 音符 · ${bpm} BPM${modeTag}`, 'playing');
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearScheduled();
+  if (stopTimeoutId) { clearTimeout(stopTimeoutId); stopTimeoutId = null; }
+  if (vizAnimId)     { cancelAnimationFrame(vizAnimId); vizAnimId = null; }
+  if (oscAnimId)     { cancelAnimationFrame(oscAnimId); oscAnimId = null; }
+  document.getElementById('playBtn').classList.remove('active');
+  document.getElementById('playBtn').textContent = '▶  播放';
+  document.getElementById('progressFill').style.width = '0%';
+  document.querySelectorAll('.note-block').forEach(b => b.classList.remove('active'));
+  setStatus('');
+  drawOscilloscopeIdle();
+}
+
+function clearScheduled() {
+  scheduledNodes.forEach(n => { try { n.stop(0); } catch(_) {} });
+  scheduledNodes = [];
+}
+
+// ═══════════════════════════════════════════════════════════
+// VISUALIZER
+// ═══════════════════════════════════════════════════════════
+function buildVisualizer(tokens) {
+  const viz = document.getElementById('visualizer');
+  viz.innerHTML = '';
+  tokens.forEach((tok, i) => {
+    const el = document.createElement('div');
+    el.className = 'note-block' + (tok.type === 'pause' ? ' is-pause' : '');
+    el.dataset.idx = i;
+    const w = Math.round(Math.max(22, tok.duration * 26));
+    el.style.width = w + 'px';
+    if (tok.type === 'note') {
+      const idx = tok.letter.charCodeAt(0) - 97;
+      const h   = 12 + (idx / 25) * 54;
+      el.style.height    = h + 'px';
+      const hue          = 28 + (idx / 25) * 78;
+      el.style.background = `hsla(${hue},72%,54%,0.48)`;
+      el.style.color      = `hsl(${hue},80%,32%)`;
+      el.textContent      = tok.letter;
+    } else {
+      el.style.height = '10px';
+      el.textContent  = '·';
+    }
+    viz.appendChild(el);
+  });
+}
+
+function animateViz(tokens, beat, startT, totalDur) {
+  const ctx  = getCtx();
+  const prog = document.getElementById('progressFill');
+
+  function frame() {
+    if (!isPlaying) return;
+    const elapsed = ctx.currentTime - startT;
+    prog.style.width = Math.min(100, (elapsed / totalDur) * 100) + '%';
+
+    let t = 0, activeIdx = -1;
+    for (let i = 0; i < tokens.length; i++) {
+      const d = tokens[i].duration * beat;
+      if (elapsed >= t && elapsed < t + d) { activeIdx = i; break; }
+      t += d;
+    }
+
+    document.querySelectorAll('.note-block').forEach((b, idx) =>
+      b.classList.toggle('active', idx === activeIdx));
+
+    if (activeIdx >= 0) {
+      const ab = document.querySelector(`.note-block[data-idx="${activeIdx}"]`);
+      if (ab) ab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+    vizAnimId = requestAnimationFrame(frame);
+  }
+  vizAnimId = requestAnimationFrame(frame);
+}
+
+// ═══════════════════════════════════════════════════════════
+// OSCILLOSCOPE
+// ═══════════════════════════════════════════════════════════
+function drawOscilloscope() {
+  const canvas = document.getElementById('oscilloscope');
+  const c = canvas.getContext('2d');
+
+  function frame() {
+    if (!isPlaying) return;
+    oscAnimId = requestAnimationFrame(frame);
+    if (!analyser) return;
+    canvas.width = canvas.offsetWidth;
+    const W = canvas.width, H = canvas.height;
+    const buf = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteTimeDomainData(buf);
+
+    c.fillStyle = '#ede9e1';
+    c.fillRect(0, 0, W, H);
+    c.strokeStyle = 'rgba(184,110,24,0.14)';
+    c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, H / 2); c.lineTo(W, H / 2); c.stroke();
+    c.strokeStyle = '#b86e18';
+    c.lineWidth = 1.8;
+    c.beginPath();
+    const sw = W / buf.length;
+    for (let i = 0; i < buf.length; i++) {
+      const y = (buf[i] / 128) * (H / 2);
+      i === 0 ? c.moveTo(0, y) : c.lineTo(i * sw, y);
+    }
+    c.stroke();
+  }
+  oscAnimId = requestAnimationFrame(frame);
+}
+
+function drawOscilloscopeIdle() {
+  const canvas = document.getElementById('oscilloscope');
+  const c = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth || 860;
+  const W = canvas.width, H = canvas.height;
+  c.fillStyle = '#ede9e1';
+  c.fillRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(184,110,24,0.22)';
+  c.lineWidth = 1;
+  c.beginPath(); c.moveTo(0, H / 2); c.lineTo(W, H / 2); c.stroke();
+}
+
+// ═══════════════════════════════════════════════════════════
+// REFERENCE PANEL
+// ═══════════════════════════════════════════════════════════
+function buildReference() {
+  const ref = document.getElementById('noteReference');
+  for (let i = 0; i < 26; i++) {
+    const l  = String.fromCharCode(97 + i);
+    const f  = getFreq(l);
+    const el = document.createElement('div');
+    el.className = 'note-ref-item';
+    const hue = 28 + (i / 25) * 78;
+    el.innerHTML = `<span class="note-ref-letter" style="color:hsl(${hue},80%,38%)">${l}</span>
+                    <span class="note-ref-freq">${Math.round(f)}Hz</span>`;
+    el.onclick = () => previewNote(l, el);
+    ref.appendChild(el);
+  }
+}
+
+function previewNote(letter, el) {
+  const ctx  = getCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  masterGain.gain.value = document.getElementById('volumeRange').value / 100;
+  const inst = document.getElementById('instrumentSelect').value;
+  const freq = getFreq(letter);
+  const t    = ctx.currentTime + 0.01;
+
+  if (LEGATO_INSTS.has(inst)) {
+    const fake = [{ type: 'note', letter, freq, duration: 1, label: letter }];
+    scheduleLegato(inst, ctx, fake, 0.5, t);
+  } else {
+    INST[inst](ctx, freq, t, 0.45);
+  }
+  el.classList.add('playing-preview');
+  setTimeout(() => el.classList.remove('playing-preview'), 520);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INSTRUMENT MODE BADGE
+// ═══════════════════════════════════════════════════════════
+function onInstChange() {
+  const inst  = document.getElementById('instrumentSelect').value;
+  document.getElementById('legatoBadge').style.display =
+    LEGATO_INSTS.has(inst) ? 'inline-block' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRESETS
+// ═══════════════════════════════════════════════════════════
+const PRESETS = {
+  twinkle: 'ccggaag[2]_ffeeddc[2]_ggffeed[2]_ggffeed[2]_ccggaag[2]_ffeeddc[2]',
+  scale:   'abcdefghijklmnopqrstuvwxyz',
+  ode:     'mmopop[2]m[2]_oommk[2]_mmopmm[1.5]k[0.5]k[2]_llopmm[1.5]k[0.5]k[2]',
+  blues:   'c_cf_c[2]_cf_cg[0.5]f[0.5]_cf_c[2]',
+};
+
+function loadPreset(name) {
+  document.getElementById('scoreInput').value = PRESETS[name] || '';
+  buildVisualizer(parseScore(PRESETS[name] || ''));
+}
+
+// ═══════════════════════════════════════════════════════════
+// UI EVENTS
+// ═══════════════════════════════════════════════════════════
+document.getElementById('bpmRange').addEventListener('input', e =>
+  document.getElementById('bpmValue').textContent = e.target.value + ' BPM');
+
+document.getElementById('volumeRange').addEventListener('input', e => {
+  document.getElementById('volumeValue').textContent = e.target.value + ' %';
+  if (masterGain) masterGain.gain.value = e.target.value / 100;
+});
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault(); togglePlay();
+  }
+});
+
+document.getElementById('scoreInput').addEventListener('input', e => {
+  const tokens = parseScore(e.target.value);
+  if (tokens.length) buildVisualizer(tokens);
+});
+
+function setStatus(msg, type = '') {
+  const el = document.getElementById('statusLine');
+  el.textContent = msg;
+  el.className = 'status-line' + (type ? ' ' + type : '');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTE MAPPING  (nearest standard pitch for each of a–z)
+// Steps from C4 in semitones: index * 24/25
+// ═══════════════════════════════════════════════════════════
+const NOTE_NAMES_FLAT = [
+  'C4','C#4','D4','Eb4','E4','F4','F#4','G4','Ab4','A4',
+  'Bb4','B4','C5','C5','C#5','D5','Eb5','E5','F5','F#5',
+  'G5','Ab5','A5','Bb5','B5','C6'
+];
+
+// ABC notation equivalents (octave 4 = capitals, 5 = lowercase, 6 = c')
+const ABC_MAP = [
+  'C',  '^C', 'D',  '_E', 'E',  'F',  '^F', 'G',  '_A', 'A',
+  '_B', 'B',  'c',  'c',  '^c', 'd',  '_e', 'e',  'f',  '^f',
+  'g',  '_a', 'a',  '_b', 'b',  "c'"
+];
+
+// LilyPond equivalents (octave 4 = no suffix, 5 = ', 6 = '')
+const LILY_MAP = [
+  'c',    'cis',  'd',    'ees',  'e',    'f',    'fis',  'g',    'aes',  'a',
+  'bes',  'b',    "c'",   "c'",   "cis'", "d'",   "ees'", "e'",   "f'",   "fis'",
+  "g'",   "aes'", "a'",   "bes'", "b'",   "c''"
+];
+
+// Convert float duration to ABC length string (base L:1/4 = quarter note)
+function abcLen(d) {
+  // express as n/m relative to quarter note
+  const fracs = [
+    [4,1],[3,1],[2,1],[3,2],[1,1],[3,4],[1,2],[3,8],[1,4],[1,8]
+  ];
+  for (const [n, m] of fracs) {
+    if (Math.abs(d - n/m) < 0.04) {
+      if (n === 1 && m === 1) return '';
+      if (m === 1) return '' + n;
+      if (n === 1) return '/' + m;
+      return n + '/' + m;
+    }
+  }
+  // fallback: round to nearest integer or half
+  const r = Math.round(d * 2) / 2;
+  if (r === 1) return '';
+  if (r % 1 === 0) return '' + r;
+  return Math.round(r * 2) + '/2';
+}
+
+// Convert float duration to LilyPond duration string (1=quarter)
+function lilyLen(d) {
+  const map = [[4,'1'],[2,'2'],[1,'4'],[0.5,'8'],[0.25,'16'],
+               [3,'2.'],[1.5,'4.'],[0.75,'8.'],[3.5,'2..']];
+  for (const [v, s] of map) {
+    if (Math.abs(d - v) < 0.04) return s;
+  }
+  // fallback
+  return Math.round(4 / d) > 0 ? '' + Math.round(4 / d) : '4';
+}
+
+// ─── Main export generator ─────────────────────────────────
+function generateExport() {
+  const raw = document.getElementById('scoreInput').value.trim();
+  if (!raw) { return; }
+  const tokens  = parseScore(raw);
+  const bpm     = +document.getElementById('bpmRange').value;
+  if (!tokens.length) return;
+
+  generateABC(tokens, bpm);
+  generateSheet(tokens);
+  generateLily(tokens, bpm);
+}
+
+function generateABC(tokens, bpm) {
+  const lines = [
+    'X:1',
+    'T:Composed Piece',
+    'M:4/4',
+    'L:1/4',
+    `Q:1/4=${bpm}`,
+    'K:C'
+  ];
+
+  let body = '';
+  let beat = 0;    // beats accumulated in current bar
+  const BAR = 4;
+
+  tokens.forEach(tok => {
+    const dur = tok.duration;
+    if (tok.type === 'pause') {
+      body += 'z' + abcLen(dur);
+    } else {
+      const idx = tok.letter.charCodeAt(0) - 97;
+      body += ABC_MAP[idx] + abcLen(dur);
+    }
+    beat += dur;
+    if (beat >= BAR) {
+      body += ' | ';
+      beat = beat % BAR;
+    } else {
+      body += ' ';
+    }
+  });
+
+  lines.push(body.trim());
+  document.getElementById('out-abc').textContent = lines.join('\n');
+}
+
+function generateSheet(tokens) {
+  const tbody = document.getElementById('sheetTbody');
+  tbody.innerHTML = '';
+  let noteIdx = 0;
+  tokens.forEach((tok, i) => {
+    const tr = document.createElement('tr');
+    if (tok.type === 'pause') {
+      tr.innerHTML = `<td>${i+1}</td>
+        <td class="nt-letter">_</td>
+        <td class="nt-pause" colspan="2">休止符</td>
+        <td class="nt-dur">${tok.duration}</td>`;
+    } else {
+      const idx  = tok.letter.charCodeAt(0) - 97;
+      const name = NOTE_NAMES_FLAT[idx];
+      const freq = Math.round(getFreq(tok.letter));
+      tr.innerHTML = `<td>${i+1}</td>
+        <td class="nt-letter">${tok.letter}</td>
+        <td class="nt-name">${name}</td>
+        <td class="nt-dur">${freq}</td>
+        <td class="nt-dur">${tok.duration}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function generateLily(tokens, bpm) {
+  const header = `\\version "2.24.0"
+\\header { title = "Composed Piece" }
+\\score {
+  \\new Staff {
+    \\tempo 4 = ${bpm}
+    \\relative c' {`;
+
+  let notes = '      ';
+  tokens.forEach(tok => {
+    if (tok.type === 'pause') {
+      notes += 'r' + lilyLen(tok.duration) + ' ';
+    } else {
+      const idx = tok.letter.charCodeAt(0) - 97;
+      notes += LILY_MAP[idx] + lilyLen(tok.duration) + ' ';
+    }
+  });
+
+  const footer = `
+    }
+  }
+  \\layout {}
+  \\midi {}
+}`;
+
+  document.getElementById('out-lilypond').textContent = header + '\n' + notes + footer;
+}
+
+// ─── Tab switching ──────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.exp-tab').forEach((t, i) => {
+    const names = ['abc','sheet','lilypond'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.exp-pane').forEach(p =>
+    p.classList.toggle('active', p.id === 'pane-' + name));
+}
+
+// ─── Copy helpers ───────────────────────────────────────────
+function copyOutput(elId, btnId) {
+  const text = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById(btnId);
+    const orig = btn.textContent;
+    btn.textContent = '✓  已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+function copySheetAsText() {
+  const rows = [...document.querySelectorAll('#sheetTbody tr')];
+  const lines = rows.map(r => [...r.cells].map(c => c.textContent.trim().padEnd(10)).join(' '));
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const btn = document.getElementById('copy-sheet');
+    btn.textContent = '✓  已复制'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘  复制文本'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ─── Init ──────────────────────────────────────────────────
+buildReference();
+loadPreset('twinkle');
+drawOscilloscopeIdle();
+</script>
+</body>
+</html>
