@@ -105,8 +105,10 @@ const translations = {
     zh: {
         title: "卡诺热机/热泵",
         intro1: "本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。",
-        intro2: "具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。",
-        intro3: "正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。",
+        intro2: "具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。",
+        intro3: "最低工作温差低于 0.5℃，刷新了世界纪录。能在无聚光的太阳照射下运转。",
+        intro4: "能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。也适用于玩具、教具。",
+        intro5: "正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。",
         tab_rotate_engine: "旋转式热机",
         tab_rotate_pump: "旋转式热泵",
         tab_reciprocate_engine: "往复式热机",
@@ -117,6 +119,7 @@ const translations = {
         tab_video2: "满管旋转式模型",
         tab_video3: "环管动能式模型",
         tab_video4: "太阳能模型",
+        tab_video5: "极小温差模型",
         principle: "原理",
         rotate_engine: "旋转式热机",
         rotate_p1: "气缸在立面上旋转。活塞的重力压缩下方的气体使之升温，在最低点温度最高时进入温度与高温相等的热源，开始<b>等温膨胀</b>过程。",
@@ -176,12 +179,16 @@ const translations = {
         video3_content: "",
         video4_title: "太阳能卡诺热机",
         video4_content: "",
+        video5_title: "极小温差卡诺热机",
+        video5_content: "",
     },
     en: {
         title: "Carnot Engine/Heat Pump",
         intro1: "I have invented the world's first Carnot engine/heat pump. Its working gas cycle is a true Carnot cycle: 1. Isothermal expansion, 2. Adiabatic expansion, 3. Isothermal compression, 4. Adiabatic compression.",
-        intro2: "It has advantages such as high heat-to-work conversion efficiency, simple structure, easy maintenance, flexible self-starting, suitability for various heat/cold sources, and the ability to output rotational power without a crankshaft. The working gas is not separated from the outside by a piston, effectively preventing leakage. It can replace Stirling engines/heat pumps in all applications and can replace other heat engines in power generation, industrial power, and large transportation vehicles.",
-        intro3: "Patent pending. Those interested in technical or patent cooperation, please contact: saintthor@gmail.com.",
+        intro2: "It has advantages such as high heat-to-work conversion efficiency, simple structure, easy maintenance, flexible self-starting, suitability for various heat/cold sources, and the ability to output rotational power without a crankshaft. The working gas is not separated from the outside by a piston, effectively preventing leakage.",
+        intro3: "The lowest operating temperature difference is below 0.5°C, breaking the world record. It can operate under direct sunlight without any light concentration.",
+        intro4: "It can replace Stirling engines/heat pumps in all applications and can replace other heat engines in power generation, industrial power, and large transportation vehicles. It is also for toys.",
+        intro5: "Patent pending. Those interested in technical or patent cooperation, please contact: saintthor@gmail.com.",
         tab_rotate_engine: "Rotary Engine",
         tab_rotate_pump: "Rotary Heat Pump",
         tab_reciprocate_engine: "Reciprocating Engine",
@@ -192,6 +199,7 @@ const translations = {
         tab_video2: "Full-Tube Rotary Model",
         tab_video3: "Ring-Kinetic Model",
         tab_video4: "Solar Model",
+        tab_video5: "Lowest Temp Diff Model",
         principle: "Principle",
         rotate_engine: "Rotary Heat Engine",
         rotate_p1: "The cylinder rotates on a vertical plane. The gravity of the piston compresses the gas below, raising its temperature. At the lowest point, when the temperature is highest, it enters a heat source of the same high temperature, beginning the <b>isothermal expansion</b> process.",
@@ -251,6 +259,8 @@ const translations = {
         video3_content: "What we are seeing now is a Carnot heat engine with a loop kinetic energy source. I believe the loop heat engine should rotate faster because the water column moves in the same direction as the rotation, allowing us to utilize the water column's kinetic energy. This heat engine completes one rotation in approximately 70 seconds at a room temperature of 30°C.<br><br>At 7 minutes and 30 seconds, we will measure the temperature of the working gas in the can.<br>......<br>7:30 This physical model is rather rudimentary. I didn't have an electrically controlled valve, so I used two check valves. The four valves at the connection between the straight pipe and the loop pipe were omitted. This allows water to enter the straight pipe, but it's not a major problem; adding two small bottles separates the liquid and gas, preventing gas from entering the can.<br><br>The temperature probe is on and has recorded seven high and low temperature cycles. The values ​​are as follows. Due to lighting conditions, the lowest temperatures are often difficult to see; only the lowest visible temperatures are recorded. This is represented as a line graph. The average temperature increase is 1.51°C, and the average temperature decrease is 1.14°C, indicating an overall gradual temperature rise.<br><br>To date, all the Carnot engines conceived this year have been completed. The PCT patent application for this series of Carnot engines has been submitted; interested manufacturers are welcome to contact me. Suitable for industrial applications, toys, and educational tools. Patent investment is also welcome.",
         video4_title: "Solar Carnot Heat Engine",
         video4_content: "",
+        video5_title: "The Lowest Temp diff Carnot Heat Engine",
+        video5_content: "The AI told me that the macroscopic heat engine with the lowest operating temperature difference was the P-19 heat engine developed by American engineer James R. Senft in 1990, which operated at a temperature difference of 0.5 degrees.<br><br>I will use this Carnot heat engine to challenge that record. The heat source is a light bulb. As each soda can passes under the lamp, the increased air pressure inside the can pushes the water from the small plastic bottle behind it into another small plastic bottle further back — effectively moving the water from the lower bottle to the left-side bottle. This makes the left side heavier, causing the disc to rotate counterclockwise.<br><br>Temperature measurements began at two minutes and fifteen seconds. A total of 15 cycles were measured, with an average temperature difference of 0.4267 degrees per cycle. Most cycles were around 0.4 degrees, with one at 0.3, three at 0.5, and one at 0.6 degrees.<br><br>A new world record is born.",
     }
 };
 
@@ -310,8 +320,12 @@ function setLanguage(lang) {
 <body>
 <h1><span data-lang-key="title">卡诺热机/热泵</span><button id="lang-toggle">English</button></h1>
 <p data-lang-key="intro1">本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
-<p data-lang-key="intro2">具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
-<p data-lang-key="intro3">正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
+<p data-lang-key="intro2">具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。</p>
+<p data-lang-key="intro3">
+最低工作温差低于 0.5℃，刷新了世界纪录。能在无聚光的太阳照射下运转。</p>
+<p data-lang-key="intro4">
+能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
+<p data-lang-key="intro5">正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
 
 <div class="tabs-container">
     <div class="tabs-nav">
@@ -321,10 +335,11 @@ function setLanguage(lang) {
         <button class="tab-button" data-target="panel-ring" data-lang-key="tab_ring_engine">环管动能式热机</button>
         <button class="tab-button" data-target="panel-ring2" data-lang-key="tab_empty_engine">空管式热机</button>
         <button class="tab-button" data-target="panel-switch" data-lang-key="tab_switch">导热切换</button>
-        <button class="tab-button" data-target="panel-video1" data-lang-key="tab_video1">叉管旋转式模型</button>
-        <button class="tab-button" data-target="panel-video2" data-lang-key="tab_video2">满管旋转式模型</button>
+        <!--button class="tab-button" data-target="panel-video1" data-lang-key="tab_video1">叉管旋转式模型</button-->
+        <!--button class="tab-button" data-target="panel-video2" data-lang-key="tab_video2">满管旋转式模型</button-->
         <button class="tab-button" data-target="panel-video3" data-lang-key="tab_video3">环管动能式模型</button>
         <button class="tab-button" data-target="panel-video4" data-lang-key="tab_video4">太阳能模型</button>
+        <button class="tab-button" data-target="panel-video5" data-lang-key="tab_video5">极小温差模型</button>
     </div>
 
     <div class="tabs-content">
@@ -510,15 +525,22 @@ function setLanguage(lang) {
 
         <div id="panel-video3" class="tab-pane">
             <h3 data-lang-key="video3_title">环管动能式卡诺热机</h3>
-            <iframe data-src="https://embed.wave.video/RUomyep3SdOl9Xuk" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+            <iframe data-src="https://embed.wave.video/oLuRpl9cH6jKwg3L" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
             <div data-lang-key="video3_content"></div>
         </div>
         
         <div id="panel-video4" class="tab-pane">
             <a href="https://www.youtube.com/embed/CAIS8sa1-yo" target="_blank"><h3 data-lang-key="video4_title">太阳能卡诺热机</h3></a>
-            <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/CAIS8sa1-yo" title="Solar Carnot Heat Engine" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <iframe width="560" height="315" data-src="https://www.youtube.com/embed/CAIS8sa1-yo" title="Solar Carnot Heat Engine" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             <div data-lang-key="video4_content"></div>
         </div>
+        
+        <div id="panel-video5" class="tab-pane">
+            <h3 data-lang-key="video5_title">极小温差卡诺热机</h3>
+            <iframe data-src="https://embed.wave.video/F1E5GdUElYugb5hl" height="420" width="560" frameborder="0" allow="autoplay; fullscreen" scrolling="no"></iframe>
+            <div data-lang-key="video5_content"></div>
+        </div>
+        
     </div>
 </div>
 
