@@ -536,13 +536,15 @@ class RingEngine extends Carnot
         this.pipes.push(straightPipe2);
 
         // 4b. 新增沿轴线方向的两根直管（垂直于环管平面，位于轴线两侧）
-        // 两段新管的长度缩减为原来的三分之一，即 L_new = L / 3
-        // 新管近端与环形管平面的距离为新管长度的一半，即 L_new / 2 = L / 6
+        // 缩减轴向管的长度为原来的三分之一（L_new = L / 3）。
+        // 分叉部分改回原来的长度，故近端 NF, NB 恢复到距环管平面 L / 2。
+        // 所以，轴向管：前端近端 NF = (0, L/2, 0)，远端 FF = (0, L/2 + L/3, 0)。
+        // 后端近端 NB = (0, -L/2, 0)，远端 FB = (0, -L/2 - L/3, 0)。
         const L = P2.distanceTo(P4);
-        const NF = new THREE.Vector3(0, L / 6, 0);
-        const FF = new THREE.Vector3(0, L / 2, 0);
-        const NB = new THREE.Vector3(0, -L / 6, 0);
-        const FB = new THREE.Vector3(0, -L / 2, 0);
+        const NF = new THREE.Vector3(0, L / 2, 0);
+        const FF = new THREE.Vector3(0, L / 2 + L / 3, 0);
+        const NB = new THREE.Vector3(0, -L / 2, 0);
+        const FB = new THREE.Vector3(0, -L / 2 - L / 3, 0);
 
         const axialPipeFront = this.createPipe(NF, FF, this.pipeRadius * 0.9, this.hotMaterial);
         this.rotatingGroup.add(axialPipeFront);
@@ -656,12 +658,12 @@ class RingEngine extends Carnot
 
         const discGeometry1 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
         const frontDisc = new THREE.Mesh(discGeometry1, this.hotMaterial);
-        frontDisc.position.set(0, L / 2, 0);
+        frontDisc.position.set(0, L / 2 + L / 3, 0);
         this.rotatingGroup.add(frontDisc);
 
         const discGeometry2 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
         const backDisc = new THREE.Mesh(discGeometry2, this.coldMaterial);
-        backDisc.position.set(0, -L / 2, 0);
+        backDisc.position.set(0, -L / 2 - L / 3, 0);
         this.rotatingGroup.add(backDisc);
 
         this.rotatingGroup.rotation.x = Math.PI / 2;
