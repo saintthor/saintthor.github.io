@@ -433,7 +433,7 @@ class RingEngine extends Carnot
         this.scene.background = new THREE.Color(0xffffdd);
 
         this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        this.camera.position.set( this.mainRadius * -0.4, this.mainRadius * 0.8, this.mainRadius * 4.5 );
+        this.camera.position.set( this.mainRadius * 2.2, this.mainRadius * 1.8, this.mainRadius * 2.8 );
         //this.camera.lookAt(1, 2, 3);
 
         this.renderer = new THREE.WebGLRenderer({canvas: this.Canvas, antialias: true});
@@ -806,16 +806,35 @@ class RingEngine extends Carnot
             desiredMainValve1State = false;
         }
 
-        let desiredPipeState = heat;
-        if (desiredPipeState !== this.curPipeState) {
-            this.curPipeState = desiredPipeState;
-            this.pipes[0].material = this.curPipeState ?
-                (desiredMainValve1State ? this.hotMaterial : this.coldMaterial) : this.pipeMaterial;
-            this.pipes[1].material = this.curPipeState ?
-                (!desiredMainValve1State ? this.hotMaterial : this.coldMaterial) : this.pipeMaterial;
+        // Determine current colors of the parallel pipes
+        let pipe0Color = 'gray';
+        let pipe1Color = 'gray';
+        if (heat) {
+            pipe0Color = desiredMainValve1State ? 'red' : 'blue';
+            pipe1Color = !desiredMainValve1State ? 'red' : 'blue';
         }
 
-        // 3. 更新材质（如果状态改变）
+        // Apply materials to parallel pipes
+        if (this.pipes && this.pipes.length === 2) {
+            this.pipes[0].material = (pipe0Color === 'red') ? this.hotMaterial :
+                                     ((pipe0Color === 'blue') ? this.coldMaterial : this.pipeMaterial);
+            this.pipes[1].material = (pipe1Color === 'red') ? this.hotMaterial :
+                                     ((pipe1Color === 'blue') ? this.coldMaterial : this.pipeMaterial);
+        }
+
+        // Apply materials to the 4 connection valves on the branches:
+        // connValve1 (branch from pipe 0 to front) -> green when pipe 0 is red, else red
+        // connValve2 (branch from pipe 1 to front) -> green when pipe 1 is red, else red
+        // connValve3 (branch from pipe 0 to back)  -> green when pipe 0 is blue, else red
+        // connValve4 (branch from pipe 1 to back)  -> green when pipe 1 is blue, else red
+        if (this.connectionValveMeshes && this.connectionValveMeshes.length === 4) {
+            this.connectionValveMeshes[0].material = (pipe0Color === 'red') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[1].material = (pipe1Color === 'red') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[2].material = (pipe0Color === 'blue') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[3].material = (pipe1Color === 'blue') ? this.valveOpenMaterial : this.valveClosedMaterial;
+        }
+
+        // 3. 更新主阀门和小阀门材质（如果主状态改变）
         if (desiredMainValve1State !== this.currentMainValve1State) {
             this.currentMainValve1State = desiredMainValve1State;
 
@@ -830,14 +849,6 @@ class RingEngine extends Carnot
                 const sv2_sv4_material = !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
                 this.smallValveMeshes[1].material = sv2_sv4_material;
                 this.smallValveMeshes[3].material = sv2_sv4_material;
-            }
-            if (this.connectionValveMeshes && this.connectionValveMeshes.length === 4) {
-                const openMaterial = this.valveOpenMaterial;
-                const closedMaterial = this.valveClosedMaterial;
-                this.connectionValveMeshes[0].material = this.currentMainValve1State ? openMaterial : closedMaterial;
-                this.connectionValveMeshes[1].material = !this.currentMainValve1State ? openMaterial : closedMaterial;
-                this.connectionValveMeshes[2].material = !this.currentMainValve1State ? openMaterial : closedMaterial;
-                this.connectionValveMeshes[3].material = this.currentMainValve1State ? openMaterial : closedMaterial;
             }
             this.DiffAngle = 0;
         }
