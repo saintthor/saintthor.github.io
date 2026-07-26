@@ -536,11 +536,13 @@ class RingEngine extends Carnot
         this.pipes.push(straightPipe2);
 
         // 4b. 新增沿轴线方向的两根直管（垂直于环管平面，位于轴线两侧）
+        // 两段新管的长度缩减为原来的三分之一，即 L_new = L / 3
+        // 新管近端与环形管平面的距离为新管长度的一半，即 L_new / 2 = L / 6
         const L = P2.distanceTo(P4);
-        const NF = new THREE.Vector3(0, L / 2, 0);
-        const FF = new THREE.Vector3(0, 1.5 * L, 0);
-        const NB = new THREE.Vector3(0, -L / 2, 0);
-        const FB = new THREE.Vector3(0, -1.5 * L, 0);
+        const NF = new THREE.Vector3(0, L / 6, 0);
+        const FF = new THREE.Vector3(0, L / 2, 0);
+        const NB = new THREE.Vector3(0, -L / 6, 0);
+        const FB = new THREE.Vector3(0, -L / 2, 0);
 
         const axialPipeFront = this.createPipe(NF, FF, this.pipeRadius * 0.9, this.hotMaterial);
         this.rotatingGroup.add(axialPipeFront);
@@ -605,16 +607,16 @@ class RingEngine extends Carnot
         smallValve3.rotation.z += Math.PI / 2;
         smallValve4.rotation.z += Math.PI / 2;
 
-        // 5b. 在四段连接管中央各加一个阀门
+        // 5b. 在四段连接管上各加一个阀门，移动到紧贴原直管上
         const dirBranchF1 = new THREE.Vector3().subVectors(NF, M1).normalize();
         const dirBranchF2 = new THREE.Vector3().subVectors(NF, M2).normalize();
         const dirBranchB1 = new THREE.Vector3().subVectors(NB, M1).normalize();
         const dirBranchB2 = new THREE.Vector3().subVectors(NB, M2).normalize();
 
-        const cvPos1 = new THREE.Vector3().addVectors(M1, NF).multiplyScalar(0.5);
-        const cvPos2 = new THREE.Vector3().addVectors(M2, NF).multiplyScalar(0.5);
-        const cvPos3 = new THREE.Vector3().addVectors(M1, NB).multiplyScalar(0.5);
-        const cvPos4 = new THREE.Vector3().addVectors(M2, NB).multiplyScalar(0.5);
+        const cvPos1 = M1.clone().add(dirBranchF1.clone().multiplyScalar(0.8));
+        const cvPos2 = M2.clone().add(dirBranchF2.clone().multiplyScalar(0.8));
+        const cvPos3 = M1.clone().add(dirBranchB1.clone().multiplyScalar(0.8));
+        const cvPos4 = M2.clone().add(dirBranchB2.clone().multiplyScalar(0.8));
 
         this.connectionValveMeshes = [];
 
@@ -654,12 +656,12 @@ class RingEngine extends Carnot
 
         const discGeometry1 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
         const frontDisc = new THREE.Mesh(discGeometry1, this.hotMaterial);
-        frontDisc.position.set(0, 1.5 * L, 0);
+        frontDisc.position.set(0, L / 2, 0);
         this.rotatingGroup.add(frontDisc);
 
         const discGeometry2 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
         const backDisc = new THREE.Mesh(discGeometry2, this.coldMaterial);
-        backDisc.position.set(0, -1.5 * L, 0);
+        backDisc.position.set(0, -L / 2, 0);
         this.rotatingGroup.add(backDisc);
 
         this.rotatingGroup.rotation.x = Math.PI / 2;
