@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>卡诺热机/热泵</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>
+    .canvtext { position:absolute; display:none; color:white; background-color:rgba(0,0,0,0.5); padding:5px; z-index:10 }
+    .container { position:relative; vertical-align:top; display:inline-block; margin-right:80px; border:solid 1px; padding:10px }
+    .inline-svg { display: inline-block; vertical-align: middle;
+            width: 1em;   /* 确保大小与文字相近 */
+            height: 1em;  /* 确保大小与文字相近 */
+            transform: translateY(0.1em);
+        }
+
+    body {
+        font-family: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0 auto;
+        max-width: 1200px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        color: #333;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
+    }
+    .tabs-container {
+        margin-top: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .tabs-nav {
+        display: flex;
+        flex-wrap: wrap;
+        background-color: #ecf0f1;
+        border-bottom: 2px solid #bdc3c7;
+    }
+    .tab-button {
+        padding: 12px 18px;
+        cursor: pointer;
+        border: none;
+        background-color: transparent;
+        font-size: 16px;
+        color: #7f8c8d;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+    .tab-button:hover {
+        background-color: #fff;
+        color: #3498db;
+    }
+    .tab-button.active {
+        background-color: #fff;
+        color: #2980b9;
+        border-bottom-color: #3498db;
+        font-weight: bold;
+    }
+    .tabs-content {
+        padding: 25px;
+    }
+    .tab-pane {
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+        animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .animation-layout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+    .animation-visual {
+        flex-shrink: 0;
+        position: relative;
+    }
+    .animation-description {
+        flex: 1;
+        min-width: 300px;
+    }
+    #lang-toggle {
+        margin-left: 15px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        font-family: inherit;
+    }
+</style>
+<script>
+const translations = {
+    zh: {
+        title: "卡诺热机/热泵",
+        intro1: "本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。",
+        intro2: "具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。",
+        intro3: "最低工作温差低于 0.5℃，刷新了世界纪录。能在无聚光的太阳照射下运转。",
+        intro4: "能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。也适用于玩具、教具。",
+        intro5: "正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。",
+        tab_ring_engine: "环管动能式热机",
+        ring_engine: "环管动能式热机",
+        ring_p1: "气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。",
+        ring_p2: `任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox="-5.58 -2.37 10 5.48" xmlns=\"http://www.w3.org/2000/svg\"><g><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g></svg></span>。`,
+        ring_p3: `环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox=\"-5.58 -2.37 10 5.48\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"scale(-1, 1)\"><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g></svg></span>，开口向左，切换后又变成<span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox=\"-5.58 -2.37 10 5.48\" xmlns=\"http://www.w3.org/2000/svg\"><g><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g> </svg></span>。`,
+        ring_p4: "环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。",
+        ring_p5: "每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。",
+        ring_p6: "撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。",
+        ring_p7: "绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。",
+        ring_p8: "通过气缸的旋转对外做功。",
+        ring_p9: "这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。",
+    },
+    en: {
+        title: "Carnot Engine/Heat Pump",
+        intro1: "I have invented the world's first Carnot engine/heat pump. Its working gas cycle is a true Carnot cycle: 1. Isothermal expansion, 2. Adiabatic expansion, 3. Isothermal compression, 4. Adiabatic compression.",
+        intro2: "It has advantages such as high heat-to-work conversion efficiency, simple structure, easy maintenance, flexible self-starting, suitability for various heat/cold sources, and the ability to output rotational power without a crankshaft. The working gas is not separated from the outside by a piston, effectively preventing leakage.",
+        intro3: "The lowest operating temperature difference is below 0.5°C, breaking the world record. It can operate under direct sunlight without any light concentration.",
+        intro4: "It can replace Stirling engines/heat pumps in all applications and can replace other heat engines in power generation, industrial power, and large transportation vehicles. It is also for toys.",
+        intro5: "Patent pending. Those interested in technical or patent cooperation, please contact: saintthor@gmail.com.",
+        tab_ring_engine: "Ring-Kinetic Engine",
+        ring_engine: "Ring-Kinetic Heat Engine",
+        ring_p1: "The cylinder is a ring-shaped tube with two valves, always one open and one closed. Two straight pipes also have a valve at each end. All valves are green for open and red for closed. The state of the valves on the straight pipes is always opposite to the nearest ring valve.",
+        ring_p2: `At any moment, the cylinder\'s path starts from a red valve on one straight pipe, passes through three green valves, makes a full circle, and reaches the red valve on the other straight pipe, shaped like <span style=\"font-size: 24px;\"><span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox="-5.58 -2.37 10 5.48" xmlns=\"http://www.w3.org/2000/svg\"><g><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g></svg></span>.`,
+        ring_p3: `The ring tube rotates half a circle, and the valves switch simultaneously. Before each switch, the tube is shaped like <span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox=\"-5.58 -2.37 10 5.48\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"scale(-1, 1)\"><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g></svg></span>, opening to the left, and after the switch, it becomes <span style=\"font-size: 24px;\"><svg class=\"inline-svg\" viewBox=\"-5.58 -2.37 10 5.48\" xmlns=\"http://www.w3.org/2000/svg\"><g><path d=\"M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37\" fill=\"none\" stroke=\"blue\" stroke-width=\"1\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></g> </svg></span>.`,
+        ring_p4: "There is a high-density liquid column at the bottom of the ring tube. Since the tube is rotatable and light, the liquid column always stays at the bottom when there is no load. Different gas pressures on both sides of the liquid column drive the ring tube to rotate.",
+        ring_p5: "After each valve switch, a heat source is applied to the lower straight pipe and a cold source to the upper one. The gas on the right side of the liquid column (hot pipe) undergoes isothermal expansion, while the gas on the left side (cold pipe) undergoes isothermal compression.",
+        ring_p6: "After removing the heat and cold sources, the ring tube continues to rotate due to inertia. The gas on the right side undergoes adiabatic expansion, and the gas on the left side undergoes adiabatic compression. The use of inertia is similar to that in a reciprocating engine.",
+        ring_p7: "After the green ring valve leaves the liquid column area, the valves switch, the original compression end becomes the expansion end, and the original expansion end becomes the compression end, starting the next cycle.",
+        ring_p8: "External work is done through the rotation of the cylinder.",
+        ring_p9: "This engine can flexibly adapt to variable loads. The greater the load, the more the liquid column's position shifts to the left.",
+    }
+};
+
+const Reg = new RegExp( "(.*)lang=([^&]*)(&|$)", "i" );
+const Lang = window.location.search.substr(1).match( Reg );
+let currentLang = ( Lang ? Lang[2] : '' ) || localStorage.getItem( 'lang' ) || 'en';
+
+function applyTranslation(el, lang) {
+    const key = el.getAttribute('data-lang-key');
+    if (translations[lang] && translations[lang][key]) {
+        el.innerHTML = translations[lang][key];
+    }
+}
+
+document.documentElement.lang = currentLang;
+if (translations[currentLang]) {
+    document.title = translations[currentLang].title;
+}
+
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) {
+                if (node.hasAttribute('data-lang-key')) {
+                    applyTranslation(node, currentLang);
+                }
+                node.querySelectorAll('[data-lang-key]').forEach(el => applyTranslation(el, currentLang));
+                
+                if (node.id === 'lang-toggle') {
+                    node.innerText = currentLang === 'zh' ? 'English' : '中文';
+                } else {
+                    const toggle = node.querySelector('#lang-toggle');
+                    if (toggle) toggle.innerText = currentLang === 'zh' ? 'English' : '中文';
+                }
+            }
+        });
+    });
+});
+
+observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+});
+
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    const elements = document.querySelectorAll('[data-lang-key]');
+    elements.forEach(el => applyTranslation(el, lang));
+    document.documentElement.lang = lang;
+    document.title = translations[lang].title;
+    const toggle = document.getElementById('lang-toggle');
+    if (toggle) toggle.innerText = lang === 'zh' ? 'English' : '中文';
+}
+</script>
+</head>
+<body>
+<h1><span data-lang-key="title">卡诺热机/热泵</span><button id="lang-toggle">English</button></h1>
+<p data-lang-key="intro1">本人发明了世界首创的卡诺热机/热泵。其工质气体的工作循环为真正的卡诺循环：1、等温膨胀，2、绝热膨胀，3、等温压缩，4、绝热压缩。</p>
+<p data-lang-key="intro2">具有热功转换效率高、结构简单、易于维护、灵活自启动、适用于多种热源/冷源、无须曲轴即可输出旋转动力等优势。工质气体与外界不以活塞分隔，能有效防止泄漏。</p>
+<p data-lang-key="intro3">
+最低工作温差低于 0.5℃，刷新了世界纪录。能在无聚光的太阳照射下运转。</p>
+<p data-lang-key="intro4">
+能在所有场合替换斯特林热机/热泵，并可在发电、工业动力与大型交通工具上替代其它热机。</p>
+<p data-lang-key="intro5">正在申请专利。需要在技术或专利方面合作者请联系：saintthor@gmail.com 。</p>
+
+<div class="tabs-container">
+    <div class="tabs-nav">
+        <button class="tab-button active" data-target="panel-ring" data-lang-key="tab_ring_engine">环管动能式热机</button>
+    </div>
+
+    <div class="tabs-content">
+        <div id="panel-ring" class="tab-pane active">
+            <div id="ring" class="container">
+                <div class="animation-layout">
+                    <div class="animation-visual">
+                        <div class="canvtext" style="top:10px; left:10px;"></div>
+                        <div class="canvtext" style="top:10px; left:270px;"></div>
+                        <canvas width="400" height="400"></canvas>
+                        <div>
+                            <span data-lang-key="ring_engine">环管动能式热机</span>&emsp;
+                            <button>Start</button>
+                        </div>
+                    </div>
+                    <div class="animation-description">
+                        <p data-lang-key="ring_p1">气缸为环形管，上有两个阀门，总是一开一闭。两根直管两端也各有一个阀门。所有阀门绿色为导通，红色为截止。直管上的阀门状态总是与较近的环管阀门相反。</p>
+                        <p data-lang-key="ring_p2">任一时刻，气缸通路总是由一根直管的红色阀门开始，经过三个绿色阀门，转一圈后，到达另一根直管的红色阀门，形状如同<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。</p>
+                        <p data-lang-key="ring_p3">环形管每旋转半圈，阀门切换一次，所有阀门一齐翻转。每次切换前的管形如<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g transform="scale(-1, 1)">
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>，开口向左，切换后又变成<span style="font-size: 24px;">
+                        <svg class="inline-svg" viewBox="-5.58 -2.37 10 5.48" xmlns="http://www.w3.org/2000/svg">
+                            <g>
+                                <path d="M 3.42 1.37 A 4 4 0 1 1 3.42 -1.37 L -1.58 -1.37 M 3.42 1.37 L -1.58 1.37" fill="none" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                            </g>
+                        </svg>
+                        </span>。</p>
+                        <p data-lang-key="ring_p4">环管下方有一段高密度的液柱。由于环管可旋转且较轻，无负载时液柱总是保持在正下方。液柱两侧气压不同时会驱动环形管转动。</p>
+                        <p data-lang-key="ring_p5">每次阀门切换之后，对下方的直管加热源，对上方的直管加冷源，则液柱右侧热直管一端的气体为等温膨胀，液柱左侧冷直管一端的气体为等温压缩。</p>
+                        <p data-lang-key="ring_p6">撤除热源与冷源后，环管因惯性继续旋转，液柱右侧的气体为绝热膨胀，液柱左侧的气体为绝热压缩。对惯性的利用方式与往复式热机相似。</p>
+                        <p data-lang-key="ring_p7">绿色的环管阀门离开液柱区域之后，阀门切换，原压缩端变成膨胀端，原膨胀端变成压缩端，开始下一个循环。</p>
+                        <p data-lang-key="ring_p8">通过气缸的旋转对外做功。</p>
+                        <p data-lang-key="ring_p9">这种热机能灵活适配可变的负载。负载越大，液柱的位置越向左偏。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://counter4.optistats.ovh/private/counter.js?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y&down=async" async></script>
+<noscript><a href="https://www.freecounterstat.com" title="web counter"><img src="https://counter4.optistats.ovh/private/freecounterstat.php?c=kwt9a3nklac41tmaqer9sbwzzeqshq7y" border="0" title="web counter" alt="web counter"></a></noscript>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+document.getElementById('lang-toggle').addEventListener('click', () => {
+    const newLang = currentLang === 'zh' ? 'en' : 'zh';
+    setLanguage(newLang);
+});
+
+class Carnot
+{
+    constructor( Id, isEngine )
+    {
+        let self = this;
+        this.Div = document.getElementById( Id );
+        this.Canvas = this.Div.querySelector( 'canvas' );
+        this.Div.querySelector( 'button' ).onclick = () => self.Run ? self.Stop() : self.Start();
+        this.Div.onmouseover = () =>
+        {
+            if( this.Run < 0 )
+            {
+                this.Run = 0;
+                this.Start();
+                this.Stop();
+            }
+        }
+        if( typeof( THREE ) === "undefined")
+        {
+            this.CTX = this.Canvas.getContext( '2d' );
+        }
+        else
+        {
+            let loop = async () =>
+            {
+                if( this.Run === 0 )
+                {
+                    this.StaticProcess();
+                }
+                await new Promise( r => setTimeout( r, this.Interval * 8 ));
+                loop();
+            };
+            
+            loop();
+        }
+        
+        this.Angle = 0;
+        this.Interval = 40;
+        this.Run = -1;
+        this.IsEngine = isEngine;
+    }
+
+    async Start()
+    {
+        if( this.Run > 0 )
+        {
+            return;
+        }
+
+        this.Run = 1;
+        this.Div.querySelector( 'button' ).innerText = 'Stop';
+
+        let loop = async () =>
+        {
+            this.StaticProcess();
+            if( this.Run === 0 )
+            {
+                console.log( "Stopping animation loop." );
+                await new Promise( r => setTimeout( r, this.Interval * 4 ));
+                return;
+            }
+            else
+            {
+                this.Draw();
+                this.Angle += this.IsEngine ? 0.01 : -0.01;
+                if( this.Angle < 0 )
+                {
+                    this.Angle += Math.PI * 2;
+                }
+                else if( this.Angle >= Math.PI * 2 )
+                {
+                    this.Angle -= Math.PI * 2;
+                }
+            }
+            await new Promise( r => setTimeout( r, this.Interval ));
+            loop(); // Continue loop
+        };
+
+        loop();
+    }
+
+    StaticProcess()
+    {
+        if( this.Controls )
+        {
+            this.Controls.update();
+            if( this.Run === 0 && this.renderer )
+            {
+                this.renderer.setClearColor( 0xebedaf );
+                this.renderer.render( this.scene, this.camera );
+            }
+        }
+    }
+
+    Draw()
+    {
+        return typeof( THREE ) !== "undefined" ? this.Draw3d() : this.Draw2d();
+    }
+
+    Stop()
+    {
+        this.Run = 0;
+        this.Div.querySelector( 'button' ).innerText = 'Start';
+    }
+}
+
+class RingEngine extends Carnot
+{
+    constructor(Id, isEngine)
+    {
+        super(Id, isEngine);
+
+        // 3D环管式热机的参数
+        this.mainRadius = 8;
+        this.pipeRadius = 0.8;
+        this.connectionAngleOffsetDeg = 30;
+        this.mainValveSize = 1.2;
+        this.smallValveSize = 0.8;
+        this.smallValveOffsetRatio = 0.02;
+        //this.rotationSpeed = 1.0;
+        this.DiffAngle = 0;
+        this.liquidLengthRad = Math.PI; // 180度液体区域
+        this.activeZoneStartRad = Math.PI; // 从π开始
+        this.activeZoneEndRad = 2 * Math.PI; // 到2π结束
+
+        // 阀门角度位置
+        this.mainValveAngles = [0, Math.PI]; // 主阀门在0度和180度
+
+        // 状态变量
+        this.currentMainValve1State = true;
+        this.curPipeState = false;
+
+        // 存储网格对象
+        this.mainValveMeshes = [];
+        this.smallValveMeshes = [];
+        this.pipes = [];
+
+        // --- 3D 设置 ---
+        if (typeof(THREE) !== "undefined")
+        {
+            this.setupScene();
+            this.setupObjects();
+            this.scene.add( new THREE.AxesHelper( 12 ));
+        }
+        else
+        {
+            console.log('RingEngine 仅支持 3D 模式');
+        }
+
+        if( typeof THREE.OrbitControls !== 'undefined' )
+        {
+            this.Controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
+        }
+
+        this.Draw();
+    }
+
+    setupScene()
+    {
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xffffdd);
+
+        this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        this.camera.position.set( this.mainRadius * 2.2, this.mainRadius * 1.8, this.mainRadius * 2.8 );
+        //this.camera.lookAt(1, 2, 3);
+
+        this.renderer = new THREE.WebGLRenderer({canvas: this.Canvas, antialias: true});
+        this.renderer.setSize(this.Canvas.width, this.Canvas.height);
+
+        // 材质
+        this.valveClosedMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcc4444, metalness: 0.6, roughness: 0.4
+        });
+        this.valveOpenMaterial = new THREE.MeshStandardMaterial({
+            color: 0x44cc44, metalness: 0.6, roughness: 0.4
+        });
+        this.ringMaterial = new THREE.MeshStandardMaterial({
+            color: 0xaaaaaa, metalness: 0.5, roughness: 0.5,
+            transparent: true, opacity: 0.5, side: THREE.DoubleSide
+        });
+        this.pipeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x666666, metalness: 0.5, roughness: 0.5
+        });
+        this.liquidMaterial = new THREE.MeshStandardMaterial({
+            color: 0x1bc4c8, metalness: 0.1, roughness: 0.4, side: THREE.DoubleSide
+        });
+        this.hotMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff4444, metalness: 0.3, roughness: 0.3
+        });
+        this.coldMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4444ff, metalness: 0.3, roughness: 0.3
+        });
+
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        this.scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(5, 10, 7);
+        this.scene.add(directionalLight);
+
+        this.clock = new THREE.Clock();
+    }
+
+    setupObjects()
+    {
+        // 创建旋转组
+        this.rotatingGroup = new THREE.Group();
+        this.scene.add(this.rotatingGroup);
+
+        // 1. 主环管
+        const ringGeometry = new THREE.TorusGeometry(this.mainRadius, this.pipeRadius, 32, 100);
+        const ringMesh = new THREE.Mesh(ringGeometry, this.ringMaterial);
+        ringMesh.rotation.x = Math.PI / 2;
+        this.rotatingGroup.add(ringMesh);
+
+        // 2. 主阀门
+        const initialValve1InZone = this.isAngleInActiveZone(this.mainValveAngles[0]);
+        const initialValve2InZone = this.isAngleInActiveZone(this.mainValveAngles[1]);
+        this.currentMainValve1State = initialValve1InZone || !initialValve2InZone;
+
+        const mainValvePos1 = new THREE.Vector3(this.mainRadius, 0, 0);
+        const mainValve1 = this.createValve(
+            mainValvePos1,
+            this.mainValveSize,
+            this.mainValveSize * 0.6,
+            !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial,
+            true
+        );
+        mainValve1.rotation.z += Math.PI / 2;
+        this.rotatingGroup.add(mainValve1);
+        this.mainValveMeshes.push(mainValve1);
+
+        const mainValvePos2 = new THREE.Vector3(-this.mainRadius, 0, 0);
+        const mainValve2 = this.createValve(
+            mainValvePos2,
+            this.mainValveSize,
+            this.mainValveSize * 0.6,
+            this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial,
+            true
+        );
+        mainValve2.rotation.z += Math.PI / 2;
+        this.rotatingGroup.add(mainValve2);
+        this.mainValveMeshes.push(mainValve2);
+
+        // 3. 连接点和直管
+        const offsetAngleRad = THREE.MathUtils.degToRad(this.connectionAngleOffsetDeg) * 0.37;
+        const angleP1 = offsetAngleRad;
+        const angleP2 = -offsetAngleRad;
+        const angleP3 = Math.PI - offsetAngleRad;
+        const angleP4 = Math.PI + offsetAngleRad;
+
+        const P1 = new THREE.Vector3(this.mainRadius * Math.cos(angleP1) * 0.9, 0, -this.mainRadius * Math.sin(angleP1));
+        const P2 = new THREE.Vector3(this.mainRadius * Math.cos(angleP2) * 0.9, 0, -this.mainRadius * Math.sin(angleP2));
+        const P3 = new THREE.Vector3(this.mainRadius * Math.cos(angleP3) * 0.9, 0, -this.mainRadius * Math.sin(angleP3));
+        const P4 = new THREE.Vector3(this.mainRadius * Math.cos(angleP4) * 0.9, 0, -this.mainRadius * Math.sin(angleP4));
+
+        // 4. 直管
+        const straightPipe1 = this.createPipe(P2, P4, this.pipeRadius * 0.9, this.pipeMaterial);
+        this.rotatingGroup.add(straightPipe1);
+        this.pipes.push(straightPipe1);
+
+        const straightPipe2 = this.createPipe(P1, P3, this.pipeRadius * 0.9, this.pipeMaterial);
+        this.rotatingGroup.add(straightPipe2);
+        this.pipes.push(straightPipe2);
+
+        // 4b. 新增沿轴线方向的两根直管（垂直于环管平面，位于轴线两侧）
+        // 缩减轴向管的长度为原来的三分之一（L_new = L / 3）。
+        // 分叉部分改回原来的长度，故近端 NF, NB 恢复到距环管平面 L / 2。
+        // 所以，轴向管：前端近端 NF = (0, L/2, 0)，远端 FF = (0, L/2 + L/3, 0)。
+        // 后端近端 NB = (0, -L/2, 0)，远端 FB = (0, -L/2 - L/3, 0)。
+        const L = P2.distanceTo(P4);
+        const NF = new THREE.Vector3(0, L / 2, 0);
+        const FF = new THREE.Vector3(0, L / 2 + L / 3, 0);
+        const NB = new THREE.Vector3(0, -L / 2, 0);
+        const FB = new THREE.Vector3(0, -L / 2 - L / 3, 0);
+
+        const axialPipeFront = this.createPipe(NF, FF, this.pipeRadius * 0.9, this.hotMaterial);
+        this.rotatingGroup.add(axialPipeFront);
+
+        const axialPipeBack = this.createPipe(NB, FB, this.pipeRadius * 0.9, this.coldMaterial);
+        this.rotatingGroup.add(axialPipeBack);
+
+        // 4c. 新增四段连接管形成 Y 形连接（前方两侧各有一段，后方两侧各有一段）
+        const M1 = P2.clone().add(P4).multiplyScalar(0.5);
+        const M2 = P1.clone().add(P3).multiplyScalar(0.5);
+
+        const branchPipeF1 = this.createPipe(M1, NF, this.pipeRadius * 0.9, this.hotMaterial);
+        this.rotatingGroup.add(branchPipeF1);
+
+        const branchPipeF2 = this.createPipe(M2, NF, this.pipeRadius * 0.9, this.hotMaterial);
+        this.rotatingGroup.add(branchPipeF2);
+
+        const branchPipeB1 = this.createPipe(M1, NB, this.pipeRadius * 0.9, this.coldMaterial);
+        this.rotatingGroup.add(branchPipeB1);
+
+        const branchPipeB2 = this.createPipe(M2, NB, this.pipeRadius * 0.9, this.coldMaterial);
+        this.rotatingGroup.add(branchPipeB2);
+
+        // 5. 小阀门
+        const dirPipe1 = new THREE.Vector3().subVectors(P4, P2).normalize();
+        const dirPipe2 = new THREE.Vector3().subVectors(P3, P1).normalize();
+        const pipe1Length = P2.distanceTo(P4) * 0.3;
+        const pipe2Length = P1.distanceTo(P3) * 0.3;
+
+        const svPos1 = new THREE.Vector3().addVectors(P2, dirPipe1.clone().multiplyScalar(pipe1Length * this.smallValveOffsetRatio));
+        const svPos2 = new THREE.Vector3().addVectors(P4, dirPipe1.clone().multiplyScalar(-pipe1Length * this.smallValveOffsetRatio));
+        const svPos3 = new THREE.Vector3().addVectors(P1, dirPipe2.clone().multiplyScalar(pipe2Length * this.smallValveOffsetRatio));
+        const svPos4 = new THREE.Vector3().addVectors(P3, dirPipe2.clone().multiplyScalar(-pipe2Length * this.smallValveOffsetRatio));
+
+        const sv1_isOpen = this.currentMainValve1State;
+        const sv2_isOpen = !this.currentMainValve1State;
+        const sv3_isOpen = this.currentMainValve1State;
+        const sv4_isOpen = !this.currentMainValve1State;
+
+        const smallValve1 = this.createValve(svPos1, this.smallValveSize, this.smallValveSize * 0.6,
+            sv1_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe1);
+        this.rotatingGroup.add(smallValve1);
+        this.smallValveMeshes.push(smallValve1);
+
+        const smallValve2 = this.createValve(svPos2, this.smallValveSize, this.smallValveSize * 0.6,
+            sv2_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe1);
+        this.rotatingGroup.add(smallValve2);
+        this.smallValveMeshes.push(smallValve2);
+
+        const smallValve3 = this.createValve(svPos3, this.smallValveSize, this.smallValveSize * 0.6,
+            sv3_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe2);
+        this.rotatingGroup.add(smallValve3);
+        this.smallValveMeshes.push(smallValve3);
+
+        const smallValve4 = this.createValve(svPos4, this.smallValveSize, this.smallValveSize * 0.6,
+            sv4_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirPipe2);
+        this.rotatingGroup.add(smallValve4);
+        this.smallValveMeshes.push(smallValve4);
+
+        smallValve1.rotation.z += Math.PI / 2;
+        smallValve2.rotation.z += Math.PI / 2;
+        smallValve3.rotation.z += Math.PI / 2;
+        smallValve4.rotation.z += Math.PI / 2;
+
+        // 5b. 在四段连接管上各加一个阀门，移动到紧贴原直管上
+        const dirBranchF1 = new THREE.Vector3().subVectors(NF, M1).normalize();
+        const dirBranchF2 = new THREE.Vector3().subVectors(NF, M2).normalize();
+        const dirBranchB1 = new THREE.Vector3().subVectors(NB, M1).normalize();
+        const dirBranchB2 = new THREE.Vector3().subVectors(NB, M2).normalize();
+
+        const cvPos1 = M1.clone().add(dirBranchF1.clone().multiplyScalar(0.8));
+        const cvPos2 = M2.clone().add(dirBranchF2.clone().multiplyScalar(0.8));
+        const cvPos3 = M1.clone().add(dirBranchB1.clone().multiplyScalar(0.8));
+        const cvPos4 = M2.clone().add(dirBranchB2.clone().multiplyScalar(0.8));
+
+        this.connectionValveMeshes = [];
+
+        const cv1_isOpen = this.currentMainValve1State;
+        const cv2_isOpen = !this.currentMainValve1State;
+        const cv3_isOpen = !this.currentMainValve1State;
+        const cv4_isOpen = this.currentMainValve1State;
+
+        const connValve1 = this.createValve(cvPos1, this.smallValveSize, this.smallValveSize * 0.6,
+            cv1_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirBranchF1);
+        this.rotatingGroup.add(connValve1);
+        this.connectionValveMeshes.push(connValve1);
+
+        const connValve2 = this.createValve(cvPos2, this.smallValveSize, this.smallValveSize * 0.6,
+            cv2_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirBranchF2);
+        this.rotatingGroup.add(connValve2);
+        this.connectionValveMeshes.push(connValve2);
+
+        const connValve3 = this.createValve(cvPos3, this.smallValveSize, this.smallValveSize * 0.6,
+            cv3_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirBranchB1);
+        this.rotatingGroup.add(connValve3);
+        this.connectionValveMeshes.push(connValve3);
+
+        const connValve4 = this.createValve(cvPos4, this.smallValveSize, this.smallValveSize * 0.6,
+            cv4_isOpen ? this.valveOpenMaterial : this.valveClosedMaterial, false, dirBranchB2);
+        this.rotatingGroup.add(connValve4);
+        this.connectionValveMeshes.push(connValve4);
+
+        connValve1.rotation.z += Math.PI / 2;
+        connValve2.rotation.z += Math.PI / 2;
+        connValve3.rotation.z += Math.PI / 2;
+        connValve4.rotation.z += Math.PI / 2;
+
+        // 5c. 在两根新直管远离环管平面的一端各加一个圆盘
+        const discRadius = this.mainRadius * 0.5; // 直径为环形管的一半，即半径为 mainRadius * 0.5
+        const discThickness = this.pipeRadius * 0.9 * 2; // 厚度与原有直管的直径相同
+        
+        const discGeometry1 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
+        const frontDisc = new THREE.Mesh(discGeometry1, this.hotMaterial);
+        frontDisc.position.set(0, L / 2 + L / 3, 0);
+        this.rotatingGroup.add(frontDisc);
+
+        const discGeometry2 = new THREE.CylinderGeometry(discRadius, discRadius, discThickness, 32);
+        const backDisc = new THREE.Mesh(discGeometry2, this.coldMaterial);
+        backDisc.position.set(0, -L / 2 - L / 3, 0);
+        this.rotatingGroup.add(backDisc);
+
+        this.rotatingGroup.rotation.x = Math.PI / 2;
+
+        // 6. 液体段
+        try {
+            const liquidArcGeometry = new THREE.TorusGeometry(
+                this.mainRadius,
+                this.pipeRadius,
+                16, 50,
+                this.liquidLengthRad * 0.83
+            );
+            this.liquidMesh = new THREE.Mesh(liquidArcGeometry, this.liquidMaterial);
+            this.liquidMesh.rotation.x = Math.PI;
+            this.liquidMesh.rotation.z = Math.PI / 12;;
+            this.scene.add(this.liquidMesh);
+        } catch(e) {
+            console.error("创建液体几何体时出错:", e);
+        }
+    }
+
+    createValve(position, radius, height, material, isMainValve = false, pipeDirection = null)
+    {
+        if (radius <= 0 || height <= 0) {
+            console.error("阀门尺寸无效:", radius, height);
+            return new THREE.Object3D();
+        }
+
+        try {
+            const geometry = new THREE.CylinderGeometry(radius, radius, height, 20);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.copy(position);
+
+            if (isMainValve) {
+                mesh.lookAt(0, 0, 0);
+                mesh.rotateX(Math.PI / 2);
+            } else if (pipeDirection && pipeDirection.lengthSq() > 0.0001) {
+                const lookAtPos = new THREE.Vector3().addVectors(position, pipeDirection);
+                if (lookAtPos.distanceTo(position) < 0.0001) {
+                    lookAtPos.add(new THREE.Vector3(0, 1, 0));
+                }
+                const orientation = new THREE.Matrix4();
+                const up = Math.abs(pipeDirection.normalize().y) > 0.99 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+                orientation.lookAt(position, lookAtPos, up);
+                mesh.quaternion.setFromRotationMatrix(orientation);
+                mesh.rotateY(Math.PI / 2);
+            }
+
+            return mesh;
+        } catch(e) {
+            console.error("创建阀门实例时出错:", e);
+            return new THREE.Object3D();
+        }
+    }
+
+    createPipe(point1, point2, radius, material)
+    {
+        const direction = new THREE.Vector3().subVectors(point2, point1);
+        const length = direction.length();
+
+        if (length < 0.0001) {
+            console.warn("管道长度接近零");
+            return new THREE.Object3D();
+        }
+        if (radius <= 0) {
+            console.error("管道半径无效:", radius);
+            return new THREE.Object3D();
+        }
+
+        try {
+            const geometry = new THREE.CylinderGeometry(radius, radius, length, 16);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.addVectors(point1, point2).multiplyScalar(0.5);
+
+            const directionCopy = new THREE.Vector3().copy(direction).normalize();
+            const orientation = new THREE.Matrix4();
+            const offsetRotation = new THREE.Matrix4();
+            const up = Math.abs(directionCopy.y) > 0.99 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
+            orientation.lookAt(point1, point2, up);
+            offsetRotation.makeRotationX(Math.PI / 2);
+            orientation.multiply(offsetRotation);
+            mesh.quaternion.setFromRotationMatrix(orientation);
+
+            return mesh;
+        } catch(e) {
+            console.error("创建管道实例时出错:", e);
+            return new THREE.Object3D();
+        }
+    }
+
+    normalizeAngle(angle)
+    {
+        return ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    }
+
+    isAngleInRange(angle, start, end)
+    {
+        angle = this.normalizeAngle(angle);
+        start = this.normalizeAngle(start);
+        end = this.normalizeAngle(end);
+
+        if (start <= end) {
+            return angle >= start && angle <= end;
+        } else {
+            return angle >= start || angle <= end;
+        }
+    }
+
+    isAngleInActiveZone(angle)
+    {
+        return this.isAngleInRange(angle, this.activeZoneStartRad, this.activeZoneEndRad);
+    }
+
+    inHeatingZone(angle)
+    {
+        return this.isAngleInRange(angle, this.activeZoneStartRad, this.activeZoneEndRad - 1);
+    }
+
+    Draw3d()
+    {
+        if( !this.renderer || !this.scene || !this.camera )
+        {
+            console.log("渲染器、场景或相机未准备好:", this.renderer, this.scene, this.camera);
+            return;
+        }
+
+        const delta = this.clock.getDelta();
+
+        // 1. 旋转组
+        this.rotatingGroup.rotation.y = this.Angle;
+        const currentGroupRotation = this.normalizeAngle(this.rotatingGroup.rotation.y);
+
+        // 2. 确定期望状态
+        const worldAngleValve0 = this.normalizeAngle(this.mainValveAngles[0] - currentGroupRotation);
+        const worldAngleValve1 = this.normalizeAngle(this.mainValveAngles[1] - currentGroupRotation);
+        const valve0InZone = this.isAngleInActiveZone(worldAngleValve0);
+        const valve1InZone = this.isAngleInActiveZone(worldAngleValve1);
+        const heat = this.Angle % Math.PI < 2;
+
+        let desiredMainValve1State = this.currentMainValve1State;
+        if (valve0InZone && !valve1InZone) {
+            desiredMainValve1State = true;
+        } else if (!valve0InZone && valve1InZone) {
+            desiredMainValve1State = false;
+        }
+
+        // Determine current colors of the parallel pipes
+        let pipe0Color = 'gray';
+        let pipe1Color = 'gray';
+        if (heat) {
+            pipe0Color = desiredMainValve1State ? 'red' : 'blue';
+            pipe1Color = !desiredMainValve1State ? 'red' : 'blue';
+        }
+
+        // Apply materials to parallel pipes
+        if (this.pipes && this.pipes.length === 2) {
+            this.pipes[0].material = (pipe0Color === 'red') ? this.hotMaterial :
+                                     ((pipe0Color === 'blue') ? this.coldMaterial : this.pipeMaterial);
+            this.pipes[1].material = (pipe1Color === 'red') ? this.hotMaterial :
+                                     ((pipe1Color === 'blue') ? this.coldMaterial : this.pipeMaterial);
+        }
+
+        // Apply materials to the 4 connection valves on the branches:
+        // connValve1 (branch from pipe 0 to front) -> green when pipe 0 is red, else red
+        // connValve2 (branch from pipe 1 to front) -> green when pipe 1 is red, else red
+        // connValve3 (branch from pipe 0 to back)  -> green when pipe 0 is blue, else red
+        // connValve4 (branch from pipe 1 to back)  -> green when pipe 1 is blue, else red
+        if (this.connectionValveMeshes && this.connectionValveMeshes.length === 4) {
+            this.connectionValveMeshes[0].material = (pipe0Color === 'red') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[1].material = (pipe1Color === 'red') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[2].material = (pipe0Color === 'blue') ? this.valveOpenMaterial : this.valveClosedMaterial;
+            this.connectionValveMeshes[3].material = (pipe1Color === 'blue') ? this.valveOpenMaterial : this.valveClosedMaterial;
+        }
+
+        // 3. 更新主阀门和小阀门材质（如果主状态改变）
+        if (desiredMainValve1State !== this.currentMainValve1State) {
+            this.currentMainValve1State = desiredMainValve1State;
+
+            if (this.mainValveMeshes.length === 2) {
+                this.mainValveMeshes[0].material = !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.mainValveMeshes[1].material = this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+            }
+            if (this.smallValveMeshes.length === 4) {
+                const sv1_sv3_material = this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.smallValveMeshes[0].material = sv1_sv3_material;
+                this.smallValveMeshes[2].material = sv1_sv3_material;
+                const sv2_sv4_material = !this.currentMainValve1State ? this.valveOpenMaterial : this.valveClosedMaterial;
+                this.smallValveMeshes[1].material = sv2_sv4_material;
+                this.smallValveMeshes[3].material = sv2_sv4_material;
+            }
+            this.DiffAngle = 0;
+        }
+
+        this.DiffAngle += heat ? 0.0002 : -0.0003;
+        this.Angle += this.DiffAngle;
+
+        // 4. 更新文本显示
+
+        if( this.Run > 0 )
+        {
+            const textDoms = Array.from(this.Div.querySelectorAll( '.canvtext' ));
+            const heatStr = heat ? (currentLang === 'zh' ? '等温' : 'Isothermal') : (currentLang === 'zh' ? '绝热' : 'Adiabatic');
+            if (textDoms.length >= 2) {
+                textDoms[0].innerText = (currentLang === 'zh' ? '左侧：' : 'Left: ') + heatStr + (currentLang === 'zh' ? '压缩' : 'Comp.');
+                textDoms[1].innerText = (currentLang === 'zh' ? '右侧：' : 'Right: ') + heatStr + (currentLang === 'zh' ? '膨胀' : 'Exp.');
+                textDoms.forEach(t => t.style.display = 'block');
+            }
+        }
+
+        // 5. 渲染
+        this.renderer.render( this.scene, this.camera );
+    }
+}
+
+const engines = {
+    'ring': new RingEngine( 'ring', 1 )
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tabsNav = document.querySelector('.tabs-nav');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const iframes = document.querySelectorAll('.tab-pane iframe');
+
+    const switchTab = (targetId) => {
+        // Deactivate all tabs and panes
+        tabButtons.forEach(button => button.classList.remove('active'));
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+
+        // Stop all canvas animations
+        Object.values(engines).forEach(engine => {
+            if (engine.Run) {
+                engine.Stop();
+            }
+        });
+
+        // Unload all iframes
+        iframes.forEach(iframe => {
+            if (iframe.src) {
+                iframe.src = '';
+            }
+        });
+
+        // Activate the target tab and pane
+        const targetButton = document.querySelector(`.tab-button[data-target="${targetId}"]`);
+        const targetPane = document.getElementById(targetId);
+
+        if (targetButton && targetPane) {
+            targetButton.classList.add('active');
+            targetPane.classList.add('active');
+
+            // Load iframe if it exists in the active pane
+            const activeIframe = targetPane.querySelector('iframe');
+            if (activeIframe && activeIframe.dataset.src) {
+                activeIframe.src = activeIframe.dataset.src;
+            }
+        }
+    };
+
+    tabsNav.addEventListener('click', (event) => {
+        if (event.target.classList.contains('tab-button')) {
+            const targetId = event.target.dataset.target;
+            switchTab(targetId);
+        }
+    });
+
+    // Initialize the first tab
+    const firstTab = document.querySelector('.tab-button.active');
+    if (firstTab) {
+        switchTab(firstTab.dataset.target);
+    }
+});
+
+</script>
+</body>
+</html>
