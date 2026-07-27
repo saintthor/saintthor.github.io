@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UBB Test</title>
+    <meta charset="utf-8" />
+    <script src="ubb.js"></script>
+    <style>
+        body { font-family: sans-serif; }
+        textarea { width: 100%; height: 250px; }
+        .output { border: 1px solid #ccc; padding: 10px; min-height: 50px; }
+    </style>
+</head>
+<body>
+
+    <h1>UBB.js Test Page</h1>
+
+    <div>
+        <button type="button" onclick="addTag('b')">B</button>
+        <button type="button" onclick="addTag('i')">I</button>
+        <button type="button" onclick="addTag('u')">U</button>
+        <button type="button" onclick="addTag('toggle')">Toggle</button>
+         <button type="button" onclick="addTag('r')">r</button>
+    </div>
+    <textarea id="input">[div=#ffffcc|float=right|width=400px]test div float right[/div]
+[div=#ccffff|float=left|width=400px]test div float left[/div]
+[r][b][/r]
+[b]bold[/b]
+[r][b]bold[/b][/r]
+[r]some text[/r]
+[r][b][/r][r][/b][/r]
+[toggle=off][title]Click to open[/title][content]Here is the content.[/content][/toggle]
+[a=anchor1]This is an anchor.[/a]
+You can jump to it using [goto=anchor1]this link[/goto].
+
+[tabs]
+[tab=Tab1]Content of tab 1. [a=anchor2]Anchor in tab 1[/a][/tab]
+[tab=Tab2]Content of tab 2. You can jump to [goto=anchor2]anchor in tab 1[/goto].[/tab]
+[/tabs]
+</textarea>
+    <br>
+    <button onclick="generate()">Generate</button>
+
+    <h2>Output:</h2>
+    <div id="output" class="output"></div>
+
+    <script>
+        const ubb = new UBB();
+
+        function generate() {
+            const input = document.getElementById('input').value;
+            const output = ubb.express(input);
+            document.getElementById('output').innerHTML = output;
+        }
+
+        function addTag(tag) {
+            const textarea = document.getElementById('input');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            let replacement;
+
+            if (tag === 'toggle') {
+                replacement = `[toggle=off][title]${selectedText || 'TITLE'}[/title][content]CONTENT[/content][/toggle]`;
+                 textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+                const contentStart = textarea.value.indexOf('CONTENT', start);
+                textarea.focus();
+                textarea.setSelectionRange(contentStart, contentStart + 'CONTENT'.length);
+
+            } else {
+                 replacement = `[${tag}]${selectedText}[/${tag}]`;
+                 textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+                 textarea.focus();
+                 if (!selectedText) {
+                    const cursorPosition = start + tag.length + 2;
+                    textarea.setSelectionRange(cursorPosition, cursorPosition);
+                 } else {
+                    textarea.setSelectionRange(start, start + replacement.length);
+                 }
+            }
+        }
+
+        window.onload = generate;
+    </script>
+
+</body>
+</html>
