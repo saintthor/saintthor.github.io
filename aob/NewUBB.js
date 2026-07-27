@@ -192,6 +192,11 @@ class UBB {
     }
 
     express(text, isRecursiveCall = false) {
+        if (text === null || text === undefined) {
+            return '';
+        }
+        text = text.toString();
+
         if (!isRecursiveCall) {
             const r_contents = [];
             const placeholder = (index) => `__R_PLACEHOLDER_${index}__`;
