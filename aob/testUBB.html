@@ -3,7 +3,8 @@
 <head>
     <title>UBB Test</title>
     <meta charset="utf-8" />
-    <script src="ubb.js"></script>
+    <link rel="stylesheet" href="pjf.css">
+    <script src="NewUBB.js"></script>
     <style>
         body { font-family: sans-serif; }
         textarea { width: 100%; height: 250px; }
@@ -36,6 +37,24 @@ You can jump to it using [goto=anchor1]this link[/goto].
 [tab=Tab1]Content of tab 1. [a=anchor2]Anchor in tab 1[/a][/tab]
 [tab=Tab2]Content of tab 2. You can jump to [goto=anchor2]anchor in tab 1[/goto].[/tab]
 [/tabs]
+
+<h3>Select Mode 0:</h3>
+[select]
+[choice=on][title]Option 1[/title][content]Content of Option 1[/content][/choice]
+[choice][title]Option 2[/title][content]Content of Option 2[/content][/choice]
+[/select]
+
+<h3>Select Mode 1:</h3>
+[select=1]
+[choice=on][title]Option 1[/title][content]Content of Option 1[/content][/choice]
+[choice][title]Option 2[/title][content]Content of Option 2[/content][/choice]
+[/select]
+
+<h3>Select Mode 2:</h3>
+[select=2]
+[choice=on][title]Option 1[/title][content]Content of Option 1[/content][/choice]
+[choice][title]Option 2[/title][content]Content of Option 2[/content][/choice]
+[/select]
 </textarea>
     <br>
     <button onclick="generate()">Generate</button>
@@ -49,7 +68,9 @@ You can jump to it using [goto=anchor1]this link[/goto].
         function generate() {
             const input = document.getElementById('input').value;
             const output = ubb.express(input);
-            document.getElementById('output').innerHTML = output;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = output;
+            ubb.awake(outputDiv);
         }
 
         function addTag(tag) {
