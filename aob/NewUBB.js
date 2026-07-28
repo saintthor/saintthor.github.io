@@ -68,8 +68,7 @@ class UBB {
         r: { num: 2, note: '禁止转义' },
         hr: { num: 1, note: '水平分隔线', express: () => `<hr>` },
         url: { num: 2, note: '链接', express: (content, attrs) => {
-            const Address = attrs || content;
-            const href = (Address.startsWith('http://') || Address.startsWith('https://')) ? Address : 'http://' + Address;
+            const href = attrs || content;
             return `<a href="${href}" target="_blank" rel="noopener noreferrer">${content}</a>`;
         } },
         article: { num: 2, note: '帖子链接', express: (content, attrs) => `<a class="atcllink" data-atclid="${attrs}">${content}</a>` },
