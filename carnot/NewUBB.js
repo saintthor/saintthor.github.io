@@ -19,7 +19,7 @@ class UBB {
             'display', 'height', 'width', 'border', 'border-top', 'border-bottom',
             'border-left', 'border-right', 'padding', 'padding-top', 'padding-bottom',
             'padding-left', 'padding-right', 'background-color', 'margin', 'margin-top',
-            'margin-bottom', 'margin-left', 'margin-right', 'color', 'font-size',
+            'margin-bottom', 'margin-left', 'margin-right', 'color', 'font-size', 'position',
             'overflow', 'overflow-x', 'overflow-y', 'align', 'valign', 'colspan', 'float'
         ];
 
