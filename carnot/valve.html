@@ -1,0 +1,308 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>翻板分流阀</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: full-height 3D stage on the left, instrument panel on the right; stacks on phones. */
+:root{
+  --bg:#eaeff2; --stage:#dfe7ec; --panel:#f8fafb; --fg:#15222a; --muted:#566a76; --line:#c3d0d8;
+  --flap:#d8731f; --plug:#13867f; --water:#2a78cc; --wall:#4f7388; --ok:#1b8a58; --off:#b3432a;
+  --font-ui:'Barlow Semi Condensed','PingFang SC','Noto Sans SC','Microsoft YaHei',system-ui,sans-serif;
+  --font-num:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e151a; --stage:#111b22; --panel:#16212a; --fg:#e4edf1; --muted:#8aa0ad; --line:#293a45;
+    --flap:#f08a3c; --plug:#3cc4bc; --water:#5ba8ff; --wall:#8db0c6; --ok:#4cd08e; --off:#ff7b5c;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e151a; --stage:#111b22; --panel:#16212a; --fg:#e4edf1; --muted:#8aa0ad; --line:#293a45;
+  --flap:#f08a3c; --plug:#3cc4bc; --water:#5ba8ff; --wall:#8db0c6; --ok:#4cd08e; --off:#ff7b5c;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--font-ui); font-size:15px; line-height:1.5;
+  box-sizing:border-box; padding-block:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+#app{height:100%; display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px}
+#stage{position:relative; min-height:0; min-width:0; background:var(--stage); border:1px solid var(--line); border-radius:6px; overflow:hidden}
+#c{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
+.tag{position:absolute; left:0; top:0; font:600 12px/1 var(--font-ui); color:var(--fg); background:var(--panel);
+  border:1px solid var(--line); padding:3px 6px; border-radius:3px; white-space:nowrap; pointer-events:none; transform:translate(-50%,-130%)}
+.tag.flap{border-color:var(--flap)} .tag.plug{border-color:var(--plug)}
+#hint{position:absolute; left:10px; bottom:8px; font-size:12px; color:var(--muted); pointer-events:none}
+aside{min-width:0; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px; display:flex; flex-direction:column; gap:16px}
+h1{margin:0; font-size:22px; font-weight:600; letter-spacing:.02em}
+.sub{margin:2px 0 0; color:var(--muted); font-size:13px}
+.lbl{font-size:12px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase}
+.state{display:grid; gap:10px}
+.row{display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:10px}
+.row b{font-weight:600}
+.meter{height:8px; background:var(--line); border-radius:4px; overflow:hidden}
+.meter i{display:block; height:100%; width:0; background:var(--water)}
+.val{font:600 13px var(--font-num); min-width:5.2em; text-align:right}
+.val.on{color:var(--ok)} .val.off{color:var(--off)}
+.ang{display:flex; justify-content:space-between; align-items:baseline}
+.ang output{font:600 22px var(--font-num)}
+input[type=range]{width:100%; accent-color:var(--flap); margin:6px 0 0}
+.ends{display:flex; justify-content:space-between; font-size:12px; color:var(--muted)}
+.btns{display:grid; gap:8px}
+button{font:inherit; color:var(--fg); background:transparent; border:1px solid var(--line); border-radius:4px; padding:8px 10px; text-align:left; cursor:pointer}
+button:hover{border-color:var(--flap)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--flap); outline-offset:2px}
+button small{display:block; color:var(--muted); font-size:12px}
+button.active{border-color:var(--flap); background:color-mix(in srgb,var(--flap) 14%,transparent)}
+label.chk{display:flex; gap:8px; align-items:center; font-size:14px}
+dl{margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13px}
+dt{color:var(--muted)} dd{margin:0; font-family:var(--font-num); font-size:12.5px}
+@media (max-width:820px){
+  #app{height:auto; grid-template-columns:minmax(0,1fr)}
+  #stage{height:64vw; min-height:300px}
+}
+</style>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="tags"></div>
+    <div id="hint">从前侧（+Z）看：顺时针 = 翻板贴向下侧壁。拖动旋转，滚轮缩放。</div>
+  </div>
+  <aside>
+    <div>
+      <h1>卡诺热机翻板阀门</h1>
+      <div style="display:none">By: liuzhuo2011@gmail.com</div>
+      <p class="sub">用一个翻板实现两个阀门。横管为环形管的一段，下方开口为环管阀门后方的折管口（换热器出气口）。环管阀门前方的折管口未画出，其阀门另外做。</p>
+      <p class="sub">翻板在 0° 时，折管口阻断，折管内气压高。翻板解锁后在气压作用下逆时针翻转至 90° 并上锁，阻断环管。</p>
+      <p class="sub">顺时针翻转前环管左侧气压高，解锁后翻板在气压作用下顺时针翻转至 0° 并上锁，阻断折管。</p>
+      <p class="sub">弧形塞子的作用是延后折管导通时间，避免折管里的高压气体反向流到环管左侧。塞子和翻板的同侧表面应耐热。塞子要做成空心的以减重。</p>
+    </div>
+
+    <div class="state">
+      <div class="lbl">通路状态</div>
+      <div class="row"><b>环管</b><div class="meter"><i id="mMain"></i></div><span class="val" id="vMain">导通</span></div>
+      <div class="row"><b>折管</b><div class="meter"><i id="mBr"></i></div><span class="val" id="vBr">封闭</span></div>
+    </div>
+
+    <div>
+      <div class="ang"><span class="lbl">翻板角度</span><output id="angOut" for="ang">0°</output></div>
+      <input id="ang" type="range" min="0" max="90" step="1" value="0" aria-label="翻板角度">
+      <div class="ends"><span>0° 顺时针到底</span><span>逆时针到底 90°</span></div>
+    </div>
+
+    <div class="btns">
+      <button id="bCw" type="button" style="display:none">顺时针到底<small>左侧高压推开翻板贴壁，塞子插入折管，环管导通</small></button>
+      <button id="bCcw" type="button" style="display:none">逆时针到底<small>折管高压顶起翻板封闭环管，折管内流体流出</small></button>
+      <button id="bAuto" type="button" class="active">自动往复：开<small>点击暂停或继续</small></button>
+    </div>
+
+    <div class="state">
+      <label class="chk" style="display:none"><input id="kFront" type="checkbox">显示前侧壁</label>
+    </div>
+
+    <dl>
+      <dt>环管截面</dt><dd>8 × 40</dd>
+      <dt>侧壁孔</dt><dd>5 × 2，长边垂直轴线</dd>
+      <dt>翻板</dt><dd>8 × 40，行程 90°</dd>
+      <dt>塞子</dt><dd>5 × 2 截面，60° 圆弧</dd>
+      <dt>圆弧圆心</dt><dd>翻板转轴</dd>
+    </dl>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  // ---------- geometry constants (model units) ----------
+  var HALF_L = 30;          // main pipe runs x = -30 .. +30, inlet at -X, flow toward +X
+  var H = 8, W = 40;        // inner cross-section: 8 (Y) x 40 (Z)
+  var T = 0.6;              // wall thickness
+  var PIVOT_Y = -H/2;       // flap axis lies on the lower (wide, drilled) wall, along Z
+  var R = 5;                // centre-line radius of plug / branch arc
+  var HOLE_X = 2, HOLE_Z = 5;
+  var ARC = Math.PI/3;      // 60 deg plug
+  var BR_END = -105*Math.PI/180;
+  var BR_OPEN = 68*Math.PI/180;   // flap angle at which plug has cleared the hole
+  var PLUG_FREE = 60*Math.PI/180; // flap angle at which plug tip reaches the hole
+
+  var canvas = document.getElementById('c'), stage = document.getElementById('stage');
+  var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(38, 1, 0.5, 500);
+  camera.position.set(46, -16, 100);
+  var controls = new THREE.OrbitControls(camera, canvas);
+  controls.target.set(0, -1.5, 0);
+  controls.enableDamping = true;
+  controls.minDistance = 25; controls.maxDistance = 150;
+  controls.update();
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+  var dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(25, 45, 35); scene.add(dl);
+
+  // ---------- materials (colors come from CSS tokens) ----------
+  var wallMat = new THREE.MeshStandardMaterial({transparent:true, opacity:0.2, side:THREE.DoubleSide, depthWrite:false, roughness:0.6});
+  var edgeMat = new THREE.LineBasicMaterial({transparent:true, opacity:0.85});
+  var flapMat = new THREE.MeshStandardMaterial({roughness:0.45, metalness:0.1});
+  var plugMat = new THREE.MeshStandardMaterial({roughness:0.45, metalness:0.1});
+  var hingeMat = new THREE.MeshStandardMaterial({roughness:0.4, metalness:0.3});
+
+  function addWall(parent, geom, x, y, z){
+    var m = new THREE.Mesh(geom, wallMat); m.position.set(x||0, y||0, z||0); m.renderOrder = 2;
+    var e = new THREE.LineSegments(new THREE.EdgesGeometry(geom, 25), edgeMat); e.position.copy(m.position);
+    parent.add(m); parent.add(e);
+    return [m, e];
+  }
+
+  // ---------- main pipe ----------
+  var pipe = new THREE.Group(); scene.add(pipe);
+  // lower wall with 5 x 2 hole (hole centred at x = R, long side along Z)
+  var ws = new THREE.Shape();
+  ws.moveTo(-HALF_L, -W/2); ws.lineTo(HALF_L, -W/2); ws.lineTo(HALF_L, W/2); ws.lineTo(-HALF_L, W/2); ws.closePath();
+  var hole = new THREE.Path();
+  hole.moveTo(R-HOLE_X/2, -HOLE_Z/2); hole.lineTo(R+HOLE_X/2, -HOLE_Z/2);
+  hole.lineTo(R+HOLE_X/2, HOLE_Z/2); hole.lineTo(R-HOLE_X/2, HOLE_Z/2); hole.closePath();
+  ws.holes.push(hole);
+  var lowGeom = new THREE.ExtrudeGeometry(ws, {depth:T, bevelEnabled:false});
+  lowGeom.rotateX(-Math.PI/2);
+  addWall(pipe, lowGeom, 0, -H/2 - T, 0);
+  addWall(pipe, new THREE.BoxGeometry(2*HALF_L, T, W + 2*T), 0, H/2 + T/2, 0);
+  addWall(pipe, new THREE.BoxGeometry(2*HALF_L, H + 2*T, T), 0, 0, -W/2 - T/2);
+  var front = addWall(pipe, new THREE.BoxGeometry(2*HALF_L, H + 2*T, T), 0, 0, W/2 + T/2);
+  //front.forEach(function(o){o.visible = false;});
+
+  // ---------- branch (arc channel, same centre as the flap axis) ----------
+  function sector(r0, r1, a0, a1, depth){
+    var s = new THREE.Shape();
+    s.absarc(0, 0, r1, a0, a1, false);
+    s.absarc(0, 0, r0, a1, a0, true);
+    s.closePath();
+    var g = new THREE.ExtrudeGeometry(s, {depth:depth, bevelEnabled:false, curveSegments:Math.max(8, Math.round((a1-a0)*24))});
+    g.translate(0, 0, -depth/2);
+    return g;
+  }
+  var branch = new THREE.Group(); branch.position.set(0, PIVOT_Y, 0); scene.add(branch);
+  var A0 = BR_END, A1 = -6*Math.PI/180, w = 0.5;
+  addWall(branch, sector(R-1-w, R-1, A0, A1, HOLE_Z + 2*w));
+  addWall(branch, sector(R+1, R+1+w, A0, A1, HOLE_Z + 2*w));
+  addWall(branch, sector(R-1, R+1, A0, A1, w), 0, 0, HOLE_Z/2 + w/2);
+  addWall(branch, sector(R-1, R+1, A0, A1, w), 0, 0, -HOLE_Z/2 - w/2);
+  var fl = addWall(branch, new THREE.BoxGeometry(2 + 2*w + 1.4, 0.5, HOLE_Z + 2*w + 1.4));
+  fl.forEach(function(o){
+    o.position.set(R*Math.cos(BR_END), R*Math.sin(BR_END), 0); o.rotation.z = BR_END;
+  });
+
+  // ---------- flap (rotates about Z axis at wall surface) ----------
+  var flap = new THREE.Group(); flap.position.set(0, PIVOT_Y, 0); scene.add(flap);
+  var slab = new THREE.Mesh(new THREE.BoxGeometry(H, 0.5, W - 0.2), flapMat); slab.position.set(H/2, 0.25, 0); flap.add(slab);
+  var hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, W - 0.2, 24), hingeMat); hinge.rotation.x = Math.PI/2; flap.add(hinge);
+  // plug: ring sector r 4..6, from -60deg to 0 deg, depth 5, root on the flap underside
+  var plugGeom = sector(R-1+0.04, R+1-0.04, -ARC, 0, HOLE_Z - 0.08);
+  var plug = new THREE.Mesh(plugGeom, plugMat); flap.add(plug);
+
+  var phi = 0, target = 0;
+
+  // ---------- labels ----------
+  var tagsEl = document.getElementById('tags');
+  var tagDefs = [
+    {t:'入口（-X）', v:function(){return new THREE.Vector3(-HALF_L, H/2+T+0.5, 0);}},
+    {t:'出口（+X）', v:function(){return new THREE.Vector3(HALF_L, H/2+T+0.5, 0);}},
+    {t:'翻板轴', c:'flap', v:function(){return new THREE.Vector3(0, PIVOT_Y, W/2);}},
+    {t:'弧形塞子', c:'plug', v:function(){return flap.localToWorld(new THREE.Vector3(R*Math.cos(-ARC/2), R*Math.sin(-ARC/2), HOLE_Z/2));}},
+    {t:'折管', v:function(){return new THREE.Vector3(R*Math.cos(BR_END), PIVOT_Y + R*Math.sin(BR_END) - 1.5, 0);}}
+  ];
+  tagDefs.forEach(function(d){ var e = document.createElement('div'); e.className = 'tag' + (d.c ? ' '+d.c : ''); e.textContent = d.t; tagsEl.appendChild(e); d.e = e; });
+  function placeTags(){
+    var wpx = stage.clientWidth, hpx = stage.clientHeight;
+    tagDefs.forEach(function(d){
+      var v = d.v().project(camera);
+      var vis = v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05;
+      d.e.style.display = vis ? '' : 'none';
+      d.e.style.left = ((v.x*0.5+0.5)*wpx) + 'px';
+      d.e.style.top = ((-v.y*0.5+0.5)*hpx) + 'px';
+    });
+  }
+
+  // ---------- theme ----------
+  function tok(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function applyTheme(){
+    renderer.setClearColor(new THREE.Color(tok('--stage')), 1);
+    wallMat.color.set(tok('--wall')); edgeMat.color.set(tok('--wall'));
+    flapMat.color.set(tok('--flap')); plugMat.color.set(tok('--plug')); hingeMat.color.set(tok('--flap'));
+  }
+  applyTheme();
+  try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); }catch(e){}
+  new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+  // ---------- controls ----------
+  var ang = document.getElementById('ang'), angOut = document.getElementById('angOut');
+  var bCw = document.getElementById('bCw'), bCcw = document.getElementById('bCcw'), bAuto = document.getElementById('bAuto');
+  var autoOn = true, autoT = 0, dragging = false;
+  function setAuto(on){
+    autoOn = on; autoT = 0; bAuto.classList.toggle('active', on);
+    bAuto.firstChild.nodeValue = on ? '自动往复：开' : '自动往复：关';
+  }
+  ang.addEventListener('pointerdown', function(){ dragging = true; });
+  window.addEventListener('pointerup', function(){ dragging = false; });
+  ang.addEventListener('input', function(){ setAuto(false); target = +ang.value*Math.PI/180; });
+  bCw.addEventListener('click', function(){ setAuto(false); target = 0; });
+  bCcw.addEventListener('click', function(){ setAuto(false); target = Math.PI/2; });
+  bAuto.addEventListener('click', function(){ setAuto(!autoOn); });
+  document.getElementById('kFront').addEventListener('change', function(e){ front.forEach(function(o){ o.visible = e.target.checked; }); });
+
+  var mMain = document.getElementById('mMain'), mBr = document.getElementById('mBr'), vMain = document.getElementById('vMain'), vBr = document.getElementById('vBr');
+  function smooth(a, b, x){ var t = Math.max(0, Math.min(1, (x-a)/(b-a))); return t*t*(3-2*t); }
+  function setVal(el, bar, f, labels){
+    var txt = f >= 0.995 ? labels[0] : (f <= 0.005 ? labels[1] : labels[2]);
+    el.textContent = txt; el.className = 'val ' + (f >= 0.995 ? 'on' : (f <= 0.005 ? 'off' : ''));
+    bar.style.width = (f*100).toFixed(0) + '%';
+  }
+  function readout(){
+    var deg = phi*180/Math.PI;
+    angOut.textContent = deg.toFixed(0) + '°';
+    if(!dragging) ang.value = deg.toFixed(0);
+    var mainOpen = 1 - Math.sin(phi);
+    var brOpen = smooth(PLUG_FREE, BR_OPEN, phi);
+    setVal(vMain, mMain, mainOpen < 0.003 ? 0 : (mainOpen > 0.997 ? 1 : mainOpen), ['导通','封闭','部分']);
+    setVal(vBr, mBr, brOpen < 0.003 ? 0 : (brOpen > 0.997 ? 1 : brOpen), ['导通','封闭','开启中']);
+  }
+
+  // ---------- resize + loop ----------
+  function resize(){
+    var w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h;
+    // keep the 60-unit pipe in frame on narrow stages
+    camera.fov = w/h < 1.3 ? 38*1.3/(w/h)*0.82 : 38;
+    camera.fov = Math.min(camera.fov, 75);
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage); resize();
+
+  var last = performance.now();
+  function frame(now){
+    var dt = Math.min((now - last)/1000, 0.05); last = now;
+    if(autoOn){
+      var atEnd = Math.abs(phi - target) < 0.003;
+      if(atEnd){ autoT += dt; if(autoT > 2.6){ autoT = 0; target = target < 0.1 ? Math.PI/2 : 0; } }
+    }
+    var diff = target - phi, vmax = 55*Math.PI/180;
+    var sp = Math.max(-vmax, Math.min(vmax, diff*4));
+    if(Math.abs(diff) < 0.0008) phi = target; else phi += sp*dt;
+    phi = Math.max(0, Math.min(Math.PI/2, phi));
+    flap.rotation.z = phi;
+    readout();
+    controls.update();
+    renderer.render(scene, camera);
+    placeTags();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
